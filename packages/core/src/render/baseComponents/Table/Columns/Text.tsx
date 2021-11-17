@@ -1,0 +1,20 @@
+import { FunctionComponent } from 'react';
+import { ColumnNames } from 'types/types';
+import { definePropertyOfName } from 'utils/index';
+
+interface TextProps {
+  data: string;
+}
+
+const Text: FunctionComponent<TextProps> = ({ data }) => {
+  if (typeof data === 'string') {
+    return <span>{data}</span>;
+  } else {
+    console.error(`data of props should be string, but got "${typeof data}" in column text`);
+    return null;
+  }
+};
+
+definePropertyOfName(Text, ColumnNames.TEXT);
+
+export default Text;

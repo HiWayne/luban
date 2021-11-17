@@ -1,0 +1,46 @@
+{
+  "name": "creation",
+  "version": "1.0.0",
+  "description": "create and edit the needed input part of core in low code platform that named 'luban'",
+  "author": "xiaotian <tianyu.liu@duitang.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "http://registry.npmjs.org/"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "gifshot": "^0.4.5",
+    "libgif": "0.0.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router": "^5.2.1",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "4.0.3",
+    "web-vitals": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.33",
+    "@types/react-dom": "^17.0.10",
+    "@types/react-router": "^5.1.17",
+    "@types/react-router-dom": "^5.3.2",
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.1.8"
+  }
+}

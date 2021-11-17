@@ -1,70 +1,36 @@
-# Getting Started with Create React App
+# Low/No Code 平台： luban(鲁班)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 名称由来
 
-## Available Scripts
+该平台并非『乐高』式的通过简单映射 component 堆砌静态页面，而是每个 component 之间可以自定义关联状态，当一个组件发生修改，可以由用户自定义它将影响哪些其他组件，并因此做出相应的改变。它也可以自定义后端接口模型，组件树和模型树也是独立正交的，接口不必耦合平台。这些节点逻辑像『机关』一样组织在一起，可以自定义互相关联的业务逻辑，这个平台或使用这个平台的人就是『鲁班』。
 
-In the project directory, you can run:
+## 亮点
 
-### `yarn start`
+`假设一个button按钮，它在一些场景下是点击后发送请求，在另一个场景下是点击后弹出弹框，点弹框的确定按钮才发送请求。你会怎样设计低代码平台？给按钮的配置里加上action字段，不同的action对应不同的逻辑？那如果现在又有一个点击按钮后不弹弹窗，而是某个组件消失的场景呢，再加一个action？`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+`想想问题的本质是什么，你在前端开发中是怎么解决这件事的？用状态。现代前端带来了状态的概念，所有的页面逻辑都是基于状态，当我点击按钮，它触发了状态的改变，于是其他依赖这个状态的视图发生了变化，它可以是弹窗出现、可以是某个组件消失、可以是直接发送请求……`
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+`这就是这个平台的设计思想，不是为了解决这个问题而解决，而是从更底层更抽象的角度解决『这类』问题。于是它带来了以下的特性：`
 
-### `yarn test`
+- 灵活性
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  > 或许非互联网企业可能有很多问卷调查这样的简单后台，但在互联网企业中有超过 50%的内部后台都是有自定义逻辑的，所以简单的可视化拼接组件并不能给后台开发带来多少提效，必须能够满足丰富的逻辑。而能完成丰富逻辑，它就必须足够抽象、细粒度。
 
-### `yarn build`
+  > 假设这样一个场景，有两个 radio 标签，分别代表男、女。当选择男时下方只显示男性相关的选项，选择女时下方只显示女性相关的选项。用代码写不难，但浪费时间且枯燥无味，『乐高』式的平台又满足不了需求，这个平台则可以。这只是一个简单的案例，因为这个平台基于的模型足够抽象，你可以用状态(state)和修改状态(effect)的机制做非常多的事情。而市面上的很多低代码平台都是提供有限的配置，更多只关注组件本身，缺少组件之间的逻辑性。
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+  > 总的来说，它十分适合策略/状态模式的场景。在一些复杂逻辑的后台里，比如配置短信 push 推送的后台，你可能要针对不同类型的用户触发不同的 push 策略，那些定义策略的表单们又是由完全不同的，这时『乐高』式的平台就难以完成这种需求。
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  > 另外还可以在基础组件之外，扩展更多自定义组件，以满足不同企业风格和特殊逻辑。
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- 后端解耦
+  > 它不提供后端接口，也不需要后端接口面向它实现。相反，它可以面向后端接口实现。表单组件可以一一映射成自定义的字段，字段的嵌套关系可以并不一定和组件树对应，非常灵活。于是可以在现有后端体系不变的情况下减少前端的工作量，这是一个完全面向前端的平台。
 
-### `yarn eject`
+## 实现原理
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+内部建立了 3 颗树，分别是 **vdomTree**（组件树）、**modelTree**（后端模型树）、**stateTree**（视图状态树）
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3 棵树节点并非一一对应的关系，这是因为组件的结构（比如表单组件），它们对应的字段未必就是后端需要的数据模型结构，所以需要一个独立的**modelTree**，它和**vdomTree**有正交的关系。至于**stateTree**，由于不同层级的组件之间可能存在状态关系，于是不必多说它也应该独立出来。
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+那么组件是如何找到和它关联的模型和状态的呢？**vdomTree**的节点中有 state、model、effect 三个字段，分别保存了在其他两颗树的路径。
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+最终把**vdomTree**作为入口交给渲染层时，每个节点被解析成对应组件，组件通过**state**找到它依赖的状态，如果是表单组件会通过**model**找到它绑定的模型字段，通过 effect 找到它发生变更时要影响的状态。于是，当一个表单组件发生 change 后，它会根据**model**路径更新**modelTree**（模型树），可能还会根据**effect**路径修改**stateTree**（状态树）。触发更新后，其他依赖该**state**路径的组件也做出相应更新，完成了组件之间的状态通信。
