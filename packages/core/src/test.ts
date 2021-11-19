@@ -6,7 +6,7 @@ export default JSON.stringify({
       id: -1,
       api: {
         url: '/api/query',
-        method: 'GET',
+        method: 'get',
         effect: ['list'],
         model: ['queryParams'],
         computeParams: '',
@@ -60,7 +60,7 @@ export default JSON.stringify({
           text: '查询',
           api: {
             url: '/api/query',
-            method: 'GET',
+            method: 'get',
             effect: ['list'],
             model: ['queryParams'],
             computeParams: '(params) => params && {...params, start: 0, limit: 25}',
@@ -68,9 +68,16 @@ export default JSON.stringify({
               if (params && (params.title || params.createTime)) {
                 return true
               } else {
-                return false
+                return '标题和时间至少填写一个'
               }
             }`,
+          },
+          init: {
+            url: '/api/query',
+            method: 'get',
+            effect: ['list'],
+            model: ['queryParams'],
+            computeParams: '(params) => params && {...params, start: 0, limit: 25}',
           },
           leftOffset: 0.5,
         },
@@ -83,18 +90,18 @@ export default JSON.stringify({
       state: ['list'],
       model: ['selectedList'],
       computeData: '(data) => data && data.data.object_list.map(item => ({...item, key: item.id}))',
-      api: {
-        url: '/api/query',
-        method: 'GET',
-        effect: ['list'],
-        model: ['queryParams'],
-        computeParams: '',
-      },
       pagination: {
         limit: 10,
         computeStart: '',
         computeMore: '(data) => data && !!data.data.more',
         computeTotal: '(data) => data && data.data.total',
+        api: {
+          url: '/api/query',
+          method: 'get',
+          effect: ['list'],
+          model: ['queryParams'],
+          computeParams: '',
+        },
       },
       columns: [
         {
@@ -124,16 +131,14 @@ export default JSON.stringify({
               text: '删除',
               leftOffset: 0.5,
               api: {
-                method: 'DELETE',
+                method: 'delete',
                 url: '/api/delete',
                 computeParams: '(data) => data && {id: data.id}',
               },
               refresh: {
                 url: '/api/query',
-                method: 'GET',
+                method: 'get',
                 effect: ['list'],
-                model: ['queryParams'],
-                computeParams: '(params) => params && {...params, start: 0, limit: 25}',
               },
             },
           ],
@@ -185,20 +190,18 @@ export default JSON.stringify({
           text: '确定',
           type: 'primary',
           effect: ['showEditor'],
-          model: ['selectedData'],
           value: false,
           api: {
-            method: 'PUT',
+            method: 'put',
             url: '/api/update',
+            model: ['selectedData'],
             computeParams:
               '(data) => {if (data) {const newData = {...data}; Reflect.deleteProperty(newData, "key"); return newData} else {return data}}',
           },
           refresh: {
             url: '/api/query',
-            method: 'GET',
+            method: 'get',
             effect: ['list'],
-            model: ['queryParams'],
-            computeParams: '(params) => params && {...params, start: 0, limit: 25}',
           },
         },
       ],
@@ -212,17 +215,15 @@ export default JSON.stringify({
       leftOffset: 0.5,
       state: ['list'],
       api: {
-        method: 'DELETE',
+        method: 'delete',
         url: '/api/batchdelete',
         model: ['selectedList'],
         computeParams: '(data) => data && {id: data.map(item => item.id).join()}',
       },
       refresh: {
         url: '/api/query',
-        method: 'GET',
+        method: 'get',
         effect: ['list'],
-        model: ['queryParams'],
-        computeParams: '(params) => params && {...params, start: 0, limit: 25}',
       },
     },
     {
@@ -268,16 +269,16 @@ export default JSON.stringify({
           text: '确定',
           type: 'primary',
           effect: ['showCreation'],
-          model: ['createData'],
           value: false,
           api: {
-            method: 'POST',
+            method: 'post',
             url: '/api/create',
+            model: ['createData'],
             computeParams: '',
           },
-          refresh: {
+          init: {
             url: '/api/query',
-            method: 'GET',
+            method: 'get',
             effect: ['list'],
             model: ['queryParams'],
             computeParams: '(params) => params && {...params, start: 0, limit: 25}',

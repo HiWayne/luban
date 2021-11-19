@@ -1,7 +1,14 @@
 import { FunctionComponent, useCallback, useContext } from 'react';
 import { Button, Form as AntdForm } from 'antd';
 import { Api, ComponentLevel, ComponentNames, OffsetConst } from 'types/types';
-import { definePropertyOfName, definePropertyOfLevel, fetchByApiConfig, convertRelativeToAbsolute } from 'utils/index';
+import {
+  definePropertyOfName,
+  definePropertyOfLevel,
+  fetchByApiConfig,
+  convertRelativeToAbsolute,
+  definePropertyOfIdentifier,
+  IDENTIFIER_INIT,
+} from 'utils/index';
 import useTree from 'hooks/useTree';
 import { ModelTreeContext } from 'render/index';
 
@@ -17,7 +24,7 @@ interface AdvancedFormProps {
 
 interface BasicFormProps extends CommonProps {
   buttonText?: string;
-  api: Api;
+  api: Api | any;
 }
 
 interface FormProps extends BasicFormProps, AdvancedFormProps {}
@@ -28,6 +35,7 @@ const BasicForm: FunctionComponent<BasicFormProps> = ({ children, buttonText, ap
   const { handleStateChange } = useTree({ effect: api?.effect });
 
   const handleClick = useCallback(() => {
+    definePropertyOfIdentifier(api, IDENTIFIER_INIT);
     fetchByApiConfig(api, undefined, handleStateChange, undefined, modelTree);
   }, [api, handleStateChange, modelTree]);
 
@@ -40,6 +48,7 @@ const BasicForm: FunctionComponent<BasicFormProps> = ({ children, buttonText, ap
           marginTop: convertRelativeToAbsolute(OffsetConst.TOP_OFFSET),
           marginLeft: convertRelativeToAbsolute(OffsetConst.LEFT_OFFSET),
         }}
+        type="primary"
       >
         {buttonText || '查询'}
       </Button>

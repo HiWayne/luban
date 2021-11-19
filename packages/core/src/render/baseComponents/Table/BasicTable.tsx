@@ -1,8 +1,15 @@
-import { FunctionComponent, useMemo } from 'react';
+import { FunctionComponent, useCallback, useMemo, useRef } from 'react';
 import { Button, Table } from 'antd';
-import { Api, ColumnNames } from 'types/types';
-import { useTree } from 'hooks/index';
-import { executeFunction, verifyExecuteResult, fetchByApiConfig } from 'utils/index';
+import { Api, ColumnNames, OffsetConst } from 'types/types';
+import { useTree, usePagination } from 'hooks/index';
+import {
+  executeFunction,
+  verifyExecuteResult,
+  fetchByApiConfig,
+  convertRelativeToAbsolute,
+  definePropertyOfIdentifier,
+  IDENTIFIER_REFRESH,
+} from 'utils/index';
 import TableColumnRender from './TableColumnRender';
 
 interface BasicColumn {
@@ -21,6 +28,7 @@ export interface BasicTableProps extends CommonProps {
   operateApi?: Api;
   hasDelete: boolean;
   deleteApi?: Api;
+  pagination: Api | any;
 }
 
 export const BasicTable: FunctionComponent<BasicTableProps> = ({
@@ -34,8 +42,12 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
   selectApi,
   state,
   computeData,
+  pagination: paginationConfig,
 }) => {
   const { nodeState } = useTree({ state });
+
+  const selectedRowsRef = useRef<any[]>([]);
+  const selectedRowKeysRef = useRef<any[]>([]);
 
   const dataSource = useMemo(() => {
     const data = computeData ? executeFunction(computeData, nodeState[0]?.response) : nodeState[0]?.response;
@@ -45,6 +57,12 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
     }
     return data;
   }, [computeData, nodeState]);
+
+  const refreshFetch = useCallback(() => {
+    const api = { ...paginationConfig.api };
+    definePropertyOfIdentifier(api, IDENTIFIER_REFRESH);
+    fetchByApiConfig(api, undefined, undefined, nodeState[0]);
+  }, [paginationConfig.api, nodeState]);
 
   const _columns = useMemo(() => {
     const result = columns.map((column) => ({
@@ -68,29 +86,85 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
         render: (v: any, row: any) => {
           const handleOperate = () => {
             if (operateApi) {
-              fetchByApiConfig(operateApi, undefined);
+              fetchByApiConfig(operateApi, row).then(refreshFetch);
             }
           };
           const handleDelete = () => {
             if (deleteApi) {
-              fetchByApiConfig(deleteApi, undefined);
+              fetchByApiConfig(deleteApi, deleteApi.computeParams ? row : { id: row.id }).then(refreshFetch);
             }
           };
           return (
             <>
-              {hasOperate ? <Button onClick={handleOperate}>{operateName || '编辑'}</Button> : null}
-              {hasDelete ? <Button onClick={handleDelete}>删除</Button> : null}
+              {hasOperate ? <Button onClick={handleOperate}>{operateName || '操作'}</Button> : null}
+              {hasDelete ? (
+                <Button
+                  onClick={handleDelete}
+                  style={{
+                    marginLeft: hasOperate ? convertRelativeToAbsolute(OffsetConst.MINI_LEFT_OFFSET) : undefined,
+                  }}
+                  danger
+                >
+                  删除
+                </Button>
+              ) : null}
             </>
           );
         },
       } as any);
     }
     return result;
-  }, [columns, hasOperate, hasDelete, operateName, operateApi, deleteApi]);
+  }, [columns, hasOperate, hasDelete, operateName, operateApi, deleteApi, refreshFetch]);
+
+  const handleBatchClick = useCallback(() => {
+    if (selectApi) {
+      fetchByApiConfig(
+        selectApi,
+        selectApi.computeParams ? selectedRowsRef.current : { ids: selectedRowKeysRef.current.join(',') },
+      ).then(refreshFetch);
+    }
+  }, [selectApi, refreshFetch]);
+
+  const rowSelection = useMemo(
+    () =>
+      canSelect
+        ? {
+            onChange(selectedRowKeys: any[], selectedRows: any[]) {
+              selectedRowKeysRef.current = selectedRowKeys;
+              selectedRowsRef.current = selectedRows;
+            },
+          }
+        : undefined,
+    [canSelect],
+  );
+
+  const { pagination, isLoading } = usePagination(paginationConfig, nodeState);
+
   return (
     <>
-      <Table dataSource={dataSource} columns={_columns} />
-      {canSelect ? <Button>批量操作</Button> : null}
+      <Table
+        dataSource={dataSource}
+        columns={_columns}
+        rowSelection={rowSelection}
+        pagination={pagination}
+        style={{
+          marginTop: convertRelativeToAbsolute(OffsetConst.TOP_OFFSET),
+          marginLeft: convertRelativeToAbsolute(OffsetConst.LEFT_OFFSET),
+        }}
+        loading={isLoading}
+      />
+      {canSelect ? (
+        <Button
+          style={{
+            marginLeft: convertRelativeToAbsolute(OffsetConst.LEFT_OFFSET),
+            marginBottom: convertRelativeToAbsolute(OffsetConst.TOP_OFFSET),
+          }}
+          onClick={handleBatchClick}
+          type="primary"
+        >
+          批量操作
+        </Button>
+      ) : null}
     </>
   );
 };

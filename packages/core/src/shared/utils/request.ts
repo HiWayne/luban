@@ -20,6 +20,8 @@ const openNotificationWithError = createNotification('error');
 const request =
   (method: string) =>
   (url: string, params: any, notify = true) => {
+    console.warn(`${method} ${url}, params:`);
+    console.warn(params);
     switch (method) {
       case 'get':
       case 'delete':

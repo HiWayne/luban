@@ -1,14 +1,33 @@
 const basicTest = JSON.stringify({
   vdom: [
     {
+      level: 'advanced',
+      name: 'mount',
+      id: -1,
+      api: {
+        url: '/api/query',
+        method: 'get',
+        effect: ['list'],
+        model: ['queryParams'],
+        computeParams: '',
+      },
+    },
+    {
       level: 'basic',
       id: 1,
       name: 'form',
       api: {
-        method: 'GET',
+        method: 'get',
         url: '/api/query',
         model: ['queryParams'],
         effect: ['list'],
+        rules: `(params) => {
+          if (params && (params.title || params.createTime)) {
+            return true
+          } else {
+            return '标题和时间至少填写一个'
+          }
+        }`,
       },
       children: [
         {
@@ -46,6 +65,34 @@ const basicTest = JSON.stringify({
       ],
       state: ['list'],
       computeData: '(data) => data && data.data.object_list.map(item => ({...item, key: item.id}))',
+      pagination: {
+        limit: 10,
+        computeStart: '',
+        computeMore: '(data) => data && !!data.data.more',
+        computeTotal: '(data) => data && data.data.total',
+        api: {
+          url: '/api/query',
+          method: 'get',
+          effect: ['list'],
+          model: ['queryParams'],
+        },
+      },
+      hasOperate: true,
+      operateApi: {
+        method: 'put',
+        url: '/api/update',
+      },
+      hasDelete: true,
+      deleteApi: {
+        method: 'delete',
+        url: '/api/delete',
+      },
+      canSelect: true,
+      selectApi: {
+        method: 'delete',
+        url: '/api/batchdelete',
+        computeParams: '(rows) => rows && {ids: rows.map(row => row.id).join(",")}',
+      },
     },
   ],
   model: {

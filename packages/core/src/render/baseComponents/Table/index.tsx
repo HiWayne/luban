@@ -1,6 +1,6 @@
-import { FunctionComponent, Key, useMemo, useState } from 'react';
-import { Table as AntdTable, TablePaginationConfig } from 'antd';
-import { useTree } from 'hooks/index';
+import { FunctionComponent, Key, useMemo } from 'react';
+import { Table as AntdTable } from 'antd';
+import { useTree, usePagination } from 'hooks/index';
 import RenderNode from 'render/Render';
 import {
   convertRelativeToAbsolute,
@@ -8,7 +8,6 @@ import {
   definePropertyOfLevel,
   executeFunction,
   verifyExecuteResult,
-  fetchByApiConfig,
 } from 'utils/index';
 import { ComponentNames, Api, ComponentLevel } from 'types/types';
 import { BasicTableProps, BasicTable } from './BasicTable';
@@ -49,14 +48,7 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
   pagination: paginationConfig,
   api,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [paginationLoading, setPaginationLoading] = useState(false);
-  const { nodeState, handleModelChange, handleStateChange, isShow, nodeModel } = useTree({ state, model, effect });
-
-  // 是否正在请求
-  const isLoading = nodeState[0]?._loading;
-  // 是否是refresh类型的请求，是 则翻页器回到第一页
-  const isRefresh = nodeState[0]?._refresh;
+  const { nodeState, handleModelChange, isShow } = useTree({ state, model, effect });
 
   const dataSource = useMemo(
     () => (computeData ? executeFunction(computeData, nodeState[0]?.response) : nodeState[0]?.response),
@@ -102,66 +94,7 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
     [_columns],
   );
 
-  const pagination: TablePaginationConfig | boolean = useMemo(() => {
-    if (paginationConfig) {
-      const limit = paginationConfig.limit;
-      let startParams = {},
-        hasMore = false,
-        total = 0;
-      if (paginationConfig.computeStart) {
-        startParams = executeFunction(paginationConfig.computeStart, nodeState[0]?.response);
-        if (!verifyExecuteResult(startParams)) {
-          console.error('paginationConfig.computeStart occurred error in table pagination');
-          return false;
-        }
-      }
-      if (paginationConfig.computeMore) {
-        hasMore = executeFunction(paginationConfig.computeMore, nodeState[0]?.response);
-        if (!verifyExecuteResult(hasMore)) {
-          console.error('paginationConfig.computeMore occurred error in table pagination');
-          return false;
-        }
-      }
-      if (paginationConfig.computeTotal) {
-        total = executeFunction(paginationConfig.computeTotal, nodeState[0]?.response);
-        if (!verifyExecuteResult(total)) {
-          console.error('paginationConfig.computeTotal occurred error in table pagination');
-          return false;
-        }
-      }
-      return paginationConfig
-        ? {
-            position: ['bottomRight'],
-            current: isRefresh ? 1 : currentPage,
-            pageSize: limit,
-            total: total,
-            onChange(page: number, pageSize: number | undefined) {
-              if (!paginationConfig.computeMore) {
-                hasMore = total - (page - 1) * pageSize! > 0;
-              }
-              if (!hasMore) {
-                return;
-              }
-              if (!paginationConfig.computeStart) {
-                startParams = { start: (page - 1) * pageSize! };
-              }
-              const params = { ...nodeModel[0], ...startParams, limit: pageSize };
-              setPaginationLoading(true);
-              fetchByApiConfig(api, params, handleStateChange, nodeState[0])
-                .then(() => {
-                  setCurrentPage(page);
-                })
-                .finally(() => {
-                  setPaginationLoading(false);
-                });
-            },
-            disabled: paginationLoading,
-          }
-        : false;
-    } else {
-      return false;
-    }
-  }, [paginationConfig, nodeState, api, handleStateChange, nodeModel, paginationLoading, isRefresh, currentPage]);
+  const { pagination, isLoading } = usePagination(paginationConfig, nodeState);
 
   if (!verifyExecuteResult(dataSource)) {
     console.error('computeData occurred error in "table"');

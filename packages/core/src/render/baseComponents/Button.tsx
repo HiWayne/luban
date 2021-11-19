@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useContext, useState } from 'react';
+import { FunctionComponent, useCallback, useContext, useState, useMemo } from 'react';
 import { Button as AntdButton } from 'antd';
 import { Size, ButtonType, ComponentNames, Api, ComponentLevel } from 'types/types';
 import { useTree } from 'hooks/index';
@@ -8,6 +8,7 @@ import {
   definePropertyOfLevel,
   definePropertyOfIdentifier,
   IDENTIFIER_REFRESH,
+  IDENTIFIER_INIT,
   executeFunction,
   verifyExecuteResult,
   fetchByApiConfig,
@@ -20,10 +21,11 @@ interface AdvancedButtonProps extends CommonProps {
   href?: string;
   target?: string;
   size?: Size;
-  type?: ButtonType;
+  type?: ButtonType | string;
   value?: any;
   api: Api;
   refresh?: any;
+  init?: any;
 }
 
 interface ButtonProps extends AdvancedButtonProps {}
@@ -44,11 +46,16 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
   topOffset,
   computeData,
   refresh,
+  init,
 }) => {
   if (refresh) {
     definePropertyOfIdentifier(refresh, IDENTIFIER_REFRESH);
   }
+  if (init) {
+    definePropertyOfIdentifier(init, IDENTIFIER_INIT);
+  }
   const { handleModelChange, handleStateChange, isShow } = useTree({ state, model, effect });
+  const { nodeState: effectState } = useTree({ state: refresh?.effect });
   const [modelTree] = useContext(ModelTreeContext);
   const [isLoading, setIsLoading] = useState(false);
   const handleClick = useCallback(() => {
@@ -61,7 +68,7 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
       }
     }
     if (api) {
-      const nodeModel = readValueByPath(model, api.effect);
+      const nodeModel = readValueByPath(modelTree, api.model);
       const originalParams = ioc !== undefined ? ioc : nodeModel && nodeModel[0];
       setIsLoading(true);
       fetchByApiConfig(api, originalParams, handleStateChange, undefined, modelTree)
@@ -71,13 +78,31 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
         .then(() => {
           handleStateChange(value, effect);
           if (refresh) {
-            fetchByApiConfig(refresh, undefined, handleStateChange, undefined, modelTree, false);
+            fetchByApiConfig(refresh, undefined, handleStateChange, effectState[0], modelTree, false);
+          } else if (init) {
+            fetchByApiConfig(init, undefined, handleStateChange, undefined, modelTree, false);
           }
         });
     } else if (value !== undefined) {
       handleStateChange(value);
     }
-  }, [handleStateChange, value, api, ioc, handleModelChange, effect, computeData, model, modelTree, refresh]);
+  }, [
+    handleStateChange,
+    value,
+    api,
+    ioc,
+    handleModelChange,
+    effect,
+    computeData,
+    modelTree,
+    refresh,
+    init,
+    effectState,
+  ]);
+
+  // 在antd 4.0 之后，危险成为一种按钮属性而不是按钮类型
+  const computedType = useMemo(() => (type === 'danger' ? undefined : type), [type]);
+  const computedDanger = useMemo(() => (type === 'danger' ? true : undefined), [type]);
 
   return isShow ? (
     <AntdButton
@@ -85,7 +110,8 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
       href={href}
       target={target}
       size={size}
-      type={type}
+      type={computedType as ButtonType}
+      danger={computedDanger}
       onClick={handleClick}
       style={{ marginTop: convertRelativeToAbsolute(topOffset), marginLeft: convertRelativeToAbsolute(leftOffset) }}
     >

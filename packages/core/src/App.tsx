@@ -1,6 +1,6 @@
 import 'antd/dist/antd.css';
 import Page from 'render/index';
-import testJson from './test';
+import testJson from './basicTest';
 
 const App = () => {
   return <Page data={testJson} />;

@@ -13,6 +13,7 @@ export {
   definePropertyOfIdentifier,
   getIdentifierProperty,
   IDENTIFIER_REFRESH,
+  IDENTIFIER_INIT,
   executeFunction,
   verifyExecuteResult,
   getEventValue,

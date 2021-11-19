@@ -51,6 +51,7 @@ export const getLevelProperty = craeteGetProperty(LEVEL);
 
 const IDENTIFIER = '_indentifier';
 export const IDENTIFIER_REFRESH = 'refresh';
+export const IDENTIFIER_INIT = 'init';
 export const definePropertyOfIdentifier = createDefineProperty<string>(IDENTIFIER);
 export const getIdentifierProperty = craeteGetProperty(IDENTIFIER);
 
@@ -103,13 +104,23 @@ export const fetchByApiConfig = async (
       response: state?.response,
       _loading: false,
       _refresh: false,
+      _init: false,
+      params: state?.params,
     };
     if (getIdentifierProperty(api) === IDENTIFIER_REFRESH) {
       result._refresh = true;
+    } else if (getIdentifierProperty(api) === IDENTIFIER_INIT) {
+      result._init = true;
     }
     const readModel = readValueByPath(modelTree, api.model);
     originalParams = originalParams || (readModel && readModel[0]);
-    const params = api.computeParams ? executeFunction(api.computeParams, originalParams) : originalParams;
+    // 如果是refresh，复用上次的params去请求，即重新更新当前页的数据
+    const params = result._refresh
+      ? result.params
+      : api.computeParams
+      ? executeFunction(api.computeParams, originalParams)
+      : originalParams;
+    result.params = result._refresh ? result.params : originalParams;
     if (!verifyExecuteResult(params)) {
       console.error('api.computeParams occurred error in "fetchByApiConfig"');
       return;
@@ -124,7 +135,7 @@ export const fetchByApiConfig = async (
         message: '不符合规则的参数',
         description: isValid || '',
       });
-      return;
+      return Promise.reject(isValid || '不符合规则的参数');
     }
     if (isValidPath(api.effect) && typeof callback === 'function') {
       callback({ ...result, _loading: true }, api.effect);
@@ -156,7 +167,7 @@ export const fetchByApiConfig = async (
       if (!result.response || error) {
         return Promise.reject();
       } else {
-        return Promise.resolve();
+        return Promise.resolve(result);
       }
     }
   }

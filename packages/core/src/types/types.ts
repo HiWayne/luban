@@ -45,17 +45,17 @@ export enum ButtonType {
 }
 
 export enum Method {
-  GET = 'GET',
-  POST = 'POST',
-  PUT = 'PUT',
-  DELETE = 'DELETE',
-  POST_FORM = 'POST_FORM',
-  PUT_FORM = 'PUT_FORM',
-  HEAD = 'HEAD',
-  OPTIONS = 'OPTIONS',
-  CONNECT = 'CONNECT',
-  TRACE = 'TRACE',
-  PATCH = 'PATCH',
+  GET = 'get',
+  POST = 'post',
+  PUT = 'put',
+  DELETE = 'delete',
+  POST_FORM = 'post_form',
+  PUT_FORM = 'put_form',
+  HEAD = 'head',
+  OPTIONS = 'options',
+  CONNECT = 'connect',
+  TRACE = 'trace',
+  PATCH = 'patch',
 }
 
 export interface Api {
@@ -83,4 +83,8 @@ export enum PickerType {
 export enum OffsetConst {
   TOP_OFFSET = 0.5,
   LEFT_OFFSET = 0.5,
+  SMALL_TOP_OFFSET = 0.25,
+  SMALL_LEFT_OFFSET = 0.25,
+  MINI_TOP_OFFSET = 0.125,
+  MINI_LEFT_OFFSET = 0.125,
 }

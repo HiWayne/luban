@@ -70,8 +70,10 @@ interface VDomNode {
   pagination?: Pagination;
   // datepicker范围精度
   picker?: string;
-  // button请求完成后重新请求列表
+  // button请求完成后重新请求当前页列表
   refresh?: Api;
+  // button请求完成后重新请求初始页列表
+  init?: Api;
 }
 
 interface ModelTree {
@@ -103,4 +105,5 @@ interface Pagination {
   computeStart?: string;
   computeMore?: string;
   computeTotal?: string;
+  api?: Api;
 }
