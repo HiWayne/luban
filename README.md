@@ -1,5 +1,9 @@
 # Low/No Code 平台： luban(鲁班)
 
+#### 由旧项目[shekina](https://github.com/HiWayne/shekina)重构而来
+
+#### 感兴趣可以看[重构原因](https://github.com/HiWayne/shekina/blob/master/README.md)
+
 ## 名称由来
 
 因为该平台并非『乐高』式的通过简单映射 component 堆砌页面，而是每个 component 之间可以自定义关联状态，当一个组件发生修改，可以由用户定义它将影响哪些其他组件，其他组件因此做出相应的改变。它也可以自由定义后端接口模型，组件树和模型树是独立正交的，接口的设计不必耦合平台。这些树的节点像『机关』一样组织在一起，可以自定义相互的业务逻辑，这个平台以及使用这个平台的人就是『鲁班』。
