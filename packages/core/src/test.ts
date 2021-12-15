@@ -22,6 +22,8 @@ export default JSON.stringify({
       leftOffset: 0.5,
       effect: ['showCreation'],
       value: true,
+      // onClick: '(state) => new Promise(r => {setTimeout(() => {state.showCreation = true;r()}, 3000)})',
+      onClick: '(state) => state.showCreation = true',
     },
     {
       level: 'advanced',
@@ -106,11 +108,22 @@ export default JSON.stringify({
       columns: [
         {
           title: '标题',
+          name: 'copy',
           dataIndex: 'title',
+        },
+        {
+          title: '图片',
+          name: 'multiImages',
+          dataIndex: 'images',
         },
         {
           title: '内容',
           dataIndex: 'content',
+        },
+        {
+          title: '创建时间',
+          name: 'time',
+          dataIndex: 'createTime',
         },
         {
           title: '操作',

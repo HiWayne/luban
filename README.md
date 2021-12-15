@@ -2,13 +2,13 @@
 
 #### 由旧项目[shekina](https://github.com/HiWayne/shekina)重构而来
 
-#### 感兴趣可以看[重构原因](https://github.com/HiWayne/shekina/blob/master/README.md)
+#### 感兴趣的话可以看[重构原因](https://github.com/HiWayne/shekina/blob/master/README.md)
 
 ## 名称由来
 
 因为该平台并非『乐高』式的通过简单映射 component 堆砌页面，而是每个 component 之间可以自定义关联状态，当一个组件发生修改，可以由用户定义它将影响哪些其他组件，其他组件因此做出相应的改变。它也可以自由定义后端接口模型，组件树和模型树是独立正交的，接口的设计不必耦合平台。这些树的节点像『机关』一样组织在一起，可以自定义相互的业务逻辑，这个平台以及使用这个平台的人就是『鲁班』。
 
-## 亮点
+## 平台亮点
 
 `假设一个button按钮，它在一些情况下是点击按钮后发送请求，在另一个场景下是点击按钮后弹出弹框，点弹框中的确定按钮才发送请求。你在低代码平台会怎样设计这个按钮配置？给按钮的配置里加上action字段，不同的action对应不同的逻辑？那如果现在又有需求，点击按钮后某个组件消失呢，再加一个action吗？`
 
@@ -29,7 +29,15 @@
 - 后端解耦
   > 它不提供后端接口，也不需要后端接口面向它实现。相反，它可以面向后端接口实现。表单组件可以一一映射成自定义的字段，字段的嵌套关系可以并不一定和组件树对应，非常灵活。于是可以在现有后端体系不变的情况下完成前端页面，这是一个完全面向前端的平台。
 
-## 实现细节
+## 项目结构
+
+采用了基于 lerna 的 monorepo 来管理项目，分出了 **core** 和 **creation** 两个包。
+
+其中 **core** 是将配置文件解析成页面的核心，将它拆出来是因为，在仅需要通过配置展示页面的场景下，引入 **core** 就足够了，不必耦合生产配置的逻辑。
+
+**creation** 负责生产配置文件，它是一个可视化配置页面的平台，通过拖拽组件和填写配置，能够轻易的生成后台页面，最终的产物是 json，即作为将来 **core** 的输入。
+
+## 原理概述
 
 内部建立了 3 颗树，分别是 **vdomTree**（组件树）、**modelTree**（后端模型树）、**stateTree**（视图状态树）
 
@@ -39,10 +47,129 @@
 
 最终把**vdomTree**作为入口交给渲染层时，每个节点被解析成对应组件，组件通过**state**找到它依赖的状态，如果是表单组件会通过**model**找到它绑定的模型字段，通过 effect 找到它发生变更时要影响的状态。于是，当一个表单组件发生 change 后，它会根据**model**路径更新**modelTree**（模型树），可能还会根据**effect**路径修改**stateTree**（状态树）。触发更新后，其他依赖该**state**路径的组件也做出相应更新，完成了组件之间的状态通信。
 
-## 项目结构
+## 代码设计与难点 Logs
 
-采用了基于 lerna 的 monorepo 来管理项目，分出了 **core** 和 **creation** 两个包。
+1. **`vdomTree` 如何遍历**：深度优先遍历 `vdomTree`，对每个节点会有 `beginWork`（递）、`completeWork`（归）两个阶段（参考自 React 源码）。由于要把 json 转化为 `JSX.Element`，所以自底向上转换，在 `completeWork` 里处理。顺序是，叶子节点先被转换后，回溯到父节点，已经变成 `JSX.Element` 的子节点会放在父节点的 children 里，接着父节点继续转换并拿 children 作为它的子元素，当整个递归完成后，就形成了完整的 `JSX.Element` 结构用于渲染。
 
-其中 **core** 是将配置文件解析成页面的核心，将它拆出来是因为，在仅需要通过配置展示页面的场景下，引入 **core** 就足够了，不必耦合生产配置的逻辑。
+<br />
+<br />
 
-**creation** 负责生产配置文件，它是一个可视化配置页面的平台，通过拖拽组件和填写配置，能够轻易的生成后台页面，最终的产物是 json，即作为将来 **core** 的输入。
+2. **组件标记**：利用 `Reflect.defineProperty`，封装了 `definePropertyOfName`、`definePropertyOfLevel` 函数，通过它们给组件库中的组件标记唯一名称和组件级别（基础组件/进阶组件）。同时让相应的 getProperty 方法成对出现，约束了变量，避免出现散落在各处的 hard-coding。将来组件如果需要增加权限，组件标记也可以起到作用。
+
+> ```ts
+> export const defineProperty = (
+>   target: FunctionComponent<any>,
+>   property: string,
+>   value: any,
+>   config?: PropertyDescriptor,
+> ) => {
+>   config = config || {};
+>   Reflect.defineProperty(target, property, {
+>     value,
+>     enumerable: false,
+>     configurable: false,
+>     ...config,
+>   });
+> };
+>
+> const createDefineProperty =
+>   <T>(property: string, config?: PropertyDescriptor) =>
+>   (target: FunctionComponent<any>, value: T) =>
+>     defineProperty(target, property, value, config);
+>
+> const NAME = '_name';
+> export const definePropertyOfName = createDefineProperty<ComponentNames | ColumnNames>(NAME);
+> export const getNameProperty = createGetProperty(NAME);
+>
+> const LEVEL = '_level';
+> export const definePropertyOfLevel = createDefineProperty<ComponentLevel[]>(LEVEL);
+> export const getLevelProperty = createGetProperty(LEVEL);
+> ```
+
+还可以看到函数被设计为类似`柯里化`和 `point free` 风格的编写方式，将原本多个参数的函数根据不同场景预执行，通过 `createDefineProperty` 这个函数工厂，避免了写模板代码。同时不显式提及参数的传递，符合函数式编程的`point free`特征。
+
+<br />
+<br />
+
+3. **性能优化**：`modelTree`、`stateTree` 以顶层状态的形式出现在 react 中，为了透传到各个组件所以使用了 `context`。与此同时，为了避免不必要的渲染，整个 `vdomTree` 产物使用 `useMemo` 缓存，只和 `vdomTree` 的变化有关（`vdomTree` 由平台配置后就已固定，不会变化，只有 `modelTree`、`stateTree` 会因为定义的逻辑而变化）
+
+> ```tsx
+> const render = useMemo(() => <Render data={vdomTree} />, [vdomTree]);
+>
+> return (
+>   <ModelTreeContext.Provider value={modelValue}>
+>     <StateTreeContext.Provider value={stateValue}>{render}</StateTreeContext.Provider>
+>   </ModelTreeContext.Provider>
+> );
+> ```
+
+于是当 `modelTree`、`stateTree` 变化时，只有 `render` 内部依赖（`useContext`）了它们的局部子组件们才会重新渲染。
+
+<br />
+<br />
+
+4. **immutable 的状态、模型如何局部更新**：当一个表单 change 后会触发 `modelTree` 中的某个字段更新，当某个 `state` 更新时，会触发 `stateTree` 中对应字段的更新。由于数据需要 immutable，所以在一个大对象中局部更新显得有些复杂。推荐使用 `immerjs`，它是 `mbox` 作者写的 生产 immutable 数据的库，可以用 mutable 的方式产生 immutable 的数据，内部采用 `Proxy` 监听属性变化，相比于 `immutablejs` 库特有的数据结构和操作方式，`immerjs` 心智负担更小，也不需要掌握太多额外的知识。
+
+<br />
+<br />
+
+5. **解析树的逻辑如何抽象**：举例一个组件节点的配置：
+
+> ```js
+> {
+>   level: 'advanced', // 进阶组件
+>   name: 'input', // 组件类型是input
+>   id: 15, // 唯一id
+>   label: '标题', // label文案
+>   width: '200px', // 宽度
+>   model: ['data', 'title'], // 模型字段路径：modelTree.data.title
+>   state: ['showInput'] // state路径：stateTree.showInput
+>   effect: ['hasInputValue'] // effect路径：会修改stateTree.hasInputValue
+> }
+> ```
+
+一个表单节点有些配置逻辑是相同的，比如`model`、`state`、`effect`这三个配置。
+
+`model`表示表单 change 后对应 `modelTree` 路径下的值会被同步；
+`state` 表示该组件的状态（比如可见性）受 `stateTree` 路径下的哪些属性影响；
+`effect` 表示该组件会影响哪些 `state`（也是通过 `stateTree` 下的路径数组来表示）。
+
+于是抽象出`useTree`这个 hooks，通过传入组件的`model`、`state`、`effect`配置，它会产生以上逻辑，并返回相应的方法或状态。其中`model`和`effect`涉及修改逻辑，主要实现方式是：直接根据 path 路径以 mutable 的形式修改对象，并传入 immerjs。`state`逻辑则是利用 reduce 遍历数组，期间不断判断当前是不是`Object`（即能不能再通过`.`读取属性），并返回最终的属性值或`null`。同时`state`、`effect`可能有多个值，所以还需要兼容二维数组的形式（值的 path 是一个数组，多个值是二维数组）。
+
+<br />
+<br />
+
+6. **复杂配置解析的抽象**：配置中有一些比较复杂的部分，比如『请求』、『翻页』相关的配置，因为一个请求的完整描述不仅要定义 `url`、`请求方式`、`参数来源`、参数可能经过的`规则校验函数`、`计算函数`等，还需要定义请求的数据最终会影响哪个`状态`。所以一个『请求』相关的配置可能是比较复杂的，比如：
+
+> ```js
+> api: {
+>   url: '/api/query', // 请求地址
+>   method: 'get', // 请求方式
+>   effect: ['list'], // 请求最终影响哪些状态
+>   model: ['queryParams'], // 请求参数来自哪个model
+>   computeParams: `
+>     (params) => params && {...params, start: 0, limit: 25}
+>   `, // 参数的计算函数（可能需要类型转换等等逻辑）
+>   rules: `
+>     (params) => {
+>       if (params && (params.title || params.createTime)) {
+>         return true
+>       } else {
+>         return '标题和时间至少填写一个'
+>       }
+>     }
+>   `, // 参数的校验函数（如果return的不是true则是报错信息）
+> }
+> ```
+
+那么对 `api` 配置的解析自然也会比较复杂，同理像翻页 `pagination` 配置逻辑也会很复杂，于是将这些解析逻辑抽象成诸如 useApi、usePagination 的 hooks 用以在各种需要它们的地方复用。
+
+<br />
+<br />
+
+7. **json 如何保存函数**：对于一些复杂配置，能写自定义函数是必须的，json scheme 中只能以字符串的形式保存函数。这些字符串在 runtime 被执行时，有两种方案。1. `eval`，2. `new Function`。最终选择了**方案 2**，因为 `eval` 会导致作用域中的变量都变成闭包，造成无谓的**内存浪费**，内部变量的暴露也会带来**安全风险**。而 `new Function` 的作用域只在全局作用域之上，只能通过约定的参数接收传给它有限的内容，不仅内存消耗少，而且安全性上也有一定提升。
+
+<br />
+<br />
+
+8. **异步自定义函数带来的问题**：如果函数不会影响状态，那么异步和同步没什么区别。如果会影响状态，可能会产生过期状态(`stale state`)问题。首先修改状态是利用 `immerjs` 这个库，`produce` 接受一个`(draft) => { // modify draft }`函数，自定义函数只需要是`modify draft`那部分就可以，非常方便。同时 `immerjs` 也支持函数返回 promise，可以异步的产生 immutable 数据。到目前为止没有什么问题，但是如果在异步期间，其他组件更新了状态，那么这个异步上下文中的状态就变成了`stale state`，异步的修改是在旧状态的基础上执行的，异步结束后就会以`stale state`更新`current state`从而发生状态不一致的问题。在 `useClick` 这个 hooks 中，待解决……

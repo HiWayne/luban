@@ -74,6 +74,8 @@ interface VDomNode {
   refresh?: Api;
   // button请求完成后重新请求初始页列表
   init?: Api;
+  // 点击事件
+  onClick?: string;
 }
 
 interface ModelTree {
@@ -94,6 +96,7 @@ interface CommonProps {
   topOffset?: number;
   computeData?: string;
   computeParams?: string;
+  onClick?: string;
 }
 
 interface ComponentHasName extends React.FunctionComponent {

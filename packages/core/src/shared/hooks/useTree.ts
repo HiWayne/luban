@@ -19,9 +19,9 @@ interface UseTreeResponse {
 
 type UserTree = (params: UseTreeParams) => UseTreeResponse;
 
-const useStateTreeRef = createSingleton();
+export const useStateTreeRef = createSingleton();
 
-const useModelTreeRef = createSingleton();
+export const useModelTreeRef = createSingleton();
 
 /**
  *
@@ -40,6 +40,7 @@ const useModelTreeRef = createSingleton();
 const useTree: UserTree = ({ model, state, effect }) => {
   const [modelTree, setModelTree] = useContext(ModelTreeContext);
   const [stateTree, setStateTree] = useContext(StateTreeContext);
+  // 如果连续有多个操作，state不会及时修改，所以放在单例里，每次更新state同步给单例
   const modelTreeRef = useModelTreeRef(modelTree);
   const stateTreeRef = useStateTreeRef(stateTree);
 
