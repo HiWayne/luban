@@ -1,23 +1,23 @@
 const traverse = (
   input: VDomNode | VDomNode[],
-  startCallback?: (item: VDomNode) => any,
-  endCallback?: (item: VDomNode) => any,
+  beginWork?: (item: VDomNode) => any,
+  completeWork?: (item: VDomNode) => any,
 ): any[] | undefined => {
   const _traverse = (vdomNode: VDomNode): VDomNode => {
     if (vdomNode) {
-      if (typeof startCallback === 'function') {
-        vdomNode = startCallback(vdomNode);
+      if (typeof beginWork === 'function') {
+        vdomNode = beginWork(vdomNode);
       }
-      if (typeof endCallback !== 'function') {
-        endCallback = (v) => v;
+      if (typeof completeWork !== 'function') {
+        completeWork = (v) => v;
       }
       if (Array.isArray(vdomNode.children) && vdomNode.children.length > 0) {
-        return endCallback({
+        return completeWork({
           ...vdomNode,
           children: vdomNode.children.map((childVdomNode) => _traverse(childVdomNode) as VDomNode),
         });
       }
-      return endCallback(vdomNode);
+      return completeWork(vdomNode);
     } else {
       return vdomNode;
     }

@@ -39,21 +39,21 @@ const createDefineProperty =
   (target: FunctionComponent<any>, value: T) =>
     defineProperty(target, property, value, config);
 
-const craeteGetProperty = (property: string) => (target: any) => Reflect.get(target, property);
+const createGetProperty = (property: string) => (target: any) => Reflect.get(target, property);
 
 const NAME = '_name';
 export const definePropertyOfName = createDefineProperty<ComponentNames | ColumnNames>(NAME);
-export const getNameProperty = craeteGetProperty(NAME);
+export const getNameProperty = createGetProperty(NAME);
 
 const LEVEL = '_level';
 export const definePropertyOfLevel = createDefineProperty<ComponentLevel[]>(LEVEL);
-export const getLevelProperty = craeteGetProperty(LEVEL);
+export const getLevelProperty = createGetProperty(LEVEL);
 
-const IDENTIFIER = '_indentifier';
+const IDENTIFIER = '_identifier';
 export const IDENTIFIER_REFRESH = 'refresh';
 export const IDENTIFIER_INIT = 'init';
 export const definePropertyOfIdentifier = createDefineProperty<string>(IDENTIFIER);
-export const getIdentifierProperty = craeteGetProperty(IDENTIFIER);
+export const getIdentifierProperty = createGetProperty(IDENTIFIER);
 
 const ERROR_SIGN = Symbol('ERROR_SIGN');
 
