@@ -1,11 +1,12 @@
 import { FunctionComponent, useCallback, useMemo, useRef } from 'react';
 import { Button, Table } from 'antd';
+import { clone } from 'ramda';
 import { Api, ColumnNames, OffsetConst } from 'types/types';
-import { useTree, usePagination } from 'hooks/index';
+import { useTree, usePagination, useApi } from 'hooks/index';
+import { fetchByApiConfig } from 'hooks/useApi';
 import {
   executeFunction,
   verifyExecuteResult,
-  fetchByApiConfig,
   convertRelativeToAbsolute,
   definePropertyOfIdentifier,
   IDENTIFIER_REFRESH,
@@ -58,11 +59,14 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
     return data;
   }, [computeData, nodeState]);
 
+  const api = useMemo(() => clone(paginationConfig.api), [paginationConfig.api]);
+
+  const fetchByApi = useApi({ api, state });
+
   const refreshFetch = useCallback(() => {
-    const api = { ...paginationConfig.api };
     definePropertyOfIdentifier(api, IDENTIFIER_REFRESH);
-    fetchByApiConfig(api, undefined, undefined, nodeState[0]);
-  }, [paginationConfig.api, nodeState]);
+    fetchByApi();
+  }, [api, fetchByApi]);
 
   const _columns = useMemo(() => {
     const result = columns.map((column) => ({

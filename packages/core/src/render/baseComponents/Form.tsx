@@ -1,16 +1,14 @@
-import { FunctionComponent, useCallback, useContext } from 'react';
+import { FunctionComponent, useCallback } from 'react';
 import { Button, Form as AntdForm } from 'antd';
 import { Api, ComponentLevel, ComponentNames, OffsetConst } from 'types/types';
 import {
   definePropertyOfName,
   definePropertyOfLevel,
-  fetchByApiConfig,
   convertRelativeToAbsolute,
   definePropertyOfIdentifier,
   IDENTIFIER_INIT,
 } from 'utils/index';
-import useTree from 'hooks/useTree';
-import { ModelTreeContext } from 'render/index';
+import useApi from 'hooks/useApi';
 
 enum Layout {
   horizontal = 'horizontal',
@@ -30,14 +28,12 @@ interface BasicFormProps extends CommonProps {
 interface FormProps extends BasicFormProps, AdvancedFormProps {}
 
 const BasicForm: FunctionComponent<BasicFormProps> = ({ children, buttonText, api }) => {
-  const [modelTree] = useContext(ModelTreeContext);
-
-  const { handleStateChange } = useTree({ effect: api?.effect });
+  const fetchByApi = useApi({ api });
 
   const handleClick = useCallback(() => {
     definePropertyOfIdentifier(api, IDENTIFIER_INIT);
-    fetchByApiConfig(api, undefined, handleStateChange, undefined, modelTree);
-  }, [api, handleStateChange, modelTree]);
+    fetchByApi();
+  }, [api, fetchByApi]);
 
   return (
     <AntdForm>
