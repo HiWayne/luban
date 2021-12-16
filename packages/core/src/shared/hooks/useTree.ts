@@ -87,6 +87,10 @@ const useTree: UserTree = ({ model, state, effect }) => {
   );
 
   return {
+    // 模型树
+    modelTree,
+    // 状态树
+    stateTree,
     // 该组件关联的model字段
     nodeModel,
     // 该组件关联的状态

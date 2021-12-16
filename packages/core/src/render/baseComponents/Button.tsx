@@ -1,7 +1,7 @@
 import { FunctionComponent, useCallback, useContext, useState, useMemo } from 'react';
 import { Button as AntdButton } from 'antd';
 import { Size, ButtonType, ComponentNames, Api, ComponentLevel } from 'types/types';
-import { useTree, useClick } from 'hooks/index';
+import { useTree, useCustomClick } from 'hooks/index';
 import {
   convertRelativeToAbsolute,
   definePropertyOfName,
@@ -59,7 +59,7 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
   const { nodeState: effectState } = useTree({ state: refresh?.effect });
   const [modelTree] = useContext(ModelTreeContext);
   const [isLoading, setIsLoading] = useState(false);
-  const handlecustomClick = useClick(onClick);
+  const handlecustomClick = useCustomClick(onClick);
   const handleClick = useCallback(() => {
     if (typeof handlecustomClick === 'function') {
       handlecustomClick();
