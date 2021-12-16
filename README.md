@@ -49,84 +49,94 @@
 
 ## 代码设计与难点 Logs
 
-1. **`vdomTree` 如何遍历**：深度优先遍历 `vdomTree`，对每个节点会有 `beginWork`（递）、`completeWork`（归）两个阶段（参考自 React 源码）。由于要把 json 转化为 `JSX.Element`，所以自底向上转换，在 `completeWork` 里处理。顺序是，叶子节点先被转换后，回溯到父节点，已经变成 `JSX.Element` 的子节点会放在父节点的 children 里，接着父节点继续转换并拿 children 作为它的子元素，当整个递归完成后，就形成了完整的 `JSX.Element` 结构用于渲染。
+> **1. `vdomTree` 如何遍历**：
+
+深度优先遍历 `vdomTree`，对每个节点会有 `beginWork`（递）、`completeWork`（归）两个阶段（参考自 React 源码）。由于要把 json 转化为 `JSX.Element`，所以自底向上转换，在 `completeWork` 里处理。顺序是，叶子节点先被转换后，回溯到父节点，已经变成 `JSX.Element` 的子节点会放在父节点的 children 里，接着父节点继续转换并拿 children 作为它的子元素，当整个递归完成后，就形成了完整的 `JSX.Element` 结构用于渲染。
 
 <br />
 <br />
 
-2. **组件标记**：利用 `Reflect.defineProperty`，封装了 `definePropertyOfName`、`definePropertyOfLevel` 函数，通过它们给组件库中的组件标记唯一名称和组件级别（基础组件/进阶组件）。同时让相应的 getProperty 方法成对出现，约束了变量，避免出现散落在各处的 hard-coding。将来组件如果需要增加权限，组件标记也可以起到作用。
+> **2. 组件标记**：
 
-> ```ts
-> export const defineProperty = (
->   target: FunctionComponent<any>,
->   property: string,
->   value: any,
->   config?: PropertyDescriptor,
-> ) => {
->   config = config || {};
->   Reflect.defineProperty(target, property, {
->     value,
->     enumerable: false,
->     configurable: false,
->     ...config,
->   });
-> };
->
-> const createDefineProperty =
->   <T>(property: string, config?: PropertyDescriptor) =>
->   (target: FunctionComponent<any>, value: T) =>
->     defineProperty(target, property, value, config);
->
-> const NAME = '_name';
-> export const definePropertyOfName = createDefineProperty<ComponentNames | ColumnNames>(NAME);
-> export const getNameProperty = createGetProperty(NAME);
->
-> const LEVEL = '_level';
-> export const definePropertyOfLevel = createDefineProperty<ComponentLevel[]>(LEVEL);
-> export const getLevelProperty = createGetProperty(LEVEL);
-> ```
+利用 `Reflect.defineProperty`，封装了 `definePropertyOfName`、`definePropertyOfLevel` 函数，通过它们给组件库中的组件标记唯一名称和组件级别（基础组件/进阶组件）。同时让相应的 getProperty 方法成对出现，约束了变量，避免出现散落在各处的 hard-coding。将来组件如果需要增加权限，组件标记也可以起到作用。
+
+```ts
+export const defineProperty = (
+  target: FunctionComponent<any>,
+  property: string,
+  value: any,
+  config?: PropertyDescriptor,
+) => {
+  config = config || {};
+  Reflect.defineProperty(target, property, {
+    value,
+    enumerable: false,
+    configurable: false,
+    ...config,
+  });
+};
+
+const createDefineProperty =
+  <T>(property: string, config?: PropertyDescriptor) =>
+  (target: FunctionComponent<any>, value: T) =>
+    defineProperty(target, property, value, config);
+
+const NAME = '_name';
+export const definePropertyOfName = createDefineProperty<ComponentNames | ColumnNames>(NAME);
+export const getNameProperty = createGetProperty(NAME);
+
+const LEVEL = '_level';
+export const definePropertyOfLevel = createDefineProperty<ComponentLevel[]>(LEVEL);
+export const getLevelProperty = createGetProperty(LEVEL);
+```
 
 还可以看到函数被设计为类似`柯里化`和 `point free` 风格的编写方式，将原本多个参数的函数根据不同场景预执行，通过 `createDefineProperty` 这个函数工厂，避免了写模板代码。同时不显式提及参数的传递，符合函数式编程的`point free`特征。
 
 <br />
 <br />
 
-3. **性能优化**：`modelTree`、`stateTree` 以顶层状态的形式出现在 react 中，为了透传到各个组件所以使用了 `context`。与此同时，为了避免不必要的渲染，整个 `vdomTree` 产物使用 `useMemo` 缓存，只和 `vdomTree` 的变化有关（`vdomTree` 由平台配置后就已固定，不会变化，只有 `modelTree`、`stateTree` 会因为定义的逻辑而变化）
+> **3. 性能优化**：
 
-> ```tsx
-> const render = useMemo(() => <Render data={vdomTree} />, [vdomTree]);
->
-> return (
->   <ModelTreeContext.Provider value={modelValue}>
->     <StateTreeContext.Provider value={stateValue}>{render}</StateTreeContext.Provider>
->   </ModelTreeContext.Provider>
-> );
-> ```
+`modelTree`、`stateTree` 以顶层状态的形式出现在 react 中，为了透传到各个组件所以使用了 `context`。与此同时，为了避免不必要的渲染，整个 `vdomTree` 产物使用 `useMemo` 缓存，只和 `vdomTree` 的变化有关（`vdomTree` 由平台配置后就已固定，不会变化，只有 `modelTree`、`stateTree` 会因为定义的逻辑而变化）
+
+```tsx
+const render = useMemo(() => <Render data={vdomTree} />, [vdomTree]);
+
+return (
+  <ModelTreeContext.Provider value={modelValue}>
+    <StateTreeContext.Provider value={stateValue}>{render}</StateTreeContext.Provider>
+  </ModelTreeContext.Provider>
+);
+```
 
 于是当 `modelTree`、`stateTree` 变化时，只有 `render` 内部依赖（`useContext`）了它们的局部子组件们才会重新渲染。
 
 <br />
 <br />
 
-4. **immutable 的状态、模型如何局部更新**：当一个表单 change 后会触发 `modelTree` 中的某个字段更新，当某个 `state` 更新时，会触发 `stateTree` 中对应字段的更新。由于数据需要 immutable，所以在一个大对象中局部更新显得有些复杂。推荐使用 `immerjs`，它是 `mbox` 作者写的 生产 immutable 数据的库，可以用 mutable 的方式产生 immutable 的数据，内部采用 `Proxy` 监听属性变化，相比于 `immutablejs` 库特有的数据结构和操作方式，`immerjs` 心智负担更小，也不需要掌握太多额外的知识。
+> **4. immutable 的状态、模型如何局部更新**：
+
+当一个表单 change 后会触发 `modelTree` 中的某个字段更新，当某个 `state` 更新时，会触发 `stateTree` 中对应字段的更新。由于数据需要 immutable，所以在一个大对象中局部更新显得有些复杂。推荐使用 `immerjs`，它是 `mbox` 作者写的 生产 immutable 数据的库，可以用 mutable 的方式产生 immutable 的数据，内部采用 `Proxy` 监听属性变化，相比于 `immutablejs` 库特有的数据结构和操作方式，`immerjs` 心智负担更小，也不需要掌握太多额外的知识。
 
 <br />
 <br />
 
-5. **解析树的逻辑如何抽象**：举例一个组件节点的配置：
+> **5. 解析树的逻辑如何抽象**：
 
-> ```js
-> {
->   level: 'advanced', // 进阶组件
->   name: 'input', // 组件类型是input
->   id: 15, // 唯一id
->   label: '标题', // label文案
->   width: '200px', // 宽度
->   model: ['data', 'title'], // 模型字段路径：modelTree.data.title
->   state: ['showInput'] // state路径：stateTree.showInput
->   effect: ['hasInputValue'] // effect路径：会修改stateTree.hasInputValue
-> }
-> ```
+举例一个组件节点的配置：
+
+```js
+{
+  level: 'advanced', // 进阶组件
+  name: 'input', // 组件类型是input
+  id: 15, // 唯一id
+  label: '标题', // label文案
+  width: '200px', // 宽度
+  model: ['data', 'title'], // 模型字段路径：modelTree.data.title
+  state: ['showInput'] // state路径：stateTree.showInput
+  effect: ['hasInputValue'] // effect路径：会修改stateTree.hasInputValue
+}
+```
 
 一个表单节点有些配置逻辑是相同的，比如`model`、`state`、`effect`这三个配置。
 
@@ -139,37 +149,84 @@
 <br />
 <br />
 
-6. **复杂配置解析的抽象**：配置中有一些比较复杂的部分，比如『请求』、『翻页』相关的配置，因为一个请求的完整描述不仅要定义 `url`、`请求方式`、`参数来源`、参数可能经过的`规则校验函数`、`计算函数`等，还需要定义请求的数据最终会影响哪个`状态`。所以一个『请求』相关的配置可能是比较复杂的，比如：
+> **6. 复杂配置解析的抽象**：
 
-> ```js
-> api: {
->   url: '/api/query', // 请求地址
->   method: 'get', // 请求方式
->   effect: ['list'], // 请求最终影响哪些状态
->   model: ['queryParams'], // 请求参数来自哪个model
->   computeParams: `
->     (params) => params && {...params, start: 0, limit: 25}
->   `, // 参数的计算函数（可能需要类型转换等等逻辑）
->   rules: `
->     (params) => {
->       if (params && (params.title || params.createTime)) {
->         return true
->       } else {
->         return '标题和时间至少填写一个'
->       }
->     }
->   `, // 参数的校验函数（如果return的不是true则是报错信息）
-> }
-> ```
+配置中有一些比较复杂的部分，比如『请求』、『翻页』相关的配置，因为一个请求的完整描述不仅要定义 `url`、`请求方式`、`参数来源`、参数可能经过的`规则校验函数`、`计算函数`等，还需要定义请求的数据最终会影响哪个`状态`。所以一个『请求』相关的配置可能是比较复杂的，比如：
+
+```js
+api: {
+  url: '/api/query', // 请求地址
+  method: 'get', // 请求方式
+  effect: ['list'], // 请求最终影响哪些状态
+  model: ['queryParams'], // 请求参数来自哪个model
+  computeParams: `
+    (params) =params && {...params, start: 0, limit: 25}
+  `, // 参数的计算函数（可能需要类型转换等等逻辑）
+  rules: `
+    (params) ={
+      if (params && (params.title || params.createTime)) {
+        return true
+      } else {
+        return '标题和时间至少填写一个'
+      }
+    }
+  `, // 参数的校验函数（如果return的不是true则是报错信息）
+}
+```
 
 那么对 `api` 配置的解析自然也会比较复杂，同理像翻页 `pagination` 配置逻辑也会很复杂，于是将这些解析逻辑抽象成诸如 useApi、usePagination 的 hooks 用以在各种需要它们的地方复用。
 
 <br />
 <br />
 
-7. **json 如何保存函数**：对于一些复杂配置，能写自定义函数是必须的，json scheme 中只能以字符串的形式保存函数。这些字符串在 runtime 被执行时，有两种方案。1. `eval`，2. `new Function`。最终选择了**方案 2**，因为 `eval` 会导致作用域中的变量都变成闭包，造成无谓的**内存浪费**，内部变量的暴露也会带来**安全风险**。而 `new Function` 的作用域只在全局作用域之上，只能通过约定的参数接收传给它有限的内容，不仅内存消耗少，而且安全性上也有一定提升。
+> **7. json 如何保存函数**：
+
+对于一些复杂配置，能写自定义函数是必须的，json scheme 中只能以字符串的形式保存函数。这些字符串在 runtime 被执行时，有两种方案。1. `eval`，2. `new Function`。最终选择了**方案 2**，因为 `eval` 会导致作用域中的变量都变成闭包，造成无谓的**内存浪费**，内部变量的暴露也会带来**安全风险**。而 `new Function` 的作用域只在全局作用域之上，只能通过约定的参数接收传给它有限的内容，不仅内存消耗少，而且安全性上也有一定提升。
 
 <br />
 <br />
 
-8. **异步自定义函数带来的问题**：如果函数不会影响状态，那么异步和同步没什么区别。如果会影响状态，可能会产生过期状态(`stale state`)问题。首先修改状态是利用 `immerjs` 这个库，`produce` 接受一个`(draft) => { // modify draft }`函数，自定义函数只需要是`modify draft`那部分就可以，非常方便。同时 `immerjs` 也支持函数返回 promise，可以异步的产生 immutable 数据。到目前为止没有什么问题，但是如果在异步期间，其他组件更新了状态，那么这个异步上下文中的状态就变成了`stale state`，异步的修改是在旧状态的基础上执行的，异步结束后就会以`stale state`更新`current state`从而发生状态不一致的问题。在 `useClick` 这个 hooks 中，待解决……
+> **8. 异步自定义函数带来的问题**：
+
+如果自定义函数不会影响状态，那么异步和同步没什么区别。如果会影响状态，可能会产生过期状态(`stale state`)问题。为什么？首先修改状态是利用 `immerjs` 这个库，`produce` 接受一个`(draft) => { // modify draft }`函数，所以自定义函数只要负责`modify draft`那部分就可以，非常自然、方便。同时 `immerjs` 也支持函数返回 `promise`，可以异步的产生 immutable 数据。到目前为止似乎没什么问题，但是如果在异步期间，其他组件更新了状态，那么这个异步上下文中的状态就变成了`stale state`，异步的状态更新是在旧状态的基础上执行的，异步结束后就会用`stale state`更新`current state`从而发生状态不一致的问题。日常业务开发往往都是在异步结束后手动更新状态，此刻的状态本就是最新的，所以没有问题。但在这里，用户定义的只是这个更新流程的一部分，状态在同步执行期间就已经固定了，等异步结束可能早已变成旧的。问题的本质是，**状态切片在同步执行时就交给了`immerjs`，但是最终修改发生在异步里，期间视图状态如果被其他地方更新也无法感知，这个状态切片就落后了**。
+
+如果改成在异步完成后才把状态交给 `immerjs` 然后同步修改，**这时的状态逻辑在同一个宏任务中，不会被其他状态更新『插队』，一定是最新的**。但是这样意味着 `immerjs` 需要放在在用户端，增加了自定义函数的代码量和知识边界，但不得不妥协。于是自定义函数改为接受两个参数，一个是封装后的 `immerjs` 的 `produce` ；另一个是 `next` 函数，它接受最终的新状态，用来在异步时通知状态更新，自定义函数也可以不用 `next` 直接返回一个 `promise` （见下方例子）。如果是同步的自定义函数可以不用调用`next`，直接返回新状态值。也可以依然调用`next`，因为 `useCustomClick` （自定义函数的处理封装在 `useCustomClick` 这个 hooks 中）内部有锁机制，如果 `next` 被调用过，则不会使用返回值，否则会判断返回值是否存在，然后主动调用`next`，最后把锁放开以便下一次使用。
+
+下面是定义自定义函数的例子：
+
+```ts
+// 同步
+(immer_produce, next) => {
+  const newState = immer_produce((state) => {
+    state.someState = true;
+  });
+  // 也可以不return，直接调用next
+  // next(newState);
+  return newState;
+};
+
+// 异步
+(immer_produce, next) => {
+  setTimeout(() => {
+    const newState = immer_produce((state) => {
+      state.someState = true;
+    });
+    next(newState);
+  }, 3000);
+
+  // 也可以不用上面那种写法，直接返回一个promise，resolve的值是最终的newState
+  /**
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newState = immer_produce((state) => {
+          state.someState = true;
+        });
+        resolve(newState);
+      }, 3000);
+    });
+  **/
+
+  // 总之解决异步时状态不同步的关键是，将异步放在之前，保证immer_produce是同步的
+  // 这里只是方便阅读，实际定义是一个字符串，放在json的onClick字段中
+};
+```

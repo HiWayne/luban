@@ -22,8 +22,14 @@ export default JSON.stringify({
       leftOffset: 0.5,
       effect: ['showCreation'],
       value: true,
-      // onClick: '(state) => new Promise(r => {setTimeout(() => {state.showCreation = true;r()}, 3000)})',
-      onClick: '(state) => state.showCreation = true',
+      onClick: `
+        (immer_produce, next) => {
+          const newState = immer_produce((state) => {
+            state.showCreation = true;
+          })
+          next(newState)
+        }
+      `,
     },
     {
       level: 'advanced',

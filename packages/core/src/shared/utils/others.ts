@@ -60,7 +60,7 @@ const ERROR_SIGN = Symbol('ERROR_SIGN');
 export const executeFunction = (functionString?: string, ...args: any[]) => {
   try {
     // eslint-disable-next-line no-new-func
-    const _function = functionString ? new Function('data', `return (${functionString})(data)`) : (v: any) => v;
+    const _function = functionString ? new Function('...args', `return (${functionString})(...args)`) : (v: any) => v;
     return _function(...args);
   } catch (e) {
     return ERROR_SIGN;
@@ -79,7 +79,7 @@ export const getEventValue = (e: any) => {
 
 export const createSingleton = () => {
   let isCall = false,
-    result = { current: null };
+    result: { current: any } = { current: null };
   return (singleton: any) => {
     if (!isCall) {
       isCall = true;
