@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { TablePaginationConfig } from 'antd';
-import { executeFunction, verifyExecuteResult, fetchByApiConfig } from 'utils/index';
+import { executeFunction, verifyExecuteResult } from 'utils/index';
 import { useTree } from 'hooks/index';
+import { fetchByApiConfig } from 'hooks/useApi';
 
 const usePagination = (paginationConfig: Pagination | undefined, nodeState: any) => {
   // 是否正在请求
@@ -11,6 +12,10 @@ const usePagination = (paginationConfig: Pagination | undefined, nodeState: any)
 
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationLoading, setPaginationLoading] = useState(false);
+
+  if (isInit && currentPage !== 1) {
+    setCurrentPage(1);
+  }
 
   const { handleStateChange, nodeModel } = useTree({
     effect: paginationConfig?.api.effect,
@@ -33,7 +38,7 @@ const usePagination = (paginationConfig: Pagination | undefined, nodeState: any)
       return paginationConfig
         ? {
             position: ['bottomRight'],
-            current: isInit ? 1 : currentPage,
+            current: currentPage,
             pageSize: limit,
             total: total,
             onChange(page: number, pageSize: number | undefined) {
@@ -77,7 +82,7 @@ const usePagination = (paginationConfig: Pagination | undefined, nodeState: any)
     } else {
       return false;
     }
-  }, [paginationConfig, nodeState, handleStateChange, nodeModel, paginationLoading, isInit, currentPage]);
+  }, [paginationConfig, nodeState, handleStateChange, nodeModel, paginationLoading, currentPage]);
 
   return {
     pagination,

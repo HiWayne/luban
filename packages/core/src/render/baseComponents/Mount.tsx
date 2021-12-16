@@ -1,18 +1,16 @@
-import { FunctionComponent, useContext, useEffect } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import { Api, ComponentLevel, ComponentNames } from 'types/types';
-import { definePropertyOfLevel, definePropertyOfName, fetchByApiConfig } from 'utils/index';
-import { ModelTreeContext } from 'render/index';
-import useTree from 'hooks/useTree';
+import { definePropertyOfLevel, definePropertyOfName } from 'utils/index';
+import { useApi } from 'hooks/index';
 
 interface MountProps {
   api: Api;
 }
 
 const Mount: FunctionComponent<MountProps> = ({ api, children }) => {
-  const [modelTree] = useContext(ModelTreeContext);
-  const { handleStateChange } = useTree({ model: api.model, effect: api.effect });
+  const fetchByApi = useApi({ api });
   useEffect(() => {
-    fetchByApiConfig(api, undefined, handleStateChange, undefined, modelTree);
+    fetchByApi();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return <div>{children}</div>;

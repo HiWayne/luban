@@ -10,6 +10,8 @@ interface UseTreeParams {
 }
 
 interface UseTreeResponse {
+  modelTree: ModelTree;
+  stateTree: StateTree;
   nodeModel: any;
   nodeState: any;
   isShow: boolean;
