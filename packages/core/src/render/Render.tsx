@@ -1,7 +1,13 @@
 import { FunctionComponent, useMemo } from 'react';
-import { traverse, getNameProperty } from 'utils/index';
-import * as Components from 'baseComponents/index';
-import { ComponentsObject } from 'types/types';
+import { traverse, getNameProperty } from '@core/utils/index';
+import * as baseComponents from 'baseComponents/index';
+import * as customComponents from 'customComponents/index';
+import { ComponentsObject } from '@core/types/types';
+
+const Components = {
+  ...baseComponents,
+  ...customComponents,
+};
 
 interface RenderProps {
   data: VDomNode | VDomNode[];

@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
-import { ColumnNames } from 'types/types';
-import { definePropertyOfName } from 'utils/index';
+import { ColumnNames } from '@core/types/types';
+import { definePropertyOfName } from '@core/utils/index';
 
 interface Data {
   text: string;

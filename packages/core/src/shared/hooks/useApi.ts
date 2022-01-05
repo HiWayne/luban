@@ -1,15 +1,15 @@
 import { notification } from 'antd';
 import { useCallback } from 'react';
-import { Api, Method } from 'types/types';
-import { readValueByPath } from 'utils/operateValueByPath';
+import { Api, Method } from '@core/types/types';
+import { readValueByPath } from '@core/utils/operateValueByPath';
 import {
   executeFunction,
   getIdentifierProperty,
   IDENTIFIER_INIT,
   IDENTIFIER_REFRESH,
   verifyExecuteResult,
-} from 'utils/others';
-import request from 'utils/request';
+} from '@core/utils/others';
+import request from '@core/utils/request';
 import useTree from './useTree';
 
 const GET = request('get');
@@ -105,6 +105,15 @@ interface UseApiParams {
   state?: Path | MaybeHasSubPath;
 }
 
+/**
+ * @description 根据api配置生成请求函数
+ * @param {Api} params.api api配置对象，必须
+ * @param {object | undefined} params.originalParams 原始请求参数（因为可能经过计算函数），不传则取api.model指向的数据
+ * @param {function | undefined} params.callback 请求回调函数，不传则根据api.effect修改状态
+ * @param {boolean} params.notify 请求结束是否显示通知，不传则为true
+ * @param {Path | MaybeHasSubPath} params.state 上次请求存放的state位置，不传默认取api.effect
+ * @returns {function} 请求函数
+ */
 const useApi = ({ api, originalParams, callback, notify, state }: UseApiParams) => {
   const {
     modelTree,
@@ -117,7 +126,7 @@ const useApi = ({ api, originalParams, callback, notify, state }: UseApiParams) 
       fetchByApiConfig(
         api,
         originalParams || (nodeModel && nodeModel[0]),
-        api?.effect ? handleStateChange : callback,
+        typeof callback === 'function' ? callback : api?.effect ? handleStateChange : undefined,
         nodeState[0],
         modelTree,
         notify,

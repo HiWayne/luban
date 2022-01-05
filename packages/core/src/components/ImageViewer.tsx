@@ -1,7 +1,7 @@
 import { FunctionComponent, useCallback, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import Viewer from 'viewerjs';
-import scaleIcon from 'images/icon-scale.png';
+import scaleIcon from '@core/images/icon-scale.png';
 import 'viewerjs/dist/viewer.css';
 
 interface ImageViewerProps {

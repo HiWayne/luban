@@ -3,14 +3,21 @@
     "baseUrl": "./",
     "paths": {
       "api/*": ["src/api/*"],
-      "components/*": ["src/components/*"],
+      "@core/components/*": ["../core/src/components/*"],
+      "@creation/components/*": ["src/components/*"],
+      "baseComponents/*": ["../core/src/render/baseComponents/*"],
+      "customComponents/*": ["../core/src/render/customComponents/*"],
       "pages/*": ["src/pages/*"],
       "router/*": ["src/router/*"],
       "assets/*": ["src/assets/*"],
-      "images/*": ["src/assets/images/*"],
+      "@core/images/*": ["../core/src/assets/images/*"],
+      "@creation/images/*": ["src/assets/images/*"],
       "styles/*": ["src/assets/styles/*"],
-      "utils/*": ["src/shared/utils/*"],
-      "hooks/*": ["src/shared/hooks/*"]
+      "@core/utils/*": ["../core/src/shared/utils/*"],
+      "@creation/utils/*": ["src/shared/utils/*"],
+      "@creation/hooks/*": ["src/shared/hooks/*"],
+      "@core/hooks/*": ["../core/src/shared/hooks/*"],
+      "@core/types/*": ["../core/src/types/*"]
     }
   }
 }

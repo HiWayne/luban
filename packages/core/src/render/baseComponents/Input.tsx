@@ -1,8 +1,14 @@
 import { FunctionComponent, useCallback, useMemo } from 'react';
 import { Input as AntdInput, Form } from 'antd';
-import { convertWidth, convertRelativeToAbsolute, definePropertyOfName, definePropertyOfLevel } from 'utils/index';
-import { Size, ComponentNames, ComponentLevel, OffsetConst } from 'types/types';
-import { useTree } from 'hooks/index';
+import {
+  convertWidth,
+  convertRelativeToAbsolute,
+  definePropertyOfName,
+  definePropertyOfAliasName,
+  definePropertyOfLevel,
+} from '@core/utils/index';
+import { Size, ComponentNames, ComponentLevel, OffsetConst } from '@core/types/types';
+import { useTree } from '@core/hooks/index';
 
 const inputMap = {
   textarea: AntdInput.TextArea,
@@ -131,6 +137,7 @@ const Input: FunctionComponent<InputProps> = (props) => {
 };
 
 definePropertyOfName(Input, ComponentNames.INPUT);
+definePropertyOfAliasName(Input, '输入框');
 definePropertyOfLevel(Input, [ComponentLevel.BASIC, ComponentLevel.ADVANCED]);
 
 export default Input;

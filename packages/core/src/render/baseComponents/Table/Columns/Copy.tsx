@@ -1,9 +1,9 @@
 import { FunctionComponent, useCallback } from 'react';
 import { notification } from 'antd';
 import styled from '@emotion/styled';
-import { ColumnNames } from 'types/types';
-import { definePropertyOfName } from 'utils/index';
-import copyIcon from 'images/icon-copy.png';
+import { ColumnNames } from '@core/types/types';
+import { definePropertyOfName } from '@core/utils/index';
+import copyIcon from '@core/images/icon-copy.png';
 
 interface CopyProps {
   data: string;

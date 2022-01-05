@@ -22,7 +22,7 @@ export default JSON.stringify({
       leftOffset: 0.5,
       effect: ['showCreation'],
       value: true,
-      onClick: `
+      customLogic: `
         (immer_produce, next) => {
           const newState = immer_produce((state) => {
             state.showCreation = true;

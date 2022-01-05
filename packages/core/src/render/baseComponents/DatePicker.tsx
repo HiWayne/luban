@@ -1,8 +1,14 @@
 import { FunctionComponent, useCallback, useMemo } from 'react';
 import { DatePicker as AntdDatePicker, Form } from 'antd';
-import { ComponentNames, DatePickerType, PickerType, ComponentLevel, OffsetConst } from 'types/types';
-import { definePropertyOfName, convertRelativeToAbsolute, definePropertyOfLevel } from 'utils/index';
-import { useTree } from 'hooks/index';
+import { ComponentNames, DatePickerType, PickerType, ComponentLevel, OffsetConst } from '@core/types/types';
+import {
+  definePropertyOfName,
+  definePropertyOfAliasName,
+  convertRelativeToAbsolute,
+  definePropertyOfLevel,
+} from '@core/utils/index';
+import { useTree } from '@core/hooks/index';
+import { PickerComponentClass } from 'antd/lib/date-picker/generatePicker/interface';
 
 const { RangePicker } = AntdDatePicker;
 
@@ -43,7 +49,7 @@ const DatePicker: FunctionComponent<DatePickerProps> = ({
 }) => {
   const { handleModelChange, handleStateChange, isShow } = useTree({ state, effect, model });
 
-  const ANTD_DATE_PICKER = useMemo(() => {
+  const ANTD_DATE_PICKER: PickerComponentClass<any> = useMemo(() => {
     switch (type) {
       case DatePickerType.DATE:
         return AntdDatePicker;
@@ -119,6 +125,7 @@ const DatePicker: FunctionComponent<DatePickerProps> = ({
 };
 
 definePropertyOfName(DatePicker, ComponentNames.DATEPICKER);
+definePropertyOfAliasName(DatePicker, '时间选择器');
 definePropertyOfLevel(DatePicker, [ComponentLevel.BASIC, ComponentLevel.ADVANCED]);
 
 export default DatePicker;

@@ -3,7 +3,7 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  extends: 'react-app',
+  extends: ['react-app'],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',

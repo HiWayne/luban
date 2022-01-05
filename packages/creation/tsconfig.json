@@ -1,12 +1,26 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", "src/react-app-env.d.ts"],
-  "exclude": ["node_modules/*", "lib/*", "build/*"],
+  "include": [
+    "*.ts",
+    "*.tsx",
+    "*.js",
+    "*.jsx",
+    "react-app-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules/*",
+    "lib/*",
+    "build/*"
+  ],
   "compilerOptions": {
     "experimentalDecorators": true,
     "allowJs": true,
     "jsx": "react-jsx",
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

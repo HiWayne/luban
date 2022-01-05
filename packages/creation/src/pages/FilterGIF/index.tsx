@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './index.css';
-import { mixFilterToGIF } from 'utils/filterGIF';
+import { mixFilterToGIF } from '@creation/utils/filterGIF';
 import gif from 'assets/images/test.gif';
 
 function App() {

@@ -1,10 +1,18 @@
 import { useMemo, useState } from 'react';
 import { TablePaginationConfig } from 'antd';
-import { executeFunction, verifyExecuteResult } from 'utils/index';
-import { useTree } from 'hooks/index';
-import { fetchByApiConfig } from 'hooks/useApi';
+import { executeFunction, verifyExecuteResult } from '@core/utils/index';
+import { useTree } from '@core/hooks/index';
+import { fetchByApiConfig } from '@core/hooks/useApi';
 
-const usePagination = (paginationConfig: Pagination | undefined, nodeState: any) => {
+/**
+ * @description 解析pagination配置的hooks
+ * @param {Pagination} paginationConfig pagination配置，必须
+ * @param {any} nodeState pagination判断loading等状态的数据来源，不传则默认取自pagination.api.effect
+ * @returns {pagination: TablePaginationConfig, isLoading: boolean}
+ */
+const usePagination = (paginationConfig: Pagination | undefined, nodeState?: any) => {
+  const { nodeState: _nodeState = [] } = useTree({ state: paginationConfig?.api?.effect });
+  nodeState = nodeState || _nodeState;
   // 是否正在请求
   const isLoading = nodeState[0]?._loading;
   // 是否是init类型的请求，是 则翻页器回到第一页
