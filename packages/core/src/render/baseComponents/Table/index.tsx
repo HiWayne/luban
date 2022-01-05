@@ -1,15 +1,17 @@
 import { FunctionComponent, Key, useMemo } from 'react';
 import { Table as AntdTable } from 'antd';
-import { useTree, usePagination } from 'hooks/index';
-import RenderNode from 'render/Render';
+import { useTree, usePagination } from '@core/hooks/index';
+import RenderNode from '../../../render/Render';
 import {
   convertRelativeToAbsolute,
   definePropertyOfName,
+  definePropertyOfAliasName,
   definePropertyOfLevel,
+  definePropertyOfConfig,
   executeFunction,
   verifyExecuteResult,
-} from 'utils/index';
-import { ComponentNames, Api, ComponentLevel } from 'types/types';
+} from '@core/utils/index';
+import { ComponentNames, Api, ComponentLevel } from '@core/types/types';
 import { BasicTableProps, BasicTable } from './BasicTable';
 import TableColumnRender from './TableColumnRender';
 
@@ -41,14 +43,12 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
   rowSelectionType,
   state,
   model,
-  effect,
   computeData,
   topOffset,
   leftOffset,
   pagination: paginationConfig,
-  api,
 }) => {
-  const { nodeState, handleModelChange, isShow } = useTree({ state, model, effect });
+  const { nodeState, handleModelChange, isShow } = useTree({ state, model });
 
   const dataSource = useMemo(
     () => (computeData ? executeFunction(computeData, nodeState[0]?.response) : nodeState[0]?.response),
@@ -75,7 +75,7 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
           ? (v: any, record: any) => (
               <>
                 {column.render.map((node) => {
-                  return <RenderNode key={node.id} data={{ ...node, ioc: record }} />;
+                  return <RenderNode key={node.id} data={{ ...node, inject: record }} />;
                 })}
               </>
             )
@@ -94,7 +94,7 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
     [_columns],
   );
 
-  const { pagination, isLoading } = usePagination(paginationConfig, nodeState);
+  const { pagination, isLoading } = usePagination(paginationConfig);
 
   if (!verifyExecuteResult(dataSource)) {
     console.error('computeData occurred error in "table"');
@@ -125,6 +125,127 @@ const Table: FunctionComponent<TableProps> = (props) => {
 };
 
 definePropertyOfName(Table, ComponentNames.TABLE);
+definePropertyOfAliasName(Table, '表格');
 definePropertyOfLevel(Table, [ComponentLevel.BASIC, ComponentLevel.ADVANCED]);
+definePropertyOfConfig(Table, {
+  [ComponentLevel.BASIC]: {
+    columns: {
+      require: true,
+      type: 'tableColumns',
+      name: '表格列配置',
+      tip: '配置每列的字段和显示方式等',
+    },
+    hasDelete: {
+      require: true,
+      type: 'boolean',
+      name: '是否有删除按钮',
+      tip: '每行是否有删除操作',
+    },
+    hasOperate: {
+      require: true,
+      type: 'boolean',
+      name: '是否有操作按钮',
+      tip: '每行是否有除了删除以外的其他操作',
+    },
+    operateName: {
+      require: false,
+      type: 'string',
+      name: '操作按钮名称',
+      tip: '删除按钮的左边按钮的名称',
+    },
+    operateApi: {
+      require: false,
+      type: 'api',
+      name: '操作按钮请求配置',
+      tip: '操作按钮点击后的请求相关的配置',
+    },
+    deleteApi: {
+      require: false,
+      type: 'api',
+      name: '删除按钮点击后的请求相关的配置',
+      tip: '',
+    },
+    canSelect: {
+      require: true,
+      type: 'boolean',
+      name: '表格行是否有多选功能',
+      tip: '',
+    },
+    selectApi: {
+      require: false,
+      type: 'api',
+      name: '批量请求配置',
+      tip: '如果表格有多选功能则配置批量操作按钮点击后的请求',
+    },
+    state: {
+      require: true,
+      type: 'path',
+      name: '表格数据',
+      tip: '表格数据依赖的状态路径（在state中）',
+    },
+    computeData: {
+      require: false,
+      type: 'function',
+      name: '数据计算函数',
+      tip: '如果数据不能直接使用则需要通过函数计算，函数接受一个参数，参数是后端返回的原始数据，return计算后的数据，注意判断undefined',
+    },
+    pagination: {
+      require: true,
+      type: 'pagination',
+      name: '表格翻页配置',
+      tip: '',
+    },
+  },
+  [ComponentLevel.ADVANCED]: {
+    columns: {
+      require: true,
+      type: 'tableColumns',
+      name: '表格列配置',
+      tip: '配置每列的字段和显示方式等',
+    },
+    rowSelectionType: {
+      require: false,
+      type: 'rowSelectionType',
+      name: '表格行选择类型',
+      tip: '开启后，表格行可以多选或单选',
+    },
+    state: {
+      require: true,
+      type: 'path',
+      name: '表格数据',
+      tip: '表格数据依赖的状态路径（在state中）',
+    },
+    model: {
+      require: true,
+      type: 'path',
+      name: '选择行数据',
+      tip: '选择某行后数据存放的路径（在model中）',
+    },
+    computeData: {
+      require: false,
+      type: 'function',
+      name: '数据计算函数',
+      tip: '如果数据不能直接使用则需要通过函数计算，函数接受一个参数，参数是后端返回的原始数据，return计算后的数据，注意判断undefined',
+    },
+    topOffset: {
+      require: false,
+      type: 'number',
+      name: '上偏移',
+      tip: '增加或减少上边距',
+    },
+    leftOffset: {
+      require: false,
+      type: 'number',
+      name: '下偏移',
+      tip: '增加或减少下边距',
+    },
+    pagination: {
+      require: true,
+      type: 'pagination',
+      name: '表格翻页配置',
+      tip: '',
+    },
+  },
+});
 
 export default Table;

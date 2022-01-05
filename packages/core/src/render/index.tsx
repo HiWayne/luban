@@ -1,5 +1,5 @@
 import { createContext, useMemo, useState, FunctionComponent } from 'react';
-import parse from 'parse/index';
+import parse from '../parse/index';
 import Render from './Render';
 
 export const ModelTreeContext = createContext<any>(undefined);

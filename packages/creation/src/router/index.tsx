@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import routes, { RouteItem } from './routes';
-import Loading from 'components/Loading';
+import Loading from '@creation/components/Loading';
 
 const renderRoutes = (routes: RouteItem[]) => {
   if (Array.isArray(routes)) {

@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import dayjs from 'dayjs';
-import { ColumnNames } from 'types/types';
-import { definePropertyOfName } from 'utils/index';
+import { ColumnNames } from '@core/types/types';
+import { definePropertyOfName } from '@core/utils/index';
 
 interface TimeProps {
   data: string | number | Date;

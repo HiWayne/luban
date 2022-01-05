@@ -1,3 +1,4 @@
+/// <reference path="./index.d.ts" />
 import { FunctionComponent } from 'react';
 
 export enum ComponentNames {
@@ -8,6 +9,7 @@ export enum ComponentNames {
   MODAL = 'modal',
   DATEPICKER = 'datepicker',
   MOUNT = 'mount',
+  INTRODUCE = 'introduce',
 }
 
 export enum ColumnNames {

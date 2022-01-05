@@ -1,17 +1,18 @@
 import { FunctionComponent, useCallback, useState, useMemo } from 'react';
 import { Button as AntdButton } from 'antd';
-import { Size, ButtonType, ComponentNames, Api, ComponentLevel } from 'types/types';
-import { useTree, useCustomClick, useApi } from 'hooks/index';
+import { Size, ButtonType, ComponentNames, Api, ComponentLevel } from '@core/types/types';
+import { useTree, useCustomLogic, useApi } from '@core/hooks/index';
 import {
   convertRelativeToAbsolute,
   definePropertyOfName,
+  definePropertyOfAliasName,
   definePropertyOfLevel,
   definePropertyOfIdentifier,
   IDENTIFIER_REFRESH,
   IDENTIFIER_INIT,
   executeFunction,
   verifyExecuteResult,
-} from 'utils/index';
+} from '@core/utils/index';
 
 interface AdvancedButtonProps extends CommonProps {
   text: string;
@@ -38,13 +39,13 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
   effect,
   value,
   api,
-  ioc,
+  inject,
   leftOffset,
   topOffset,
   computeData,
   refresh,
   init,
-  onClick,
+  customLogic,
 }) => {
   if (refresh) {
     definePropertyOfIdentifier(refresh, IDENTIFIER_REFRESH);
@@ -54,9 +55,9 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
   }
   const { handleModelChange, handleStateChange, isShow } = useTree({ state, model, effect });
   const [isLoading, setIsLoading] = useState(false);
-  const handleCustomClick = useCustomClick(onClick);
+  const handleCustomClick = useCustomLogic(customLogic);
 
-  const fetchByApi = useApi({ api, originalParams: ioc });
+  const fetchByApi = useApi({ api, originalParams: inject });
   const fetchByRefresh = useApi({ api: refresh, notify: false });
   const fetchByInit = useApi({ api: init, notify: false });
 
@@ -65,8 +66,8 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
       handleCustomClick();
       return;
     }
-    if (effect && ioc !== undefined) {
-      const model = computeData ? executeFunction(computeData, ioc) : ioc;
+    if (effect && inject !== undefined) {
+      const model = computeData ? executeFunction(computeData, inject) : inject;
       if (verifyExecuteResult(model)) {
         handleModelChange(model);
       } else {
@@ -94,7 +95,7 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
     handleStateChange,
     value,
     api,
-    ioc,
+    inject,
     handleModelChange,
     effect,
     computeData,
@@ -136,6 +137,7 @@ const Button: FunctionComponent<ButtonProps> = (props) => {
 };
 
 definePropertyOfName(Button, ComponentNames.BUTTON);
+definePropertyOfAliasName(Button, '按钮');
 definePropertyOfLevel(Button, [ComponentLevel.ADVANCED]);
 
 export default Button;

@@ -1,4 +1,4 @@
-import { traverse } from 'utils/index';
+import { traverse } from '@core/utils/index';
 import handleVdom from './handleVdom';
 
 type Input = string | ParseInput;

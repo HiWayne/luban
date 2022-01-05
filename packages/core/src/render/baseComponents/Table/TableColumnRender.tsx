@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import * as Columns from './Columns/index';
-import { ComponentsObject } from 'types/types';
-import { getNameProperty } from 'utils/index';
+import { ComponentsObject } from '@core/types/types';
+import { getNameProperty } from '@core/utils/index';
 
 interface TableColumnRenderProps {
   data: any;

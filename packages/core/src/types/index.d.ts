@@ -17,7 +17,7 @@ interface VDomNode {
   // 发生修改后影响哪个state，类型同state
   effect?: MaybeHasSubPath;
   // button特有，在table中使用button时，table会把button所在这行的数据注入给button，将来点击按钮时能拿到相关数据，比如编辑、删除
-  ioc?: any;
+  inject?: any;
   // 子元素
   children?: VDomNode[];
   // 左偏移，以24栅格布局为基础，最终会转成px，所以支持小数
@@ -74,8 +74,8 @@ interface VDomNode {
   refresh?: Api;
   // button请求完成后重新请求初始页列表
   init?: Api;
-  // 点击事件
-  onClick?: string;
+  // 自定义逻辑
+  customLogic?: string;
 }
 
 interface ModelTree {
@@ -91,12 +91,12 @@ interface CommonProps {
   state?: MaybeHasSubPath;
   model?: MaybeHasSubPath;
   effect?: MaybeHasSubPath;
-  ioc?: any;
+  inject?: any;
   leftOffset?: number;
   topOffset?: number;
   computeData?: string;
   computeParams?: string;
-  onClick?: string;
+  customLogic?: string;
 }
 
 interface ComponentHasName extends React.FunctionComponent {

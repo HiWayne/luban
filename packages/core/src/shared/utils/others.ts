@@ -1,9 +1,9 @@
 import { FunctionComponent } from 'react';
 import { isNil, isEmpty } from 'ramda';
 import { notification } from 'antd';
-import request from 'utils/request';
-import { ComponentNames, Method, Api, ComponentLevel, ColumnNames } from 'types/types';
-import { readValueByPath } from 'utils/operateValueByPath';
+import request from '@core/utils/request';
+import { ComponentNames, Method, Api, ComponentLevel, ColumnNames } from '@core/types/types';
+import { readValueByPath } from '@core/utils/operateValueByPath';
 
 const GET = request('get');
 const POST = request('post');
@@ -45,6 +45,10 @@ const NAME = '_name';
 export const definePropertyOfName = createDefineProperty<ComponentNames | ColumnNames>(NAME);
 export const getNameProperty = createGetProperty(NAME);
 
+const ALIAS_NAME = '_aliasName';
+export const definePropertyOfAliasName = createDefineProperty<string>(ALIAS_NAME);
+export const getAliasNameProperty = createGetProperty(ALIAS_NAME);
+
 const LEVEL = '_level';
 export const definePropertyOfLevel = createDefineProperty<ComponentLevel[]>(LEVEL);
 export const getLevelProperty = createGetProperty(LEVEL);
@@ -54,6 +58,10 @@ export const IDENTIFIER_REFRESH = 'refresh';
 export const IDENTIFIER_INIT = 'init';
 export const definePropertyOfIdentifier = createDefineProperty<string>(IDENTIFIER);
 export const getIdentifierProperty = createGetProperty(IDENTIFIER);
+
+const CONFIG = '_config';
+export const definePropertyOfConfig = createDefineProperty<{ [key in ComponentLevel]: object }>(CONFIG);
+export const getConfigProperty = createGetProperty(CONFIG);
 
 const ERROR_SIGN = Symbol('ERROR_SIGN');
 

@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Tag } from 'antd';
-import { ColumnNames } from 'types/types';
-import { definePropertyOfName } from 'utils/index';
+import { ColumnNames } from '@core/types/types';
+import { definePropertyOfName } from '@core/utils/index';
 
 interface TagsProps {
   data: string[];

@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
-import { ColumnNames } from 'types/types';
-import { definePropertyOfName } from 'utils/index';
-import { ImageViewer } from 'components/index';
+import { ColumnNames } from '@core/types/types';
+import { definePropertyOfName } from '@core/utils/index';
+import { ImageViewer } from '@core/components/index';
 
 interface SingleImageProps {
   data: string;

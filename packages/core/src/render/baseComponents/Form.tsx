@@ -1,14 +1,15 @@
 import { FunctionComponent, useCallback } from 'react';
 import { Button, Form as AntdForm } from 'antd';
-import { Api, ComponentLevel, ComponentNames, OffsetConst } from 'types/types';
+import { Api, ComponentLevel, ComponentNames, OffsetConst } from '@core/types/types';
 import {
   definePropertyOfName,
+  definePropertyOfAliasName,
   definePropertyOfLevel,
   convertRelativeToAbsolute,
   definePropertyOfIdentifier,
   IDENTIFIER_INIT,
-} from 'utils/index';
-import useApi from 'hooks/useApi';
+} from '@core/utils/index';
+import { useApi } from '@core/hooks/index';
 
 enum Layout {
   horizontal = 'horizontal',
@@ -68,6 +69,7 @@ const Form: FunctionComponent<FormProps> = ({ layout, children, level, ...props 
 };
 
 definePropertyOfName(Form, ComponentNames.FORM);
+definePropertyOfAliasName(Form, '表单容器');
 definePropertyOfLevel(Form, [ComponentLevel.BASIC, ComponentLevel.ADVANCED]);
 
 export default Form;

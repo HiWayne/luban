@@ -1,16 +1,16 @@
 import { FunctionComponent, useCallback, useMemo, useRef } from 'react';
 import { Button, Table } from 'antd';
 import { clone } from 'ramda';
-import { Api, ColumnNames, OffsetConst } from 'types/types';
-import { useTree, usePagination, useApi } from 'hooks/index';
-import { fetchByApiConfig } from 'hooks/useApi';
+import { Api, ColumnNames, OffsetConst } from '@core/types/types';
+import { useTree, usePagination, useApi } from '@core/hooks/index';
+import { fetchByApiConfig } from '@core/hooks/useApi';
 import {
   executeFunction,
   verifyExecuteResult,
   convertRelativeToAbsolute,
   definePropertyOfIdentifier,
   IDENTIFIER_REFRESH,
-} from 'utils/index';
+} from '@core/utils/index';
 import TableColumnRender from './TableColumnRender';
 
 interface BasicColumn {
@@ -142,7 +142,7 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
     [canSelect],
   );
 
-  const { pagination, isLoading } = usePagination(paginationConfig, nodeState);
+  const { pagination, isLoading } = usePagination(paginationConfig);
 
   return (
     <>

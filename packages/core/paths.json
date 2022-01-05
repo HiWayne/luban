@@ -3,17 +3,16 @@
     "baseUrl": "./",
     "paths": {
       "api/*": ["src/api/*"],
-      "parse/*": ["src/parse/*"],
-      "render/*": ["src/render/*"],
-      "components/*": ["src/components/*"],
+      "@core/components/*": ["src/components/*"],
       "baseComponents/*": ["src/render/baseComponents/*"],
-      "types/*": ["src/types/*"],
+      "customComponents/*": ["src/render/customComponents/*"],
+      "@core/types/*": ["src/types/*"],
       "router/*": ["src/router/*"],
       "assets/*": ["src/assets/*"],
-      "images/*": ["src/assets/images/*"],
+      "@core/images/*": ["src/assets/images/*"],
       "styles/*": ["src/assets/styles/*"],
-      "utils/*": ["src/shared/utils/*"],
-      "hooks/*": ["src/shared/hooks/*"]
+      "@core/utils/*": ["src/shared/utils/*"],
+      "@core/hooks/*": ["src/shared/hooks/*"]
     }
   }
 }
