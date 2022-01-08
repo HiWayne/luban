@@ -328,7 +328,6 @@ export default JSON.stringify({
     selectedList: null,
   },
   state: {
-    hasTitle: null,
     list: null,
     showEditor: null,
     showCreation: null,

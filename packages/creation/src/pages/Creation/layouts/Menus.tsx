@@ -52,32 +52,50 @@ export interface Menu {
   props: { basic: any; advanced: any };
   key: string;
   component: UnitComponent;
+  onClick?: any;
 }
 
 interface MenusProps {
   data: Menu[];
+  operateData: any[];
   selectedMenu: Menu;
-  onSelect: React.Dispatch<React.SetStateAction<Menu>>;
+  selectedOperate: any;
+  onOperate: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const Menus: FunctionComponent<MenusProps> = ({ data, selectedMenu, onSelect }) => {
+const Menus: FunctionComponent<MenusProps> = ({ data, operateData, selectedMenu, selectedOperate, onOperate }) => {
   return (
-    <Panel width={380} style={{ marginLeft: '10px' }}>
-      <MenuList style={{ height: 'calc(100vh - 120px)', overflowY: 'auto' }}>
-        {data.map((item) => (
-          <MenuItem
-            key={item.name}
-            className={selectedMenu && selectedMenu.key === item.key ? 'active' : ''}
-            onClick={() => {
-              if (!selectedMenu || selectedMenu.key !== item.key) {
-                onSelect(item);
+    <Panel width={250}>
+      <div style={{ height: 'calc(100vh - 120px)', overflowY: 'auto' }}>
+        <h3>必须</h3>
+        <MenuList>
+          {operateData.map((item) => (
+            <MenuItem
+              key={item.name}
+              className={selectedOperate && selectedOperate.key === item.key ? 'active' : ''}
+              onClick={
+                item.onClick
+                  ? item.onClick
+                  : () => {
+                      if (!selectedOperate || selectedOperate.key !== item.key) {
+                        onOperate(item);
+                      } else {
+                        onOperate(null);
+                      }
+                    }
               }
-            }}
-          >
-            {item.name}
-          </MenuItem>
-        ))}
-      </MenuList>
+            >
+              {item.name}
+            </MenuItem>
+          ))}
+        </MenuList>
+        <h3 style={{ marginTop: '20px' }}>组件</h3>
+        <MenuList>
+          {data.map((item) => (
+            <MenuItem key={item.name}>{item.name}</MenuItem>
+          ))}
+        </MenuList>
+      </div>
     </Panel>
   );
 };

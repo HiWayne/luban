@@ -54,7 +54,7 @@ const Animate: FunctionComponent<AnimateProps> = ({
   });
 
   return (
-    <animated.section style={{ transform: x.to((x) => `translate3d(${x * width - 20}px, 0, 0)`) }} {...props}>
+    <animated.section style={{ transform: x.to((x) => `translate3d(${x * width}px, 0, 0)`) }} {...props}>
       <ShadowPanel style={style} className={className}>
         <ArrowButton
           direction={direction}

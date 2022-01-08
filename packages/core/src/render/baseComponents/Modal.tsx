@@ -13,9 +13,7 @@ interface ModalProps extends CommonProps {
 
 const Modal: FunctionComponent<ModalProps> = ({ title, content, footer: _footer, state, model, effect }) => {
   const children = content
-    ? typeof content === 'string'
-      ? content
-      : Array.isArray(content)
+    ? Array.isArray(content)
       ? content.map((vdomNode) => <Render key={vdomNode.id} data={vdomNode} />)
       : null
     : null;
