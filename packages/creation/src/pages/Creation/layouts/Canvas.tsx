@@ -1,9 +1,26 @@
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
+import styled from '@emotion/styled';
+import Page from 'core/src/render/index';
 
-interface CanvasProps {}
+const Border = styled.div`
+  width: 750px;
+  height: calc(100vh - 80px);
+  border: 1px solid #bbb;
+  overflow: hidden;
+`;
 
-const Canvas: FunctionComponent<CanvasProps> = () => {
-  return <div style={{ width: '720px', height: 'calc(100vh - 80px)', border: '1px solid #bbb' }}></div>;
+interface CanvasProps {
+  data: object;
+}
+
+const Canvas: FunctionComponent<CanvasProps> = ({ data }) => {
+  const json = useMemo(() => (data ? JSON.stringify(data) : ''), [data]);
+
+  return (
+    <Border>
+      <Page data={json} />
+    </Border>
+  );
 };
 
 export default Canvas;

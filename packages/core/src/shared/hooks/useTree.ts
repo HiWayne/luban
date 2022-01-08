@@ -1,7 +1,14 @@
 import { useContext, useMemo, useCallback } from 'react';
 import { produce } from 'immer';
 import { ModelTreeContext, StateTreeContext } from '../../render/index';
-import { readValueByPath, modifyValueByPath, isShow, isValidPath, getEventValue, createSingleton } from '@core/utils/index';
+import {
+  readValueByPath,
+  modifyValueByPath,
+  isShow,
+  isValidPath,
+  getEventValue,
+  createSingleton,
+} from '@core/utils/index';
 
 interface UseTreeParams {
   model?: MaybeHasSubPath;

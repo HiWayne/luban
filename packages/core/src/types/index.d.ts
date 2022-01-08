@@ -59,7 +59,7 @@ interface VDomNode {
   // modal弹框的标题
   title?: string;
   // model弹框的内容
-  content?: VDomNode[] | string;
+  content?: VDomNode[];
   // model弹框的底部
   footer?: VDomNode[];
   // table的每列配置
