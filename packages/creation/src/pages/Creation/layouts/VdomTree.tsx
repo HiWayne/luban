@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useContext, useMemo } from 'react';
+import { FunctionComponent, useCallback, useContext, useMemo, Dispatch, SetStateAction } from 'react';
 import { Tree } from 'antd';
 import { vdomTree, components } from '../index';
 import { Menu } from './Menus';
@@ -19,8 +19,8 @@ const getChildrenKey = (vdom: VDomNode): string => {
 };
 
 interface VdomTreeProps {
-  onSelect: React.Dispatch<React.SetStateAction<Menu>>;
-  setCurrentVdom: React.Dispatch<React.SetStateAction<VDomNode>>;
+  onSelect: Dispatch<SetStateAction<Menu>>;
+  setCurrentVdom: Dispatch<SetStateAction<VDomNode>>;
 }
 
 const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }) => {
