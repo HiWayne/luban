@@ -92,7 +92,22 @@ const Menus: FunctionComponent<MenusProps> = ({ data, operateData, selectedMenu,
         <h3 style={{ marginTop: '20px' }}>组件</h3>
         <MenuList>
           {data.map((item) => (
-            <MenuItem key={item.name}>{item.name}</MenuItem>
+            <MenuItem
+              key={item.name}
+              draggable
+              onDragEnd={(e) => {
+                console.log(e);
+              }}
+              onDrop={(e) => {
+                e.stopPropagation();
+                console.log(e);
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+              }}
+            >
+              {item.name}
+            </MenuItem>
           ))}
         </MenuList>
       </div>
