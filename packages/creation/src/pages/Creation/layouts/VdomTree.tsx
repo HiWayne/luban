@@ -1,10 +1,11 @@
 import { FunctionComponent, useCallback, useContext, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import produce from 'immer';
+import { clone } from 'ramda';
 import { Tree } from 'antd';
 import G6 from '@antv/g6';
 import { vdomTree, components } from '../index';
 import { Menu } from './Menus';
 import { findVdomById, loop } from './Configure/index';
-import produce from 'immer';
 
 // 得到vdom中类children的属性名称
 const getChildrenKey = (vdom: VDomNode): string => {
@@ -26,21 +27,21 @@ interface VdomTreeProps {
 
 const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }) => {
   const [vdom, setVdom] = useContext(vdomTree);
-
-  const computeVdom = useMemo<VDomNode[]>(
-    () =>
-      produce(vdom, (draft) => {
-        loop(draft, (vdom, index) => {
-          vdom[index] = {
-            children: vdom[index].content ? vdom[index].content : [],
-            label: vdom[index].name,
-            originalData: vdom[index],
-          };
-        });
-      }),
-    [vdom],
-  );
-  console.log('computeVdom', computeVdom);
+  const dataComputedFromVdomTree = useMemo<{ id: string; children: VDomNode[] }>(() => {
+    const clonedVdom = clone(vdom);
+    loop(clonedVdom, (vdom, index) => {
+      vdom[index] = {
+        id: vdom[index].id + '',
+        children: vdom[index].content ? vdom[index].content : [],
+        label: vdom[index].name,
+        originalData: vdom[index],
+      };
+    });
+    return {
+      id: 'root',
+      children: clonedVdom,
+    };
+  }, [vdom]);
 
   useEffect(() => {
     const treeGraph = new G6.TreeGraph({
@@ -55,7 +56,7 @@ const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }
               const icon = item ? item.get('group').findByClassName('collapse-icon') : null;
               if (collapsed && icon) {
                 icon.attr('symbol', 'EXPAND_ICON');
-              } else {
+              } else if (icon) {
                 icon.attr('symbol', 'COLLAPSE_ICON');
               }
             },
@@ -66,14 +67,14 @@ const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }
       },
       layout: {
         type: 'dendrogram',
-        direction: 'LR', // H / V / LR / RL / TB / BT
+        direction: 'RL', // H / V / LR / RL / TB / BT
         nodeSep: 50,
         rankSep: 100,
         radial: true,
       },
     });
 
-    treeGraph.data(computeVdom);
+    treeGraph.data(dataComputedFromVdomTree);
     treeGraph.render();
     treeGraph.on('drop', (e) => {
       console.log(e);
