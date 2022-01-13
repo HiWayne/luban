@@ -1,5 +1,6 @@
-import { FunctionComponent, useCallback, useContext, useMemo, Dispatch, SetStateAction } from 'react';
+import { FunctionComponent, useCallback, useContext, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 import { Tree } from 'antd';
+import G6 from '@antv/g6';
 import { vdomTree, components } from '../index';
 import { Menu } from './Menus';
 import { findVdomById, loop } from './Configure/index';
@@ -26,25 +27,78 @@ interface VdomTreeProps {
 const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }) => {
   const [vdom, setVdom] = useContext(vdomTree);
 
-  // modal的content可以看做children
   const computeVdom = useMemo<VDomNode[]>(
     () =>
       produce(vdom, (draft) => {
         loop(draft, (vdom, index) => {
           vdom[index] = {
             children: vdom[index].content ? vdom[index].content : [],
-            key: vdom[index].id,
-            ...vdom[index],
+            label: vdom[index].name,
+            originalData: vdom[index],
           };
         });
       }),
     [vdom],
   );
+  console.log('computeVdom', computeVdom);
+
+  useEffect(() => {
+    const treeGraph = new G6.TreeGraph({
+      container: 'container',
+      width: 500,
+      height: 500,
+      modes: {
+        default: [
+          {
+            type: 'collapse-expand',
+            onChange(item, collapsed) {
+              const icon = item ? item.get('group').findByClassName('collapse-icon') : null;
+              if (collapsed && icon) {
+                icon.attr('symbol', 'EXPAND_ICON');
+              } else {
+                icon.attr('symbol', 'COLLAPSE_ICON');
+              }
+            },
+          },
+          'drag-canvas',
+          'zoom-canvas',
+        ],
+      },
+      layout: {
+        type: 'dendrogram',
+        direction: 'LR', // H / V / LR / RL / TB / BT
+        nodeSep: 50,
+        rankSep: 100,
+        radial: true,
+      },
+    });
+
+    treeGraph.data(computeVdom);
+    treeGraph.render();
+    treeGraph.on('drop', (e) => {
+      console.log(e);
+    });
+  }, []);
+
+  // modal的content可以看做children
+  // const computeVdom = useMemo<VDomNode[]>(
+  //   () =>
+  //     produce(vdom, (draft) => {
+  //       loop(draft, (vdom, index) => {
+  //         vdom[index] = {
+  //           children: vdom[index].content ? vdom[index].content : [],
+  //           key: vdom[index].id,
+  //           ...vdom[index],
+  //         };
+  //       });
+  //     }),
+  //   [vdom],
+  // );
 
   const onDrop = useCallback(
     (info: { node: any; dragNode: any; dropPosition: number; dropToGap: any }) => {
       console.log(info);
-      const dropKey = info.node.id; // 落
+      const dropKey = info.node.id; // 放
       const dragKey = info.dragNode.id; // 拖
       const dropPos = info.node.pos.split('-');
       const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
@@ -84,16 +138,16 @@ const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }
             }
           });
         } else {
-          let ar;
-          let i;
+          let ar: VDomNode[] = [];
+          let i: number = 0;
           findVdomById(draft, dropKey, (arr, index) => {
             ar = arr;
             i = index;
           });
           if (dropPosition === -1) {
-            ar.splice(i, 0, dragObj);
+            ar.splice(i, 0, dragObj as VDomNode);
           } else {
-            ar.splice(i + 1, 0, dragObj);
+            ar.splice(i + 1, 0, dragObj as VDomNode);
           }
         }
       });
@@ -104,21 +158,22 @@ const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }
   );
 
   return (
-    <Tree
-      treeData={computeVdom as any}
-      draggable
-      onDrop={onDrop}
-      fieldNames={{ title: 'name', key: 'id' }}
-      onSelect={
-        ((key, { selectedNodes }: { selectedNodes: VDomNode }) => {
-          const menu = components.find((component) => component.key === selectedNodes[0].name);
-          if (menu) {
-            onSelect(menu);
-            setCurrentVdom(selectedNodes[0]);
-          }
-        }) as any
-      }
-    ></Tree>
+    <div id="container"></div>
+    // <Tree
+    //   treeData={computeVdom as any}
+    //   draggable
+    //   onDrop={onDrop}
+    //   fieldNames={{ title: 'name', key: 'id' }}
+    //   onSelect={
+    //     ((_key: any, { selectedNodes }: { selectedNodes: VDomNode[] }) => {
+    //       const menu = components.find((component) => component.key === selectedNodes[0].name);
+    //       if (menu) {
+    //         onSelect(menu);
+    //         setCurrentVdom(selectedNodes[0]);
+    //       }
+    //     }) as any
+    //   }
+    // ></Tree>
   );
 };
 
