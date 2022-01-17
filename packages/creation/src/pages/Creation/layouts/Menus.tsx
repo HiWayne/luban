@@ -2,7 +2,7 @@ import { FunctionComponent } from 'react';
 import styled from '@emotion/styled';
 import { ComponentLevel } from 'core/src/types/types';
 import { UnitComponent } from './Configure/index';
-import Panel from '@creation/components/Panel';
+import { Panel } from '@creation/components/index';
 
 const MenuItem = styled.button`
   display: inline-block;

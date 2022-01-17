@@ -1,23 +1,11 @@
-import {
-  FunctionComponent,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  Dispatch,
-  SetStateAction,
-  useRef,
-} from 'react';
+import { FunctionComponent, useCallback, useContext, useMemo, Dispatch, SetStateAction } from 'react';
 import produce from 'immer';
 import { clone } from 'ramda';
-import { Tree } from 'antd';
-import G6 from '@antv/g6';
+// import { Tree } from 'antd';
 import { vdomTree, components } from '../index';
 import { Menu } from './Menus';
 import { findVdomById, loop } from './Configure/index';
-
-const WIDTH = 750;
-const HEIGHT = 650;
+import { Tree } from '@creation/components/index';
 
 // 得到vdom中类children的属性名称
 const getChildrenKey = (vdom: VDomNode): string => {
@@ -39,8 +27,7 @@ interface VdomTreeProps {
 
 const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }) => {
   const [vdom, setVdom] = useContext(vdomTree);
-  const containerRef = useRef(null);
-  const treeGraphRef = useRef(null);
+
   const dataComputedFromVdomTree = useMemo<{ id: string; children: VDomNode[] }>(() => {
     const clonedVdom = clone(vdom);
     loop(clonedVdom, (vdom, index) => {
@@ -57,72 +44,6 @@ const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }
       children: clonedVdom,
     };
   }, [vdom]);
-
-  useEffect(() => {
-    if (!treeGraphRef.current) {
-      treeGraphRef.current = new G6.TreeGraph({
-        container: containerRef.current,
-        width: WIDTH,
-        height: HEIGHT,
-        modes: {
-          default: [
-            // {
-            //   type: 'collapse-expand',
-            //   onChange(item, collapsed) {
-            //     const icon = item ? item.get('group').findByClassName('collapse-icon') : null;
-            //     if (collapsed && icon) {
-            //       icon.attr('symbol', 'EXPAND_ICON');
-            //     } else if (icon) {
-            //       icon.attr('symbol', 'COLLAPSE_ICON');
-            //     }
-            //   },
-            // },
-            'drag-canvas',
-            'zoom-canvas',
-            'drag-node',
-          ],
-        },
-        defaultEdge: {
-          shape: 'cubic-horizontal',
-          style: {
-            stroke: '#A3B1BF',
-          },
-        },
-        defaultNode: {
-          type: 'rect',
-          labelCfg: {
-            style: {
-              fill: '#000000A6',
-              fontSize: 10,
-              color: '#409eff',
-            },
-          },
-          style: {
-            stroke: '#c6e2ff',
-            width: 100,
-          },
-        },
-        layout: {
-          type: 'dendrogram',
-          direction: 'LR', // H / V / LR / RL / TB / BT
-          nodeSep: 50,
-          rankSep: 200,
-        },
-      });
-      const treeGraph = treeGraphRef.current;
-      treeGraph.data(dataComputedFromVdomTree);
-      treeGraph.render();
-      treeGraph.moveTo(WIDTH * 0.1, HEIGHT * 0.1);
-      treeGraph.on('dragnodeend', (e) => {
-        console.log('drag', e.items[0]);
-        console.log('drop', e.targetItem);
-      });
-    } else {
-      // 当vdom改变时仅更新treeGraph
-      const treeGraph = treeGraphRef.current;
-      treeGraph.changeDate(dataComputedFromVdomTree);
-    }
-  }, [dataComputedFromVdomTree]);
 
   // modal的content可以看做children
   // const computeVdom = useMemo<VDomNode[]>(
@@ -203,7 +124,6 @@ const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }
 
   return (
     <div
-      ref={containerRef}
       style={{
         position: 'fixed',
         top: '65px',
@@ -212,7 +132,9 @@ const VdomTree: FunctionComponent<VdomTreeProps> = ({ onSelect, setCurrentVdom }
         zIndex: '999',
         background: 'rgba(255, 255, 255, 0.8)',
       }}
-    ></div>
+    >
+      <Tree data={dataComputedFromVdomTree} />
+    </div>
     // <Tree
     //   treeData={computeVdom as any}
     //   draggable
