@@ -266,4 +266,4 @@ const result: {
 
 > **2. 树的拖拽编辑：**
 
-项目里已经有了`antd`，于是首先想到了`antd`中的`Tree`组件，但是外部视图拖进`Tree`组件是无法感知的，通过阅读`Tree`和`rc-tree`的源码发现，`rc-tree`state 中的`dropAllowed`是 `false` 时不会调用传入的`onDrop`，而非内部节点拖动时`dropAllowed`不会为 `true`，所以这个组件无法满足需求。经过调研发现，`@antv/g6`中的`TreeGraph`的`onDrop`可以被外部节点的拖动触发。只是`@antv/g6`自身没有实现内部节点的交互，需要自己实现。
+由于项目里已经有了 `antd` ，于是首先想到了 `antd` 中的 `Tree` 组件，但是外部视图拖进 `Tree` 组件是无法感知的，通过阅读 `Tree` 和 `rc-tree` 的源码发现，`rc-tree` this.state 中的 `dropAllowed` 是 `false` 时不会调用传入的 `onDrop` ，而非内部节点拖动时 `dropAllowed` 不会为 `true`，所以这个组件无法满足需求。经过调研发现，`@antv/g6` 中的 `TreeGraph` 的 `onDrop` 可以被外部节点的 drop 触发。只是 `@antv/g6` 自身没有实现内部节点的交互，需要自己实现。

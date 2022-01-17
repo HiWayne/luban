@@ -3,7 +3,7 @@ import { Tabs } from 'antd';
 import { ComponentLevel, ComponentNames } from 'core/src/types/types';
 import * as ConfigRows from './components/index';
 import { Menu } from '../Menus';
-import Panel from '@creation/components/Panel';
+import { Panel } from '@creation/components/index';
 import { vdomTree } from '../../index';
 import produce from 'immer';
 
