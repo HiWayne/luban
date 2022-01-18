@@ -9,7 +9,7 @@ const MenuItem = styled.button`
   line-height: 1;
   white-space: pre-wrap;
   cursor: pointer;
-  background: #fff;
+  background-color: #fff;
   border: 1px solid #dcdfe6;
   color: #606266;
   -webkit-appearance: none;
