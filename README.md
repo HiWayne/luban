@@ -1,4 +1,4 @@
-# Low Code 低代码平台： luban(鲁班)
+# Low Code 低代码平台： luban(鲁班) 开发中……
 
 #### 由旧项目[shekina](https://github.com/HiWayne/shekina)重构而来
 
