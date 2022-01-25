@@ -1,19 +1,16 @@
-import { CSSProperties, FunctionComponent, useEffect, useRef } from 'react';
+import { CSSProperties, FunctionComponent, useCallback, useEffect, useRef, useState } from 'react';
+import { unstable_batchedUpdates } from 'react-dom';
 import { TreeGraph } from '@antv/g6';
 import { GraphData, TreeGraphData } from '@antv/g6-core';
+import styled from '@emotion/styled';
 
-class Position {
-  centerX: number;
-  centerY: number;
-  width: number;
-  height: number;
-  constructor([centerX = 0, centerY = 0] = [], [width = 0, height = 0] = []) {
-    this.centerX = centerX;
-    this.centerY = centerY;
-    this.width = width;
-    this.height = height;
-  }
-}
+const EditorWrapper = styled.div`
+  position: fixed;
+  z-index: 9999;
+  font-size: 16px;
+  border: 1px solid #eee;
+  background: #fff;
+`;
 
 interface TreeProps {
   width: number;
@@ -34,8 +31,31 @@ const Tree: FunctionComponent<TreeProps> = ({
 }) => {
   const containerRef = useRef(null);
   const treeGraphRef = useRef(null);
-  const currentDragPositionRef = useRef(new Position());
-  const currentDropPositionRef = useRef(new Position());
+  const [showEditor, setShowEditor] = useState(false);
+  const showEditorRef = useRef(false);
+  const [editorX, setEditorX] = useState(0);
+  const [editorY, setEditorY] = useState(0);
+
+  const updateEditorPosition = useCallback((e) => {
+    if (e) {
+      const { item } = e;
+      const model = item.getModel();
+      const { x, y } = model;
+      // 这里有个知识点：在react的legacy模式下，浏览器原生事件或异步操作会脱离对setState的批量更新，所以它将会是同步更新的，多个setState会更新多次
+      // 如果在react事件或生命周期里，则会批量更新。或者在concurrent模式或react18的createRoot下。或者手动调用unstable_batchedUpdates
+      unstable_batchedUpdates(() => {
+        setEditorX(x + initialX * 6 + 40);
+        setEditorY(y + initialY * 6 + 25);
+        showEditorRef.current = true;
+        setShowEditor(true);
+      });
+    }
+  }, []);
+
+  const hiddenEditor = useCallback(() => {
+    showEditorRef.current = false;
+    setShowEditor(false);
+  }, []);
 
   useEffect(() => {
     if (!treeGraphRef.current) {
@@ -93,30 +113,18 @@ const Tree: FunctionComponent<TreeProps> = ({
       treeGraph.data(data);
       treeGraph.render();
       treeGraph.moveTo(initialX, initialY);
+      treeGraph.on('node:click', (e) => {
+        console.log(e);
+        if (!showEditorRef.current) {
+          updateEditorPosition(e);
+        } else {
+          hiddenEditor();
+        }
+      });
       treeGraph.on('drag', (e) => {
-        const dragItem = e.item;
-        const dragBox = dragItem._cfg.bboxCache;
-        if (dragBox) {
-          currentDragPositionRef.current = new Position(
-            [dragBox.centerX, dragBox.centerY],
-            [dragBox.width, dragBox.height],
-          );
+        if (showEditorRef.current) {
+          updateEditorPosition(e);
         }
-      });
-      treeGraph.on('node:dragover', (e) => {
-        // const dragTarget = e.items[0];
-        // const dropTarget = e.targetItem;
-        const dropItem = e.item;
-        const dropBox = dropItem._cfg.bboxCache;
-        if (dropBox) {
-          currentDropPositionRef.current = new Position(
-            [dropBox.centerX, dropBox.centerY],
-            [dropBox.width, dropBox.height],
-          );
-        }
-      });
-      treeGraph.on('dragend', () => {
-        console.log(currentDragPositionRef.current, currentDropPositionRef.current);
       });
     } else {
       // 当vdom改变时仅更新treeGraph
@@ -125,7 +133,21 @@ const Tree: FunctionComponent<TreeProps> = ({
     }
   }, [data]);
 
-  return <div ref={containerRef} style={style ? style : undefined}></div>;
+  return (
+    <>
+      <div ref={containerRef} style={style ? style : undefined}></div>
+      {showEditor ? (
+        <EditorWrapper
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          style={{ left: editorX + 'px', top: editorY + 'px' }}
+        >
+          编辑
+        </EditorWrapper>
+      ) : null}
+    </>
+  );
 };
 
 export default Tree;

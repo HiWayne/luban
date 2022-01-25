@@ -25,8 +25,6 @@
   "dependencies": {
     "@antv/g6": "^4.5.2",
     "core": "^1.0.0",
-    "gifshot": "^0.4.5",
-    "libgif": "0.0.3",
     "react-spring": "^9.4.0",
     "web-vitals": "^1.0.1"
   }

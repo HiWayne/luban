@@ -66,8 +66,6 @@ const Index: FunctionComponent = () => {
     [vdom, model, state],
   );
 
-  console.log(currentData);
-
   const operate = useMemo(
     () => [
       { name: '视图树', key: 'vdom' },
