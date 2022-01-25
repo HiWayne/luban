@@ -1,8 +1,6 @@
 import { ComponentType, lazy } from 'react';
 
 const IndexPage = lazy(() => import('pages/Creation/index'));
-const FilterGIFPage = lazy(() => import('pages/FilterGIF/index'));
-
 interface Meta {
   title?: string;
   hidden?: boolean;
@@ -22,13 +20,6 @@ const routes: RouteItem[] = [
     component: IndexPage,
     meta: {
       title: '首页',
-    },
-  },
-  {
-    path: '/filtergif',
-    component: FilterGIFPage,
-    meta: {
-      title: 'gif滤镜',
     },
   },
 ];
