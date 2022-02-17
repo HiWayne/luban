@@ -29,7 +29,8 @@
     "build:core": "cd ./packages/core && npm run build",
     "build:creation": "cd ./packages/creation && npm run build",
     "_lint-staged": "lint-staged",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "bootstrap": "lerna bootstrap"
   },
   "eslintConfig": {
     "extends": [
