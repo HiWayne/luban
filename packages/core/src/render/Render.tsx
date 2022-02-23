@@ -3,6 +3,7 @@ import { traverse, getNameProperty } from '@core/utils/index';
 import * as baseComponents from 'baseComponents/index';
 import * as customComponents from 'customComponents/index';
 import { ComponentsObject } from '@core/types/types';
+import { EditableWrapper } from '@core/components/index';
 
 const Components = {
   ...baseComponents,
@@ -11,9 +12,10 @@ const Components = {
 
 interface RenderProps {
   data: VDomNode | VDomNode[];
+  editable?: boolean;
 }
 
-const Render: FunctionComponent<RenderProps> = ({ data }) => {
+const Render: FunctionComponent<RenderProps> = ({ data, editable }) => {
   const renderedReactElement = useMemo(() => {
     return traverse(data, undefined, (vdomTreeNode): any => {
       const [MatchedComponent] =
@@ -24,13 +26,15 @@ const Render: FunctionComponent<RenderProps> = ({ data }) => {
         if (vdomTreeNode && Array.isArray(children) && children.length > 0) {
           // @ts-ignore
           return (
-            <MatchedComponent key={id} {...validProps}>
+            <MatchedComponent key={id} {...validProps} renderEditableWrapper={editable ? EditableWrapper : undefined}>
               {children}
             </MatchedComponent>
           );
         } else {
           // @ts-ignore
-          return <MatchedComponent key={id} {...validProps} />;
+          return (
+            <MatchedComponent key={id} {...validProps} renderEditableWrapper={editable ? EditableWrapper : undefined} />
+          );
         }
       }
     });

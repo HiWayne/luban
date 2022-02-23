@@ -1,6 +1,6 @@
 import { FunctionComponent, Key, useMemo } from 'react';
 import { Table as AntdTable } from 'antd';
-import { useTree, usePagination } from '@core/hooks/index';
+import { useTree, usePagination, useRenderEditableWrapper } from '@core/hooks/index';
 import RenderNode from '../../../render/Render';
 import {
   convertRelativeToAbsolute,
@@ -47,8 +47,11 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
   topOffset,
   leftOffset,
   pagination: paginationConfig,
+  renderEditableWrapper,
 }) => {
   const { nodeState, handleModelChange, isShow } = useTree({ state, model });
+
+  const { extraStyleOfRoot, RenderEditable } = useRenderEditableWrapper(renderEditableWrapper);
 
   const dataSource = useMemo(
     () => (computeData ? executeFunction(computeData, nodeState[0]?.response) : nodeState[0]?.response),
@@ -102,14 +105,17 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
   }
 
   return isShow ? (
-    <AntdTable
-      dataSource={dataSource}
-      rowSelection={rowSelection}
-      columns={columns}
-      style={{ marginTop: convertRelativeToAbsolute(topOffset), marginLeft: convertRelativeToAbsolute(leftOffset) }}
-      pagination={pagination}
-      loading={isLoading}
-    />
+    <div style={extraStyleOfRoot}>
+      <AntdTable
+        dataSource={dataSource}
+        rowSelection={rowSelection}
+        columns={columns}
+        style={{ marginTop: convertRelativeToAbsolute(topOffset), marginLeft: convertRelativeToAbsolute(leftOffset) }}
+        pagination={pagination}
+        loading={isLoading}
+      />
+      <RenderEditable />
+    </div>
   ) : null;
 };
 

@@ -18,7 +18,7 @@ const Canvas: FunctionComponent<CanvasProps> = ({ data }) => {
 
   return (
     <Border>
-      <Page data={json} />
+      <Page data={json} editable={true} />
     </Border>
   );
 };

@@ -2,7 +2,7 @@ import { FunctionComponent, useCallback, useMemo, useRef } from 'react';
 import { Button, Table } from 'antd';
 import { clone } from 'ramda';
 import { Api, ColumnNames, OffsetConst } from '@core/types/types';
-import { useTree, usePagination, useApi } from '@core/hooks/index';
+import { useTree, usePagination, useApi, useRenderEditableWrapper } from '@core/hooks/index';
 import { fetchByApiConfig } from '@core/hooks/useApi';
 import {
   executeFunction,
@@ -44,8 +44,11 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
   state,
   computeData,
   pagination: paginationConfig,
+  renderEditableWrapper,
 }) => {
   const { nodeState } = useTree({ state });
+
+  const { extraStyleOfRoot, RenderEditable } = useRenderEditableWrapper(renderEditableWrapper);
 
   const selectedRowsRef = useRef<any[]>([]);
   const selectedRowKeysRef = useRef<any[]>([]);
@@ -145,7 +148,7 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
   const { pagination, isLoading } = usePagination(paginationConfig);
 
   return (
-    <>
+    <div style={extraStyleOfRoot}>
       <Table
         dataSource={dataSource}
         columns={_columns}
@@ -169,6 +172,7 @@ export const BasicTable: FunctionComponent<BasicTableProps> = ({
           批量操作
         </Button>
       ) : null}
-    </>
+      <RenderEditable />
+    </div>
   );
 };
