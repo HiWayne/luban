@@ -97,6 +97,7 @@ interface CommonProps {
   computeData?: string;
   computeParams?: string;
   customLogic?: string;
+  renderEditableWrapper?: FunctionComponent;
 }
 
 interface ComponentHasName extends React.FunctionComponent {

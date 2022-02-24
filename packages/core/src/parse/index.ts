@@ -1,8 +1,8 @@
 import { traverse } from '@core/utils/index';
 import handleVdom from './handleVdom';
 
-type Input = string | ParseInput;
-interface ParseInput {
+type ParseInput = string | ParsedDataOfInput;
+export interface ParsedDataOfInput {
   vdom: VDomNode[];
   model: ModelTree;
   state: StateTree;
@@ -13,9 +13,9 @@ interface ParseResult {
   stateTree?: StateTree;
 }
 
-const parse = (input: Input): ParseResult => {
+const parse = (input: ParseInput): ParseResult => {
   try {
-    const parseInput = typeof input === 'string' ? (JSON.parse(input) as ParseInput) : input;
+    const parseInput = typeof input === 'string' ? (JSON.parse(input) as ParsedDataOfInput) : input;
     const { vdom, model, state } = parseInput;
     const newVdom = traverse(vdom, handleVdom(model, state));
     return {
