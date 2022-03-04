@@ -26,19 +26,29 @@ const Render: FunctionComponent<RenderProps> = ({ data, editable }) => {
         if (vdomTreeNode && Array.isArray(children) && children.length > 0) {
           // @ts-ignore
           return (
-            <MatchedComponent key={id} {...validProps} renderEditableWrapper={editable ? EditableWrapper : undefined}>
+            <MatchedComponent
+              key={id}
+              {...validProps}
+              _editable={editable}
+              renderEditableWrapper={editable ? EditableWrapper : undefined}
+            >
               {children}
             </MatchedComponent>
           );
         } else {
           // @ts-ignore
           return (
-            <MatchedComponent key={id} {...validProps} renderEditableWrapper={editable ? EditableWrapper : undefined} />
+            <MatchedComponent
+              key={id}
+              {...validProps}
+              _editable={editable}
+              renderEditableWrapper={editable ? EditableWrapper : undefined}
+            />
           );
         }
       }
     });
-  }, [data]);
+  }, [data, editable]);
   return <>{renderedReactElement}</>;
 };
 

@@ -6,6 +6,8 @@ interface VDomNode {
   // 组件等级，基础型配置方便、灵活性差；进阶型配置复杂、灵活性高
   level: Level;
   id: string | number;
+  // 在vdom树中的层级
+  hierarchicalRecords: number[];
   // 组件类型，如 input button
   name: ComponentNames;
   // button input datepicker，antd不同的button风格 不同的input datepicker类型，
@@ -76,6 +78,7 @@ interface VDomNode {
   init?: Api;
   // 自定义逻辑
   customLogic?: string;
+  _editable: boolean;
 }
 
 interface ModelTree {
@@ -98,6 +101,8 @@ interface CommonProps {
   computeParams?: string;
   customLogic?: string;
   renderEditableWrapper?: FunctionComponent;
+  hierarchicalRecords: number[];
+  _editable: boolean;
 }
 
 interface ComponentHasName extends React.FunctionComponent {

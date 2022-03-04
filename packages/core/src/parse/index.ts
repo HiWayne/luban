@@ -18,6 +18,7 @@ const parse = (input: ParseInput): ParseResult => {
     const parseInput = typeof input === 'string' ? (JSON.parse(input) as ParsedDataOfInput) : input;
     const { vdom, model, state } = parseInput;
     const newVdom = traverse(vdom, handleVdom(model, state));
+    console.log(newVdom);
     return {
       vdomTree: Array.isArray(newVdom) ? newVdom : [newVdom],
       modelTree: model,

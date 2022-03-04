@@ -8,7 +8,7 @@ import {
   definePropertyOfLevel,
 } from '@core/utils/index';
 import { Size, ComponentNames, ComponentLevel, OffsetConst } from '@core/types/types';
-import { useTree } from '@core/hooks/index';
+import { useTree, useRenderEditableWrapper } from '@core/hooks/index';
 
 const inputMap = {
   textarea: AntdInput.TextArea,
@@ -36,20 +36,23 @@ interface BasicInputProps {
 
 interface InputProps extends AdvancedInputProps, BasicInputProps {}
 
-const AdvancedInput: FunctionComponent<AdvancedInputProps> = ({
-  label,
-  type,
-  width,
-  size = Size.middle,
-  rules,
-  model,
-  state,
-  effect,
-  labelWidth,
-  topOffset,
-  leftOffset,
-  wrapperOffset,
-}) => {
+const AdvancedInput: FunctionComponent<AdvancedInputProps> = (props) => {
+  const {
+    label,
+    type,
+    width,
+    size = Size.middle,
+    rules,
+    model,
+    state,
+    effect,
+    labelWidth,
+    topOffset,
+    leftOffset,
+    wrapperOffset,
+    renderEditableWrapper,
+  } = props;
+
   const widthHasUnit = useMemo(() => convertWidth(width), [width]);
 
   const { nodeModel, handleModelChange, handleStateChange, isShow } = useTree({
@@ -57,6 +60,9 @@ const AdvancedInput: FunctionComponent<AdvancedInputProps> = ({
     model,
     effect,
   });
+
+  const { extraStyleOfRoot, renderedEditable } = useRenderEditableWrapper(renderEditableWrapper, props);
+
   const handleInputChange = useCallback(
     (e) => {
       handleModelChange(e);
@@ -68,22 +74,27 @@ const AdvancedInput: FunctionComponent<AdvancedInputProps> = ({
   // @ts-ignore
   const ANTD_INPUT = type && inputMap[type] ? inputMap[type] : AntdInput;
 
-  return isShow ? (
-    <Form.Item
-      label={label}
-      rules={rules}
-      labelCol={{ span: labelWidth }}
-      wrapperCol={{ offset: wrapperOffset }}
-      style={{ marginTop: convertRelativeToAbsolute(topOffset), marginLeft: convertRelativeToAbsolute(leftOffset) }}
-    >
-      <ANTD_INPUT
-        value={nodeModel[0]}
-        onChange={handleInputChange}
-        size={size}
-        style={widthHasUnit ? { width: widthHasUnit } : undefined}
-      />
-    </Form.Item>
-  ) : null;
+  return (
+    <div style={extraStyleOfRoot}>
+      {isShow ? (
+        <Form.Item
+          label={label}
+          rules={rules}
+          labelCol={{ span: labelWidth }}
+          wrapperCol={{ offset: wrapperOffset }}
+          style={{ marginTop: convertRelativeToAbsolute(topOffset), marginLeft: convertRelativeToAbsolute(leftOffset) }}
+        >
+          <ANTD_INPUT
+            value={nodeModel[0]}
+            onChange={handleInputChange}
+            size={size}
+            style={widthHasUnit ? { width: widthHasUnit } : undefined}
+          />
+        </Form.Item>
+      ) : null}
+      {renderedEditable}
+    </div>
+  );
 };
 
 const BasicInput: FunctionComponent<BasicInputProps> = ({ label, type, model, width, required, size }) => {

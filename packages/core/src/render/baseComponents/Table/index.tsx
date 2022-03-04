@@ -38,20 +38,23 @@ interface AdvancedTableProps extends CommonProps {
 
 type TableProps = BasicTableProps | AdvancedTableProps;
 
-const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
-  columns: _columns,
-  rowSelectionType,
-  state,
-  model,
-  computeData,
-  topOffset,
-  leftOffset,
-  pagination: paginationConfig,
-  renderEditableWrapper,
-}) => {
+const AdvancedTable: FunctionComponent<AdvancedTableProps> = (props) => {
+  const {
+    columns: _columns,
+    rowSelectionType,
+    state,
+    model,
+    computeData,
+    topOffset,
+    leftOffset,
+    pagination: paginationConfig,
+    renderEditableWrapper,
+    hierarchicalRecords,
+    _editable,
+  } = props;
   const { nodeState, handleModelChange, isShow } = useTree({ state, model });
 
-  const { extraStyleOfRoot, RenderEditable } = useRenderEditableWrapper(renderEditableWrapper);
+  const { extraStyleOfRoot, renderedEditable } = useRenderEditableWrapper(renderEditableWrapper, props);
 
   const dataSource = useMemo(
     () => (computeData ? executeFunction(computeData, nodeState[0]?.response) : nodeState[0]?.response),
@@ -77,8 +80,15 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
         render: column.render
           ? (v: any, record: any) => (
               <>
-                {column.render.map((node) => {
-                  return <RenderNode key={node.id} data={{ ...node, inject: record }} />;
+                {column.render.map((vdomNode, index) => {
+                  const hierarchicalRecordsOfThis = [...hierarchicalRecords];
+                  hierarchicalRecordsOfThis.push(index);
+                  return (
+                    <RenderNode
+                      key={vdomNode.id}
+                      data={{ ...vdomNode, inject: record, hierarchicalRecords: hierarchicalRecordsOfThis }}
+                    />
+                  );
                 })}
               </>
             )
@@ -114,7 +124,7 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = ({
         pagination={pagination}
         loading={isLoading}
       />
-      <RenderEditable />
+      {renderedEditable}
     </div>
   ) : null;
 };
