@@ -27,7 +27,8 @@
     "eject": "react-app-rewired eject"
   },
   "dependencies": {
+    "react-dnd": "^15.1.1",
+    "react-dnd-html5-backend": "^15.1.2",
     "viewerjs": "^1.10.2"
-  },
-  "devDependencies": {}
+  }
 }

@@ -11,14 +11,31 @@ interface ModalProps extends CommonProps {
   footer?: VDomNode[];
 }
 
-const Modal: FunctionComponent<ModalProps> = ({ title, content, footer: _footer, state, model, effect }) => {
+const Modal: FunctionComponent<ModalProps> = ({
+  title,
+  content,
+  footer: _footer,
+  state,
+  model,
+  effect,
+  hierarchicalRecords,
+  _editable,
+}) => {
   const children = content
     ? Array.isArray(content)
-      ? content.map((vdomNode) => <Render key={vdomNode.id} data={vdomNode} />)
+      ? content.map((vdomNode, index) => {
+          const hierarchicalRecordsOfThis = [...hierarchicalRecords];
+          hierarchicalRecordsOfThis.push(index);
+          return <Render key={vdomNode.id} data={{ ...vdomNode, hierarchicalRecords: hierarchicalRecordsOfThis }} />;
+        })
       : null
     : null;
   const footer = Array.isArray(_footer)
-    ? _footer.map((vdomNode) => <Render key={vdomNode.id} data={vdomNode} />)
+    ? _footer.map((vdomNode, index) => {
+        const hierarchicalRecordsOfThis = [...hierarchicalRecords];
+        hierarchicalRecordsOfThis.push(index);
+        return <Render key={vdomNode.id} data={{ ...vdomNode, hierarchicalRecords: hierarchicalRecordsOfThis }} />;
+      })
     : undefined;
 
   const { handleStateChange, isShow } = useTree({ state, model, effect });
