@@ -19,9 +19,9 @@ module.exports = {
       router: path.resolve(__dirname, './src/router'),
       assets: path.resolve(__dirname, './src/assets'),
       '@core/images': path.resolve(__dirname, './src/assets/images'),
-      styles: path.resolve(__dirname, './src/assets/styles'),
       '@core/utils': path.resolve(__dirname, './src/shared/utils'),
       '@core/hooks': path.resolve(__dirname, './src/shared/hooks'),
+      '@core/styles': path.resolve(__dirname, './src/shared/styles'),
     }),
     addWebpackResolve({
       extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.wasm', '.css', '.less', '.sass', '.scss', '.styl'],

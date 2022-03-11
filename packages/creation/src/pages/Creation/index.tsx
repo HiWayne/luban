@@ -7,24 +7,13 @@ import Menus, { Menu } from './layouts/Menus';
 import Canvas from './layouts/Canvas';
 import Configure from './layouts/Configure';
 import VdomTree from './layouts/VdomTree';
-import * as baseComponents from 'core/src/render/baseComponents/index';
-import * as customComponents from 'core/src/render/customComponents/index';
+import { Components } from 'core/src/render/Render';
 import { ComponentsObject } from 'core/src/types/types';
-import testJson from 'core/src/test';
+import testJson from 'core/src/testJson';
 
 export const components: Menu[] = [];
 
-Object.values(baseComponents as ComponentsObject).forEach((component: any) => {
-  components.push({
-    name: component._aliasName,
-    key: component._name,
-    props: component._config,
-    levels: component._level,
-    component,
-  });
-});
-
-Object.values(customComponents as ComponentsObject).forEach((component: any) => {
+Object.values(Components as ComponentsObject).forEach((component: any) => {
   components.push({
     name: component._aliasName,
     key: component._name,
@@ -55,7 +44,7 @@ const Index: FunctionComponent = () => {
     [state],
   );
 
-  const [currentVdom, setCurrentVdom] = useState(null);
+  const [currentVdom, setCurrentVdom] = useState<VDomNode>(null as any);
 
   const currentData = useMemo(
     () => ({

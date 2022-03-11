@@ -3,15 +3,15 @@ const traverse = (
   beginWork?: (item: VDomNode) => any,
   completeWork?: (item: VDomNode) => any,
 ): any[] | undefined => {
-  const _traverse = (vdomNode: VDomNode, index: number, hierarchicalRecords: number[]): VDomNode => {
+  const _traverse = (vdomNode: VDomNode, index: number, hierarchicalRecords: (number | string)[]): VDomNode => {
     if (vdomNode) {
-      let hierarchicalRecordsOfThis: number[];
+      let hierarchicalRecordsOfThis: (number | string)[];
       if (Array.isArray(vdomNode.hierarchicalRecords) && vdomNode.hierarchicalRecords.length > 0) {
         hierarchicalRecordsOfThis = vdomNode.hierarchicalRecords;
       } else {
         hierarchicalRecordsOfThis = [...hierarchicalRecords];
         hierarchicalRecordsOfThis.push(index);
-        vdomNode.hierarchicalRecords = hierarchicalRecordsOfThis;
+        vdomNode = { ...vdomNode, hierarchicalRecords: hierarchicalRecordsOfThis };
       }
       if (typeof beginWork === 'function') {
         vdomNode = beginWork(vdomNode);

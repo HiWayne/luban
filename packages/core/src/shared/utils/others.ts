@@ -60,7 +60,14 @@ export const definePropertyOfIdentifier = createDefineProperty<string>(IDENTIFIE
 export const getIdentifierProperty = createGetProperty(IDENTIFIER);
 
 const CONFIG = '_config';
-export const definePropertyOfConfig = createDefineProperty<{ [key in ComponentLevel]: object }>(CONFIG);
+interface Config {
+  type: string;
+  require: boolean;
+  name: string;
+  tip: string;
+}
+export type ComponentConfig = Record<ComponentLevel, Record<string, Config>>;
+export const definePropertyOfConfig = createDefineProperty<ComponentConfig>(CONFIG);
 export const getConfigProperty = createGetProperty(CONFIG);
 
 const ERROR_SIGN = Symbol('ERROR_SIGN');

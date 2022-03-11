@@ -9,7 +9,7 @@ import {
   definePropertyOfIdentifier,
   IDENTIFIER_INIT,
 } from '@core/utils/index';
-import { useApi } from '@core/hooks/index';
+import { useApi, useRenderEditableWrapper } from '@core/hooks/index';
 
 enum Layout {
   horizontal = 'horizontal',
@@ -53,16 +53,25 @@ const BasicForm: FunctionComponent<BasicFormProps> = ({ children, buttonText, ap
   );
 };
 
-const Form: FunctionComponent<FormProps> = ({ layout, children, level, ...props }) => {
+const Form: FunctionComponent<FormProps> = ({ layout, children, level, renderEditableWrapper, ...props }) => {
+  const { extraStyleOfRoot, renderedEditable } = useRenderEditableWrapper(renderEditableWrapper, props);
   switch (level) {
     case ComponentLevel.BASIC:
       return (
-        <BasicForm level={level} {...props}>
-          {children}
-        </BasicForm>
+        <div style={extraStyleOfRoot}>
+          <BasicForm level={level} {...props}>
+            {children}
+          </BasicForm>
+          {renderedEditable}
+        </div>
       );
     case ComponentLevel.ADVANCED:
-      return <AntdForm layout={layout}>{children}</AntdForm>;
+      return (
+        <div style={extraStyleOfRoot}>
+          <AntdForm layout={layout}>{children}</AntdForm>
+          {renderedEditable}
+        </div>
+      );
     default:
       return null;
   }

@@ -89,47 +89,50 @@ export const loop = (vdoms: VDomNode[] | undefined, callback?: (root: any[], ind
 
 interface ConfigureProps {
   data: Menu;
-  currentVdom: VDomNode;
+  currentVdom: VDomNode | null;
 }
 
 const Configure: FunctionComponent<ConfigureProps> = ({ data, currentVdom }) => {
   const [vdom, setVdom] = useContext(vdomTree);
-  const vdomData = useMemo(() => findVdomById(vdom, currentVdom && currentVdom.id), [vdom, currentVdom]);
+  const vdomData = useMemo(() => findVdomById(vdom, (currentVdom && currentVdom.id) || ''), [vdom, currentVdom]);
 
-  return data ? (
+  return data && currentVdom ? (
     <Panel key={data.key} direction="right" width={370} style={{ width: '350px', height: 'calc(100vh - 80px)' }}>
-      <h3>{`${data.name} 配置`}</h3>
-      <Tabs defaultActiveKey={currentVdom.level}>
-        {[
-          { key: 'basic', name: '基础' },
-          { key: 'advanced', name: '进阶' },
-        ].map(({ key: level, name }) => (
-          <TabPane tab={name} key={level} style={{ height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
-            {Object.entries((data.props && data.props[level]) || {}).map(([key, value]) => {
-              const ConfigRow = (ConfigRows as any)[(value as any).type];
-              if (ConfigRow) {
-                return (
-                  <ConfigRow
-                    key={(value as any).name}
-                    name={(value as any).name}
-                    tip={(value as any).tip}
-                    value={vdomData && vdomData[key]}
-                    onChange={(e) => {
-                      const newVdom = produce(vdom, (draft) => {
-                        const data = findVdomById(draft, currentVdom.id);
-                        data[key] = e.target.value;
-                      });
-                      setVdom(newVdom);
-                    }}
-                  />
-                );
-              } else {
-                return null;
-              }
-            })}
-          </TabPane>
-        ))}
-      </Tabs>
+      <>
+        <h3>{`${data.name} 配置`}</h3>
+        <Tabs defaultActiveKey={currentVdom.level}>
+          {[
+            { key: ComponentLevel.BASIC, name: '基础' },
+            { key: ComponentLevel.ADVANCED, name: '进阶' },
+          ].map(({ key: level, name }) => (
+            <TabPane tab={name} key={level} style={{ height: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+              {Object.entries((data.props && data.props[level]) || {}).map(([key, value]) => {
+                const ConfigRow = (ConfigRows as any)[(value as any).type];
+                if (ConfigRow) {
+                  return (
+                    <ConfigRow
+                      key={(value as any).name}
+                      name={(value as any).name}
+                      tip={(value as any).tip}
+                      value={vdomData && vdomData[key as keyof VDomNode]}
+                      onChange={(e: Event) => {
+                        const newVdom = produce(vdom, (draft) => {
+                          const data = findVdomById(draft, currentVdom.id);
+                          // @ts-ignore
+                          (data as VDomNode)[key as keyof VDomNode] = e.target.value;
+                        });
+                        setVdom(newVdom);
+                      }}
+                    />
+                  );
+                } else {
+                  return null;
+                }
+              })}
+            </TabPane>
+          ))}
+        </Tabs>
+      </>
     </Panel>
   ) : (
     <div style={{ width: '350px' }}></div>

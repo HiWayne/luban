@@ -18,4 +18,5 @@
     "isolatedModules": true,
     "noEmit": true
   },
+  "extends": "./paths.json"
 }

@@ -7,7 +7,7 @@ interface VDomNode {
   level: Level;
   id: string | number;
   // 在vdom树中的层级
-  hierarchicalRecords: number[];
+  hierarchicalRecords: (string | number)[];
   // 组件类型，如 input button
   name: ComponentNames;
   // button input datepicker，antd不同的button风格 不同的input datepicker类型，
@@ -78,7 +78,25 @@ interface VDomNode {
   init?: Api;
   // 自定义逻辑
   customLogic?: string;
+  // 内部属性，当前是否是编辑模式
   _editable: boolean;
+
+  // 简单组件
+  // table
+  // 每行是否有删除按钮
+  hasDelete?: boolean;
+  // 每行是否有除了删除以外的其他操作，该按钮会在删除按钮的左边
+  hasOperate?: boolean;
+  // 删除按钮的左边按钮的名称
+  operateName?: string;
+  // 点击操作按钮后的请求相关的配置
+  operateApi?: Api;
+  // 点击删除按钮后的请求相关的配置
+  deleteApi?: Api;
+  // 表格行是否有多选功能
+  canSelect?: boolean;
+  // 如果表格有多选功能则该配置负责点击批量操作按钮后的请求
+  selectApi?: Api;
 }
 
 interface ModelTree {
@@ -101,7 +119,7 @@ interface CommonProps {
   computeParams?: string;
   customLogic?: string;
   renderEditableWrapper?: FunctionComponent;
-  hierarchicalRecords: number[];
+  hierarchicalRecords: (string | number)[];
   _editable: boolean;
 }
 
