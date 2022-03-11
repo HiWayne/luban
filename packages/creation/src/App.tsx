@@ -1,4 +1,4 @@
-import Router from 'router/index';
+import Router from '@creation/router/index';
 
 const App = () => {
   return <Router />;

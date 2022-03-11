@@ -1,7 +1,7 @@
 import { FunctionComponent, useCallback, useState, useMemo } from 'react';
 import { Button as AntdButton } from 'antd';
 import { Size, ButtonType, ComponentNames, Api, ComponentLevel } from '@core/types/types';
-import { useTree, useCustomLogic, useApi } from '@core/hooks/index';
+import { useTree, useCustomLogic, useApi, useRenderEditableWrapper } from '@core/hooks/index';
 import {
   convertRelativeToAbsolute,
   definePropertyOfName,
@@ -28,25 +28,27 @@ interface AdvancedButtonProps extends CommonProps {
 
 interface ButtonProps extends AdvancedButtonProps {}
 
-const AdvancedButton: FunctionComponent<ButtonProps> = ({
-  text,
-  href,
-  size,
-  target,
-  type,
-  state,
-  model,
-  effect,
-  value,
-  api,
-  inject,
-  leftOffset,
-  topOffset,
-  computeData,
-  refresh,
-  init,
-  customLogic,
-}) => {
+const AdvancedButton: FunctionComponent<ButtonProps> = (props) => {
+  const {
+    text,
+    href,
+    size,
+    target,
+    type,
+    state,
+    model,
+    effect,
+    value,
+    api,
+    inject,
+    leftOffset,
+    topOffset,
+    computeData,
+    refresh,
+    init,
+    customLogic,
+    renderEditableWrapper,
+  } = props;
   if (refresh) {
     definePropertyOfIdentifier(refresh, IDENTIFIER_REFRESH);
   }
@@ -60,6 +62,8 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
   const fetchByApi = useApi({ api, originalParams: inject });
   const fetchByRefresh = useApi({ api: refresh, notify: false });
   const fetchByInit = useApi({ api: init, notify: false });
+
+  const { extraStyleOfRoot, renderedEditable } = useRenderEditableWrapper(renderEditableWrapper, props);
 
   const handleClick = useCallback(() => {
     if (typeof handleCustomClick === 'function') {
@@ -120,9 +124,14 @@ const AdvancedButton: FunctionComponent<ButtonProps> = ({
       type={computedType as ButtonType}
       danger={computedDanger}
       onClick={handleClick}
-      style={{ marginTop: convertRelativeToAbsolute(topOffset), marginLeft: convertRelativeToAbsolute(leftOffset) }}
+      style={{
+        marginTop: convertRelativeToAbsolute(topOffset),
+        marginLeft: convertRelativeToAbsolute(leftOffset),
+        ...extraStyleOfRoot,
+      }}
     >
       {text}
+      {renderedEditable}
     </AntdButton>
   ) : null;
 };

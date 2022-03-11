@@ -4,15 +4,15 @@
     "paths": {
       "api/*": ["src/api/*"],
       "@core/components/*": ["src/components/*"],
-      "baseComponents/*": ["src/render/baseComponents/*"],
-      "customComponents/*": ["src/render/customComponents/*"],
+      "@core/baseComponents/*": ["src/render/baseComponents/*"],
+      "@core/customComponents/*": ["src/render/customComponents/*"],
       "@core/types/*": ["src/types/*"],
       "router/*": ["src/router/*"],
       "assets/*": ["src/assets/*"],
       "@core/images/*": ["src/assets/images/*"],
-      "styles/*": ["src/assets/styles/*"],
       "@core/utils/*": ["src/shared/utils/*"],
-      "@core/hooks/*": ["src/shared/hooks/*"]
+      "@core/hooks/*": ["src/shared/hooks/*"],
+      "@core/styles/*": ["src/shared/styles/*"]
     }
   }
 }

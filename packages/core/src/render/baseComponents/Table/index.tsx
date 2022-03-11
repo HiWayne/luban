@@ -87,6 +87,7 @@ const AdvancedTable: FunctionComponent<AdvancedTableProps> = (props) => {
                     <RenderNode
                       key={vdomNode.id}
                       data={{ ...vdomNode, inject: record, hierarchicalRecords: hierarchicalRecordsOfThis }}
+                      editable={_editable}
                     />
                   );
                 })}
@@ -161,7 +162,7 @@ definePropertyOfConfig(Table, {
       require: true,
       type: 'boolean',
       name: '是否有操作按钮',
-      tip: '每行是否有除了删除以外的其他操作',
+      tip: '每行是否有除了删除以外的其他操作，该按钮会在删除按钮的左边',
     },
     operateName: {
       require: false,
@@ -173,12 +174,12 @@ definePropertyOfConfig(Table, {
       require: false,
       type: 'api',
       name: '操作按钮请求配置',
-      tip: '操作按钮点击后的请求相关的配置',
+      tip: '点击操作按钮后的请求相关的配置',
     },
     deleteApi: {
       require: false,
       type: 'api',
-      name: '删除按钮点击后的请求相关的配置',
+      name: '点击删除按钮后的请求相关的配置',
       tip: '',
     },
     canSelect: {
@@ -191,7 +192,7 @@ definePropertyOfConfig(Table, {
       require: false,
       type: 'api',
       name: '批量请求配置',
-      tip: '如果表格有多选功能则配置批量操作按钮点击后的请求',
+      tip: '如果表格有多选功能则该配置负责点击批量操作按钮后的请求',
     },
     state: {
       require: true,

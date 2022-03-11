@@ -2,14 +2,25 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "api/*": ["packages/creation/src/api/*"],
-      "components/*": ["packages/creation/src/components/*"],
-      "pages/*": ["packages/creation/src/pages/*"],
-      "router/*": ["packages/creation/src/router/*"],
-      "assets/*": ["packages/creation/src/assets/*"],
-      "styles/*": ["packages/creation/src/assets/styles/*"],
-      "utils/*": ["packages/creation/src/shared/utils/*"],
-      "hooks/*": ["packages/creation/src/shared/hooks/*"]
+      "@creation/api/*": ["packages/creation/src/api/*"],
+      "@creation/components/*": ["packages/creation/src/components/*"],
+      "@creation/pages/*": ["packages/creation/src/pages/*"],
+      "@creation/router/*": ["packages/creation/src/router/*"],
+      "@creation/assets/*": ["packages/creation/src/assets/*"],
+      "@creation/styles/*": ["packages/creation/src/assets/styles/*"],
+      "@creation/utils/*": ["packages/creation/src/shared/utils/*"],
+      "@creation/hooks/*": ["packages/creation/src/shared/hooks/*"],
+      "@core/api/*": ["packages/core/src/api/*"],
+      "@core/components/*": ["packages/core/src/components/*"],
+      "@core/baseComponents/*": ["packages/core/src/render/baseComponents/*"],
+      "@core/customComponents/*": ["packages/core/src/render/customComponents/*"],
+      "@core/types/*": ["packages/core/src/types/*"],
+      "@core/router/*": ["packages/core/src/router/*"],
+      "@core/assets/*": ["packages/core/src/assets/*"],
+      "@core/images/*": ["packages/core/src/assets/images/*"],
+      "@core/utils/*": ["packages/core/src/shared/utils/*"],
+      "@core/hooks/*": ["packages/core/src/shared/hooks/*"],
+      "@core/styles/*": ["packages/core/src/shared/styles/*"]
     }
   }
 }

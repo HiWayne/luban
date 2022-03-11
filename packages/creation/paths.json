@@ -5,10 +5,9 @@
       "api/*": ["src/api/*"],
       "@core/components/*": ["../core/src/components/*"],
       "@creation/components/*": ["src/components/*"],
-      "baseComponents/*": ["../core/src/render/baseComponents/*"],
-      "customComponents/*": ["../core/src/render/customComponents/*"],
+      "@core/baseComponents/*": ["../core/src/render/baseComponents/*"],
       "pages/*": ["src/pages/*"],
-      "router/*": ["src/router/*"],
+      "@creation/router/*": ["src/router/*"],
       "assets/*": ["src/assets/*"],
       "@core/images/*": ["../core/src/assets/images/*"],
       "@creation/images/*": ["src/assets/images/*"],
@@ -17,7 +16,8 @@
       "@creation/utils/*": ["src/shared/utils/*"],
       "@creation/hooks/*": ["src/shared/hooks/*"],
       "@core/hooks/*": ["../core/src/shared/hooks/*"],
-      "@core/types/*": ["../core/src/types/*"]
+      "@core/types/*": ["../core/src/types/*"],
+      "@core/styles/*": ["../core/src/shared/styles/*"]
     }
   }
 }

@@ -1,13 +1,11 @@
 import { FunctionComponent, useMemo } from 'react';
 import { traverse, getNameProperty } from '@core/utils/index';
-import * as baseComponents from 'baseComponents/index';
-import * as customComponents from 'customComponents/index';
+import * as baseComponents from '@core/baseComponents/index';
 import { ComponentsObject } from '@core/types/types';
 import { EditableWrapper } from '@core/components/index';
 
-const Components = {
+export const Components = {
   ...baseComponents,
-  ...customComponents,
 };
 
 interface RenderProps {
@@ -22,12 +20,12 @@ const Render: FunctionComponent<RenderProps> = ({ data, editable }) => {
         Object.values(Components as ComponentsObject).filter((value) => getNameProperty(value) === vdomTreeNode.name) ||
         [];
       if (typeof MatchedComponent !== 'undefined') {
-        const { children, id, ...validProps } = vdomTreeNode || {};
+        const { children, ...validProps } = vdomTreeNode || {};
         if (vdomTreeNode && Array.isArray(children) && children.length > 0) {
           // @ts-ignore
           return (
             <MatchedComponent
-              key={id}
+              key={vdomTreeNode.id}
               {...validProps}
               _editable={editable}
               renderEditableWrapper={editable ? EditableWrapper : undefined}
@@ -39,7 +37,7 @@ const Render: FunctionComponent<RenderProps> = ({ data, editable }) => {
           // @ts-ignore
           return (
             <MatchedComponent
-              key={id}
+              key={vdomTreeNode.id}
               {...validProps}
               _editable={editable}
               renderEditableWrapper={editable ? EditableWrapper : undefined}

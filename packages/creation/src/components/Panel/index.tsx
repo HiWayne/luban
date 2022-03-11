@@ -16,7 +16,13 @@ export const ShadowPanel = styled.section`
   box-sizing: border-box;
 `;
 
-const ArrowButton = styled(({ direction, open, ...props }) => <i {...props}></i>)`
+interface ArrowButtonProps {
+  direction: 'left' | 'right';
+  open: boolean;
+  onClick: () => void;
+}
+
+const ArrowButton = styled<FunctionComponent<ArrowButtonProps>>(({ direction, open, ...props }) => <i {...props}></i>)`
   position: absolute;
   top: 50%;
   ${(props) => (props.direction === 'left' ? 'right: 0;' : 'left: 0;')}

@@ -1,4 +1,4 @@
-export default JSON.stringify({
+const testJson = JSON.stringify({
   vdom: [
     {
       level: 'advanced',
@@ -333,3 +333,5 @@ export default JSON.stringify({
     showCreation: null,
   },
 });
+
+export default testJson;

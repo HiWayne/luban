@@ -7,7 +7,7 @@ import {
   convertRelativeToAbsolute,
   definePropertyOfLevel,
 } from '@core/utils/index';
-import { useTree } from '@core/hooks/index';
+import { useRenderEditableWrapper, useTree } from '@core/hooks/index';
 import { PickerComponentClass } from 'antd/lib/date-picker/generatePicker/interface';
 
 const { RangePicker } = AntdDatePicker;
@@ -32,22 +32,26 @@ interface BasicDatePickerProps {
 
 interface DatePickerProps extends BasicDatePickerProps, AdvancedDatePickerProps {}
 
-const DatePicker: FunctionComponent<DatePickerProps> = ({
-  type,
-  picker,
-  label,
-  rules,
-  labelWidth,
-  wrapperOffset,
-  topOffset,
-  leftOffset,
-  state,
-  effect,
-  model,
-  level,
-  required,
-}) => {
+const DatePicker: FunctionComponent<DatePickerProps> = (props) => {
+  const {
+    type,
+    picker,
+    label,
+    rules,
+    labelWidth,
+    wrapperOffset,
+    topOffset,
+    leftOffset,
+    state,
+    effect,
+    model,
+    level,
+    required,
+    renderEditableWrapper,
+  } = props;
   const { handleModelChange, handleStateChange, isShow } = useTree({ state, effect, model });
+
+  const { extraStyleOfRoot, renderedEditable } = useRenderEditableWrapper(renderEditableWrapper, props);
 
   const ANTD_DATE_PICKER: PickerComponentClass<any> = useMemo(() => {
     switch (type) {
@@ -60,7 +64,7 @@ const DatePicker: FunctionComponent<DatePickerProps> = ({
     }
   }, [type]);
 
-  const props = useMemo(() => {
+  const childProps = useMemo(() => {
     switch (picker) {
       case PickerType.TIME:
         return { showTime: true };
@@ -95,29 +99,38 @@ const DatePicker: FunctionComponent<DatePickerProps> = ({
   switch (level) {
     case ComponentLevel.BASIC:
       return isShow ? (
-        <Form.Item
-          label={label}
-          rules={[{ required: !!required }]}
-          style={{
-            marginTop: convertRelativeToAbsolute(OffsetConst.TOP_OFFSET),
-            marginLeft: convertRelativeToAbsolute(OffsetConst.LEFT_OFFSET),
-          }}
-        >
-          <ANTD_DATE_PICKER {...props} onChange={handleChange} />
-        </Form.Item>
+        <div style={extraStyleOfRoot}>
+          <Form.Item
+            label={label}
+            rules={[{ required: !!required }]}
+            style={{
+              marginTop: convertRelativeToAbsolute(OffsetConst.TOP_OFFSET),
+              marginLeft: convertRelativeToAbsolute(OffsetConst.LEFT_OFFSET),
+            }}
+          >
+            <ANTD_DATE_PICKER {...childProps} onChange={handleChange} />
+          </Form.Item>
+          {renderedEditable}
+        </div>
       ) : null;
 
     case ComponentLevel.ADVANCED:
       return isShow ? (
-        <Form.Item
-          label={label}
-          rules={rules}
-          labelCol={{ span: labelWidth }}
-          wrapperCol={{ offset: wrapperOffset }}
-          style={{ marginTop: convertRelativeToAbsolute(topOffset), marginLeft: convertRelativeToAbsolute(leftOffset) }}
-        >
-          <ANTD_DATE_PICKER {...props} onChange={handleChange} />
-        </Form.Item>
+        <div style={extraStyleOfRoot}>
+          <Form.Item
+            label={label}
+            rules={rules}
+            labelCol={{ span: labelWidth }}
+            wrapperCol={{ offset: wrapperOffset }}
+            style={{
+              marginTop: convertRelativeToAbsolute(topOffset),
+              marginLeft: convertRelativeToAbsolute(leftOffset),
+            }}
+          >
+            <ANTD_DATE_PICKER {...childProps} onChange={handleChange} />
+          </Form.Item>
+          {renderedEditable}
+        </div>
       ) : null;
     default:
       return null;
