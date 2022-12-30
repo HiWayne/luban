@@ -73,9 +73,9 @@ const Editor = () => {
             language="jsx"
             code={sourceCode}
             onChange={setSourceCode}
-            style={{ width: '500px' }}
+            style={{ width: '550px' }}
             wrapperStyle={{
-              width: '500px',
+              width: '550px',
               height: '300px',
             }}
           />

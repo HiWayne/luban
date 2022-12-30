@@ -2,6 +2,25 @@ import { CSSProperties, FC, useMemo } from 'react';
 import Editor from 'react-simple-code-editor';
 import Highlight, { defaultProps, Language } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/nightOwl';
+import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  & pre {
+    padding: 10px 10px 10px 50px !important;
+  }
+  & textarea {
+    padding: 10px 10px 10px 50px !important;
+  }
+`;
+
+const Line = styled.div`
+  position: relative;
+`;
+
+const LineNo = styled.span`
+  position: absolute;
+  left: -46px;
+`;
 
 interface HighLightCodeEditorProps {
   code: string;
@@ -54,11 +73,12 @@ export const HighLightCodeEditor: FC<HighLightCodeEditorProps> = ({
       {({ tokens, getLineProps, getTokenProps }) => (
         <>
           {tokens.map((line, i) => (
-            <div {...getLineProps({ line, key: i })}>
+            <Line {...getLineProps({ line, key: i })}>
+              <LineNo>{i + 1}</LineNo>
               {line.map((token, key) => (
                 <span {...getTokenProps({ token, key })} />
               ))}
-            </div>
+            </Line>
           ))}
         </>
       )}
@@ -66,7 +86,7 @@ export const HighLightCodeEditor: FC<HighLightCodeEditorProps> = ({
   );
 
   return (
-    <div style={wrapperStyles}>
+    <Wrapper style={wrapperStyles}>
       <Editor
         value={code}
         onValueChange={onValueChange}
@@ -74,6 +94,6 @@ export const HighLightCodeEditor: FC<HighLightCodeEditorProps> = ({
         padding={10}
         style={styles.root}
       />
-    </div>
+    </Wrapper>
   );
 };
