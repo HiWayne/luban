@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RouterGuard 测试 有权限 1`] = `
+<DocumentFragment>
+  <div />
+</DocumentFragment>
+`;
+
+exports[`RouterGuard 测试 未登录 1`] = `<DocumentFragment />`;
+
+exports[`RouterGuard 测试 登录无权限 1`] = `
+<DocumentFragment>
+  <div>
+    没有权限
+  </div>
+</DocumentFragment>
+`;

@@ -1,0 +1,51 @@
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "jsx": true,
+      "numericSeparator": false,
+      "classPrivateProperty": false,
+      "privateMethod": false,
+      "classProperty": false,
+      "functionBind": false,
+      "decorators": false,
+      "decoratorsBeforeExport": false
+    },
+    "transform": {
+      "react": {
+        "pragma": "React.createElement",
+        "pragmaFrag": "React.Fragment",
+        "throwIfNamespace": true,
+        "development": false,
+        "useBuiltins": false
+      },
+      "optimizer": {
+        "globals": {
+          "vars": {
+            "__DEBUG__": "true"
+          }
+        }
+      }
+    },
+    // Disable es3 / es5 / es2015 transforms
+    "target": "es2016",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "pages/*": ["src/frontend/pages/*"],
+      "router/*": ["src/frontend/router/*"],
+      "assets/*": ["src/frontend/assets/*"],
+      "lib/*": ["src/lib/*"],
+      "components/*": ["src/frontend/components/*"]
+    }
+  },
+  "module": {
+    "type": "commonjs",
+
+    // These are defaults.
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  }
+}

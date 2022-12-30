@@ -1,0 +1,18 @@
+# Third party
+**/node_modules
+
+# Build products
+build/
+dist/
+dist-backend/
+dist-ssr/
+coverage/
+lib/
+
+.prettierrc.js
+commitlint.config.js
+babel.config.js
+jest.config.js
+staticAssetsStub.js
+
+__tests__

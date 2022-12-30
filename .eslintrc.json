@@ -1,0 +1,38 @@
+{
+  "rules": {
+    "import/extensions": ["off"],
+    "import/prefer-default-export": ["off"],
+    "react/react-in-jsx-scope": ["off"],
+    "react/function-component-definition": ["off"],
+    "arrow-body-style": ["off"],
+    "react/require-default-props": ["off"],
+    "no-underscore-dangle": ["off"],
+    "jsx-a11y/click-events-have-key-events": ["off"],
+    "jsx-a11y/no-static-element-interactions": ["off"],
+    "no-param-reassign": ["off"],
+    "no-plusplus": ["off"],
+    "import/no-extraneous-dependencies": ["off"],
+    "no-else-return": ["off"],
+    "react/jsx-props-no-spreading": ["off"],
+    "func-names": "off",
+    "radix": "off",
+    "react/no-array-index-key": "off",
+    "@typescript-eslint/naming-convention": "off",
+    "prefer-destructuring": "off",
+    "import/no-cycle": "off",
+    "no-nested-ternary": "off",
+    "no-case-declarations": "off",
+    "import/no-named-default": "off",
+    "no-use-before-define": "error"
+  },
+  "extends": [
+    "airbnb",
+    "airbnb-typescript",
+    "prettier",
+    "plugin:jest/recommended"
+  ],
+  "parserOptions": {
+    "project": ["./tsconfig.json", "./rollup.config.mjs"]
+  },
+  "plugins": ["jest"]
+}
