@@ -32,7 +32,6 @@ export const generateCodeOfReactMpaInMobile = async (
     const reactSourceCode = wrapReactMicroAppHooks(
       generateReactSourceCodeOfFrontstage(pageModel),
     );
-    console.log(reactSourceCode);
     if (virtual) {
       const name = `temp_${getRandomString()}`;
       const filePath = `${tempDirPath}/${name}.js`;
@@ -84,7 +83,6 @@ export const generateCodeOfReactMpaInMobile = async (
             if (!mkdirError) {
               appendFile();
             } else {
-              console.log('mkdir error');
               reject(mkdirError);
             }
           });

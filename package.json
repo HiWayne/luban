@@ -22,11 +22,13 @@
     "esbuild": "^0.16.1",
     "fastify": "^4.10.2",
     "immer": "^9.0.16",
+    "prism-react-renderer": "^1.3.5",
     "qiankun": "^2.8.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-is": "^18.2.0",
     "react-router-dom": "^6.4.3",
+    "react-simple-code-editor": "^0.13.1",
     "styled-components": "^5.3.6",
     "ws": "^8.11.0"
   },

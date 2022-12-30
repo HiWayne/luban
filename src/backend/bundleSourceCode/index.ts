@@ -22,6 +22,7 @@ export const bundleSourceCode = async (
           loader: { '.js': 'jsx', '.css': 'css', '.ts': 'ts', '.tsx': 'tsx' },
           sourcemap: false,
           write: false,
+          minify: true,
         }).finally(() => {
           fs.rm(filePath, (rmError) => {
             if (rmError) {

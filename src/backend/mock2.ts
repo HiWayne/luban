@@ -11,6 +11,7 @@ export const treeDemo: NodeAST = {
       props: {
         layout: 'block',
         src: 'https://c-ssl.duitang.com/uploads/blog/202212/26/20221226144302_4a645.jpeg',
+        borderRadius: '100px 30px 30px 50px',
       },
     },
   ],

@@ -53,7 +53,6 @@ export const generateCodeOfTable = (
 
   const componentDeclaration = `
   ${paginationComponentDeclaration}
-
   const TableWithPagination = ({ dataSource, columns, rowKey }) => (<Table pagination={false} dataSource={dataSource} columns={columns} rowKey={rowKey} />);
   `;
 

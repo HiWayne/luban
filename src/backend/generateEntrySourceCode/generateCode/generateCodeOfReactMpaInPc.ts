@@ -33,7 +33,6 @@ export const generateCodeOfReactMpaInPc = async (
     const reactSourceCode = wrapReactMicroAppHooks(
       generateReactSourceCodeOfBackstage(pageModel),
     );
-    console.log(reactSourceCode);
     if (virtual) {
       const name = `temp_${getRandomString()}`;
       const filePath = `${tempDirPath}/${name}.js`;
@@ -85,7 +84,6 @@ export const generateCodeOfReactMpaInPc = async (
             if (!mkdirError) {
               appendFile();
             } else {
-              console.log('mkdir error');
               reject(mkdirError);
             }
           });

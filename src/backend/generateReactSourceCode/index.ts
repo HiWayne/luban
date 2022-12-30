@@ -22,7 +22,6 @@ export interface Declarations {
 
 export interface Context {
   idRef: MutableRefObject<number>;
-  commonComponentsDeclarations: Declarations;
 }
 
 /**
@@ -73,7 +72,7 @@ export const astToReactNodeCodeOfBackstage = (
 
 export const astToReactNodeCodeOfFrontstage = (
   nodeAST: NodeASTOfFrontstage,
-  declarations: string[],
+  declarations: Declarations,
   context: Context,
 ): { declarations: string; call: string } => {
   const id = ++context.idRef.current;
@@ -92,19 +91,24 @@ export const astToReactNodeCodeOfFrontstage = (
       return code + _call;
     }, '');
   }
-  const { declaration: thisDeclaration, call } =
-    generateCodeByNodeASTOfFrontstage(
-      id,
-      context,
-      nodeAST,
-      declarations,
-      childrenCode,
-    );
+  const {
+    declaration: thisDeclaration,
+    call,
+    name,
+  } = generateCodeByNodeASTOfFrontstage(
+    id,
+    context,
+    nodeAST,
+    declarations,
+    childrenCode,
+  );
 
-  declarations.push(thisDeclaration);
+  if (thisDeclaration) {
+    declarations.put({ code: thisDeclaration, name });
+  }
 
   return {
-    declarations: declarations.join(''),
+    declarations: declarations.toString(),
     call,
   };
 };
@@ -116,10 +120,7 @@ const astToReactLogicCode = (logics?: LogicAST[]) => {
 const createDeclarations = (): Declarations => ({
   declarations: [],
   has(name: string) {
-    let that: any = this;
-    if (that && that.commonComponentsDeclarations) {
-      that = that.commonComponentsDeclarations;
-    }
+    const that: any = this;
     if (!that || !Array.isArray(that.declarations)) {
       throw new Error('Declarations.has的this不是Declarations');
     }
@@ -128,10 +129,7 @@ const createDeclarations = (): Declarations => ({
     );
   },
   put(declarationData: { name: string; code: string }) {
-    let that: any = this;
-    if (that && that.commonComponentsDeclarations) {
-      that = that.commonComponentsDeclarations;
-    }
+    const that: any = this;
     if (!that || !Array.isArray(that.declarations)) {
       throw new Error('Declarations.put的this不是Declarations');
     }
@@ -140,10 +138,7 @@ const createDeclarations = (): Declarations => ({
     }
   },
   toString() {
-    let that: any = this;
-    if (that && that.commonComponentsDeclarations) {
-      that = that.commonComponentsDeclarations;
-    }
+    const that: any = this;
     if (!that || !Array.isArray(that.declarations)) {
       throw new Error('Declarations.toString的this不是Declarations');
     }
@@ -158,16 +153,13 @@ export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
   const componentName = createComponentName(pageModel.meta.key);
 
   const componentsDeclarations = createDeclarations();
-  const commonComponentsDeclarations = createDeclarations();
 
   const { declarations, call } = astToReactNodeCodeOfBackstage(
     pageModel.view as NodeASTOfBackstage,
     componentsDeclarations,
     {
       idRef: { current: 0 },
-      commonComponentsDeclarations,
     },
-    true,
   );
 
   const reactCode = `
@@ -186,12 +178,6 @@ export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
   dayjs.locale('zh-cn');
 
   ${generateCommonCodeOfBackstage()}
-
-  ${commonComponentsDeclarations.declarations.reduce(
-    (commonDeclarations, commonDeclaration) =>
-      `${commonDeclarations}${commonDeclaration.code}`,
-    '',
-  )}
   
   ${declarations}
 
@@ -201,9 +187,7 @@ export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
     return (${call})
   };
 
-  const App = () => <StrictMode><ConfigProvider locale={zhCN}><${componentName} /></ConfigProvider></StrictMode>
-  
-  `;
+  const App = () => <StrictMode><ConfigProvider locale={zhCN}><${componentName} /></ConfigProvider></StrictMode>`;
 
   return reactCode;
 };
@@ -211,44 +195,13 @@ export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
 export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
   const componentName = createComponentName(pageModel.meta.key);
 
-  const commonComponentsDeclarations: Declarations = {
-    declarations: [],
-    has(name: string) {
-      let that: any = this;
-      if (that && that.commonComponentsDeclarations) {
-        that = that.commonComponentsDeclarations;
-      }
-      if (!that || !Array.isArray(that.declarations)) {
-        throw new Error(
-          'commonComponentsDeclarations.has的this不是commonComponentsDeclarations',
-        );
-      }
-      return that.declarations.some(
-        (item: { name: string; code: string }) => item.name === name,
-      );
-    },
-    put(declarationData: { name: string; code: string }) {
-      let that: any = this;
-      if (that && that.commonComponentsDeclarations) {
-        that = that.commonComponentsDeclarations;
-      }
-      if (!that || !Array.isArray(that.declarations)) {
-        throw new Error(
-          'commonComponentsDeclarations.put的this不是commonComponentsDeclarations',
-        );
-      }
-      if (!that.has(declarationData.name)) {
-        that.declarations.push(declarationData);
-      }
-    },
-  };
+  const componentsDeclarations = createDeclarations();
 
   const { declarations, call } = astToReactNodeCodeOfFrontstage(
     pageModel.view as NodeASTOfFrontstage,
-    [],
+    componentsDeclarations,
     {
       idRef: { current: 0 },
-      commonComponentsDeclarations,
     },
   );
 
@@ -265,23 +218,14 @@ export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
 
   ${generateCommonCodeOfFrontstage()}
 
-  ${commonComponentsDeclarations.declarations.reduce(
-    (commonDeclarations, commonDeclaration) =>
-      `${commonDeclarations}${commonDeclaration.code}`,
-    '',
-  )}
-  
+  ${declarations}
   const ${componentName} = () => {
     ${astToReactLogicCode(pageModel.logics)}
-    
-    ${declarations}
 
     return (${call})
   };
 
-  const App = () => <StrictMode><${componentName} /></StrictMode>
-  
-  `;
+  const App = () => <StrictMode><${componentName} /></StrictMode>`;
 
   return reactCode;
 };

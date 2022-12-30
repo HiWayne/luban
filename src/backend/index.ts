@@ -2,6 +2,11 @@ import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import { generateEntrySourceCode } from './generateEntrySourceCode';
 import { PageModel } from './types';
+import {
+  generateReactSourceCodeOfBackstage,
+  generateReactSourceCodeOfFrontstage,
+} from './generateReactSourceCode';
+import { beautifyCode } from './beautifyCode';
 
 const app = fastify();
 
@@ -10,17 +15,14 @@ app.register(fastifyCors, {
 });
 
 app.get('/lubanApp/', async (req, reply) => {
-  const { content } = req.query || {};
+  const { content } = req.query || ({} as any);
   if (content) {
     try {
       const pageModel: PageModel = JSON.parse(decodeURIComponent(content));
       const mode = pageModel.meta.mode;
       const isDevelopment = mode === 'development';
-      const { htmlContent } = await generateEntrySourceCode(
-        isDevelopment,
-        pageModel,
-        true,
-      )!;
+      const { htmlContent } =
+        (await generateEntrySourceCode(isDevelopment, pageModel, true)) || {};
       if (isDevelopment) {
         reply.headers({ 'content-type': 'text/html' }).send(htmlContent);
       }
@@ -35,24 +37,50 @@ app.get('/lubanApp/', async (req, reply) => {
 });
 
 app.get('/virtual/*', async (req, reply) => {
-  const fileNameParam = req.params['*'];
+  const fileNameParam = (req.params as any)['*'];
   const fileName = fileNameParam.replace(/\.js$/, '');
   const mode = 'development';
 
   const isDevelopment = mode === 'development';
-  const { jsContent: microAppJsText } = await generateEntrySourceCode(
-    isDevelopment,
-    undefined,
-    false,
-    fileName,
-  )!;
+  const { jsContent: microAppJsText } =
+    (await generateEntrySourceCode(
+      isDevelopment,
+      undefined,
+      false,
+      fileName,
+    )) || {};
   if (isDevelopment) {
     reply.headers({ 'content-type': 'text/javascript' }).send(microAppJsText);
   }
 });
 
+app.get('/compileToSourceCode/', async (req, reply) => {
+  const { content } = req.query || ({} as any);
+  if (content) {
+    try {
+      let sourceCode = '';
+      const pageModel: PageModel = JSON.parse(decodeURIComponent(content));
+      if (pageModel.meta.env.includes('pc')) {
+        sourceCode = generateReactSourceCodeOfBackstage(pageModel);
+      } else if (pageModel.meta.env.includes('mobile')) {
+        sourceCode = generateReactSourceCodeOfFrontstage(pageModel);
+      }
+
+      sourceCode = beautifyCode(sourceCode);
+
+      reply.send({ status: 1, data: sourceCode, message: '' });
+    } catch {
+      reply
+        .code(500)
+        .send({ status: 0, data: null, message: '参数错误或服务器错误' });
+    }
+  } else {
+    reply.code(400).send({ status: 0, data: null, message: '内容不能为空' });
+  }
+});
+
 app.get('/api/mock/pagination/', async (req, reply) => {
-  const { start = 0 } = req.query || {};
+  const { start = 0 } = req.query || ({} as any);
   const mockList = [
     {
       id: 1423466106,
