@@ -15,7 +15,7 @@ const treeDemo: NodeAST = {
           type: 'Interact',
           receive: 'true',
           data: {
-            setState: 'component_scope_variable_name_set_show',
+            setState: 'component_scope_variable_set_show',
             mode: 'Cover',
           },
         },
@@ -25,14 +25,14 @@ const treeDemo: NodeAST = {
       id: 33,
       type: 'Modal',
       props: {
-        open: 'component_scope_variable_name_show',
-        setOpen: 'component_scope_variable_name_set_show',
+        open: 'component_scope_variable_show',
+        setOpen: 'component_scope_variable_set_show',
         title: '新建',
         okAction: {
           type: 'Interact',
           receive: 'false',
           data: {
-            setState: 'component_scope_variable_name_set_show',
+            setState: 'component_scope_variable_set_show',
             mode: 'Cover',
           },
         },
@@ -47,8 +47,8 @@ const treeDemo: NodeAST = {
           type: 'SelectWithLabel',
           props: {
             label: '类型',
-            value: 'component_scope_variable_name_params.type',
-            setValue: 'component_scope_variable_name_set_params',
+            value: 'component_scope_variable_params.type',
+            setValue: 'component_scope_variable_set_params',
             width: 100,
             options: [
               {
@@ -71,8 +71,8 @@ const treeDemo: NodeAST = {
           type: 'RadioGroupWithLabel',
           props: {
             label: '类型',
-            value: 'component_scope_variable_name_params.type',
-            setValue: 'component_scope_variable_name_set_params',
+            value: 'component_scope_variable_params.type',
+            setValue: 'component_scope_variable_set_params',
             options: [
               {
                 label: 'blog',
@@ -94,8 +94,8 @@ const treeDemo: NodeAST = {
           type: 'CheckboxGroupWithLabel',
           props: {
             label: '多选类型',
-            value: 'component_scope_variable_name_params.types',
-            setValue: 'component_scope_variable_name_set_params',
+            value: 'component_scope_variable_params.types',
+            setValue: 'component_scope_variable_set_params',
             options: [
               {
                 label: 'blog',
@@ -117,9 +117,9 @@ const treeDemo: NodeAST = {
           type: 'RangePickerWithLabel',
           props: {
             label: '时间范围',
-            value1: 'component_scope_variable_name_params.startTime',
-            value2: 'component_scope_variable_name_params.endTime',
-            setValue: 'component_scope_variable_name_set_params',
+            value1: 'component_scope_variable_params.startTime',
+            value2: 'component_scope_variable_params.endTime',
+            setValue: 'component_scope_variable_set_params',
             format: 'YYYY-MM-DD HH:mm:ss',
             defaultValue: [
               dayjs().subtract(7, 'days').format('YYYY-MM-DD HH:mm:ss'),
@@ -133,8 +133,8 @@ const treeDemo: NodeAST = {
           type: 'InputWithLabel',
           props: {
             label: 'id',
-            value: 'component_scope_variable_name_params.id',
-            setValue: 'component_scope_variable_name_set_params',
+            value: 'component_scope_variable_params.id',
+            setValue: 'component_scope_variable_set_params',
             width: 200,
             placeholder: '输入id',
           },
@@ -149,23 +149,23 @@ const treeDemo: NodeAST = {
               data: {
                 url: 'http://localhost:8000/api/mock/pagination/',
                 method: 'GET',
-                params: 'component_scope_variable_name_params',
+                params: 'component_scope_variable_params',
                 computeParams: `(params) => ({...params, startTime: params.startTime.format('YYYY-MM-DD HH:mm:ss'), endTime: params.endTime.format('YYYY-MM-DD HH:mm:ss')})`,
                 computeResponse: `(response) => response.data`,
               },
-              output: 'action_scope_variable_name_response',
+              output: 'action_scope_variable_response',
               next: {
                 type: 'Interact',
-                receive: 'action_scope_variable_name_response',
+                receive: 'action_scope_variable_response',
                 data: {
-                  setState: 'component_scope_variable_name_set_table_data',
+                  setState: 'component_scope_variable_set_table_data',
                   mode: 'Cover',
                 },
                 next: {
                   type: 'Interact',
                   receive: 1,
                   data: {
-                    setState: 'component_scope_variable_name_set_current_page',
+                    setState: 'component_scope_variable_set_current_page',
                     mode: 'Cover',
                   },
                 },
@@ -179,20 +179,20 @@ const treeDemo: NodeAST = {
       id: 5,
       type: 'Table',
       props: {
-        data: 'component_scope_variable_name_table_data.object_list',
+        data: 'component_scope_variable_table_data.object_list',
         columns: [
           {
             title: 'ID',
             dataIndex: 'id',
             key: 'id',
             render: {
-              iterate_scope_variable_name: 'row',
+              iterate_scope_variable: 'row',
               render: [
                 {
                   id: 6,
                   type: 'Text',
                   props: {
-                    text: 'iterate_scope_variable_name_row.id',
+                    text: 'iterate_scope_variable_row.id',
                     copyable: true,
                   },
                 },
@@ -206,14 +206,14 @@ const treeDemo: NodeAST = {
             key: 'content',
             width: 360,
             render: {
-              iterate_scope_variable_name: 'row',
+              iterate_scope_variable: 'row',
               render: [
                 {
                   id: 7,
                   type: 'Image',
-                  condition: ['iterate_scope_variable_name_row.type', 'blog'],
+                  condition: ['iterate_scope_variable_row.type', 'blog'],
                   props: {
-                    src: 'iterate_scope_variable_name_row.content',
+                    src: 'iterate_scope_variable_row.content',
                     width: 150,
                     height: 150,
                   },
@@ -221,9 +221,9 @@ const treeDemo: NodeAST = {
                 {
                   id: 8,
                   type: 'ImageGroup',
-                  condition: ['iterate_scope_variable_name_row.type', 'atlas'],
+                  condition: ['iterate_scope_variable_row.type', 'atlas'],
                   props: {
-                    images: 'iterate_scope_variable_name_row.content',
+                    images: 'iterate_scope_variable_row.content',
                     width: 100,
                     height: 100,
                   },
@@ -231,7 +231,7 @@ const treeDemo: NodeAST = {
                 {
                   id: 10,
                   type: 'Grid',
-                  condition: ['iterate_scope_variable_name_row.type', 'people'],
+                  condition: ['iterate_scope_variable_row.type', 'people'],
                   props: {
                     row: 1,
                     column: 2,
@@ -249,7 +249,7 @@ const treeDemo: NodeAST = {
                       id: 11,
                       type: 'Avatar',
                       props: {
-                        src: 'iterate_scope_variable_name_row.content.avatar',
+                        src: 'iterate_scope_variable_row.content.avatar',
                         size: 70,
                       },
                     },
@@ -265,7 +265,7 @@ const treeDemo: NodeAST = {
                           id: 13,
                           type: 'Text',
                           props: {
-                            text: 'iterate_scope_variable_name_row.content.username',
+                            text: 'iterate_scope_variable_row.content.username',
                           },
                         },
                         {
@@ -293,7 +293,7 @@ const treeDemo: NodeAST = {
                               id: 14,
                               type: 'Text',
                               props: {
-                                text: 'iterate_scope_variable_name_row.content.fans',
+                                text: 'iterate_scope_variable_row.content.fans',
                               },
                             },
                           ],
@@ -309,31 +309,31 @@ const treeDemo: NodeAST = {
         rowKey: 'id',
         pagination: {
           pageSize: 1,
-          total: 'component_scope_variable_name_table_data.total',
-          current: 'component_scope_variable_name_current_page',
-          setCurrent: 'component_scope_variable_name_set_current_page',
+          total: 'component_scope_variable_table_data.total',
+          current: 'component_scope_variable_current_page',
+          setCurrent: 'component_scope_variable_set_current_page',
           action: {
             type: 'PaginationStartCompute',
             data: {
               code: '(pageCount, pageSize) => (pageCount - 1) * pageSize',
             },
-            output: 'function_scope_variable_name_start',
+            output: 'function_scope_variable_start',
             next: {
               type: 'Fetch',
               data: {
                 url: 'http://localhost:8000/api/mock/pagination/',
                 method: 'GET',
-                params: 'component_scope_variable_name_params',
+                params: 'component_scope_variable_params',
                 computeParams: '(params, start) => ({...params, start})',
                 computeResponse: '(response) => response.data',
               },
-              receive: 'function_scope_variable_name_start',
-              output: 'action_scope_variable_name_response',
+              receive: 'function_scope_variable_start',
+              output: 'action_scope_variable_response',
               next: {
                 type: 'Interact',
-                receive: 'action_scope_variable_name_response',
+                receive: 'action_scope_variable_response',
                 data: {
-                  setState: 'component_scope_variable_name_set_table_data',
+                  setState: 'component_scope_variable_set_table_data',
                   mode: 'Cover',
                 },
               },
@@ -350,37 +350,37 @@ const logicDemo: LogicAST[] = [
     id: 100,
     type: 'state',
     identifiers: [
-      { name: 'component_scope_variable_name_params' },
-      { name: 'component_scope_variable_name_set_params' },
+      { name: 'component_scope_variable_params' },
+      { name: 'component_scope_variable_set_params' },
     ],
-    raw: `const [component_scope_variable_name_params, component_scope_variable_name_set_params] = useState({id: null, type: null, types: null, start: 0, limit: 1})`,
+    raw: `const [component_scope_variable_params, component_scope_variable_set_params] = useState({id: null, type: null, types: null, start: 0, limit: 1})`,
   },
   {
     id: 101,
     type: 'state',
     identifiers: [
-      { name: 'component_scope_variable_name_table_data' },
-      { name: 'component_scope_variable_name_set_table_data' },
+      { name: 'component_scope_variable_table_data' },
+      { name: 'component_scope_variable_set_table_data' },
     ],
-    raw: 'const [component_scope_variable_name_table_data, component_scope_variable_name_set_table_data] = useState({total: 0, object_list: []})',
+    raw: 'const [component_scope_variable_table_data, component_scope_variable_set_table_data] = useState({total: 0, object_list: []})',
   },
   {
     id: 102,
     type: 'state',
     identifiers: [
-      { name: 'component_scope_variable_name_current_page' },
-      { name: 'component_scope_variable_name_set_current_page' },
+      { name: 'component_scope_variable_current_page' },
+      { name: 'component_scope_variable_set_current_page' },
     ],
-    raw: `const [component_scope_variable_name_current_page, component_scope_variable_name_set_current_page] = useState(1)`,
+    raw: `const [component_scope_variable_current_page, component_scope_variable_set_current_page] = useState(1)`,
   },
   {
     id: 103,
     type: 'state',
     identifiers: [
-      { name: 'component_scope_variable_name_show' },
-      { name: 'component_scope_variable_name_set_show' },
+      { name: 'component_scope_variable_show' },
+      { name: 'component_scope_variable_set_show' },
     ],
-    raw: `const [component_scope_variable_name_show, component_scope_variable_name_set_show] = useState(false)`,
+    raw: `const [component_scope_variable_show, component_scope_variable_set_show] = useState(false)`,
   },
 ];
 
@@ -409,7 +409,7 @@ const esAstDemo: EsAst = {
             elements: [
               {
                 type: 'Identifier',
-                name: 'component_scope_variable_name_table_data',
+                name: 'component_scope_variable_table_data',
               },
             ],
           },
@@ -661,7 +661,7 @@ const esAstDemo: EsAst = {
             elements: [
               {
                 type: 'Identifier',
-                name: 'component_scope_variable_name_table_columns',
+                name: 'component_scope_variable_table_columns',
               },
             ],
           },

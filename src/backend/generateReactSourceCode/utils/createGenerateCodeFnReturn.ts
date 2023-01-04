@@ -31,26 +31,27 @@
  */
 export const createGenerateCodeFnReturn = (params: {
   canHoist?: boolean;
-  componentName: string;
+  componentName?: string;
   componentElement?: string;
   componentDeclaration?: string;
   componentCall?: string;
 }) => {
   const {
     canHoist = true,
-    componentName,
+    componentName = '',
     componentElement,
     componentDeclaration,
     componentCall,
   } = params;
 
   if (
-    (typeof componentElement === 'string' ||
-      (canHoist && componentDeclaration && componentCall) ||
-      (!canHoist &&
-        (typeof componentElement === 'string' ||
-          typeof componentCall === 'string'))) &&
-    typeof componentName === 'string'
+    (canHoist &&
+      ((componentDeclaration && componentCall) ||
+        typeof componentElement === 'string') &&
+      typeof componentName === 'string') ||
+    (!canHoist &&
+      (typeof componentElement === 'string' ||
+        typeof componentCall === 'string'))
   ) {
     return {
       canHoist,

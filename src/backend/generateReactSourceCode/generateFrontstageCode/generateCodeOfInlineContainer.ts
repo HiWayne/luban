@@ -1,13 +1,12 @@
-import { BlockContainerProps, NodeAST } from '@/backend/types/frontstage';
+import { InlineContainerProps, NodeAST } from '@/backend/types/frontstage';
 import { generateCodeOfProp } from '../generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 
-export const generateCodeOfBlockContainer = (
+export const generateCodeOfInlineContainer = (
   nodeAST: NodeAST,
   children: string | undefined,
 ) => {
   const { props, key } = nodeAST;
-
   const {
     width,
     height,
@@ -20,11 +19,11 @@ export const generateCodeOfBlockContainer = (
     backgroundRepeat,
     borderRadius,
     style,
-  } = props as BlockContainerProps;
+  } = props as InlineContainerProps;
 
-  const componentName = 'BlockContainer';
+  const componentName = 'InlineContainer';
 
-  const blockContainerStyle = {
+  const inlineContainerStyle = {
     width,
     height,
     margin,
@@ -38,16 +37,18 @@ export const generateCodeOfBlockContainer = (
     ...(style || {}),
   };
 
-  const componentCall = `<div${generateCodeOfProp(
+  const componentDeclaration = `const ${componentName} = ({ children, style = {} }) => (<div style={{display: 'inline-block', ...style}}>{children}</div>);`;
+
+  const componentCall = `<${componentName}${generateCodeOfProp(
     'key',
     key,
-  )}${generateCodeOfProp('style', blockContainerStyle)}>${
+  )}${generateCodeOfProp('style', inlineContainerStyle)}>${
     children || ''
-  }</div>`;
+  }</${componentName}>`;
 
   return createGenerateCodeFnReturn({
     componentName,
+    componentDeclaration,
     componentCall,
-    canHoist: false,
   });
 };

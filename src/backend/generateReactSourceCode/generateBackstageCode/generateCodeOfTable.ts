@@ -7,15 +7,15 @@ import { generateCodeOfPagination } from './generateCodeOfPagination';
 
 const generateRenderComponent = (
   renderDSL: {
-    iterate_scope_variable_name: string;
+    iterate_scope_variable: string;
     render: NodeAST[] | undefined;
   },
   declarations: Declarations,
   context: Context,
 ) =>
   renderDSL.render
-    ? `(_, iterate_scope_variable_name_${
-        renderDSL.iterate_scope_variable_name
+    ? `(_, iterate_scope_variable_${
+        renderDSL.iterate_scope_variable
       }, index) => <>${renderDSL.render.reduce(
         (code, nodeAST) =>
           code +

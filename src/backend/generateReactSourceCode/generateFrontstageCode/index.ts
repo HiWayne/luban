@@ -4,6 +4,9 @@ import { generateCodeOfBlockContainer } from './generateCodeOfBlockContainer';
 import { generateCodeOfScrollList } from './generateCodeOfScrollList';
 import type { Context, Declarations } from '..';
 import { generateCodeOfImage } from './generateCodeOfImage';
+import { generateCodeOfInlineContainer } from './generateCodeOfInlineContainer';
+import { generateCodeOfText } from './generateCodeOfText';
+import { generateCodeOfParagraph } from './generateCodeOfParagraph';
 
 export const generateCodeByNodeAST = (
   id: number,
@@ -24,13 +27,22 @@ export const generateCodeByNodeAST = (
 
   switch (type) {
     case 'ScrollList':
-      output = generateCodeOfScrollList(nodeAST);
+      output = generateCodeOfScrollList(nodeAST, id, declarations, context);
       break;
     case 'BlockContainer':
-      output = generateCodeOfBlockContainer(nodeAST);
+      output = generateCodeOfBlockContainer(nodeAST, children);
+      break;
+    case 'InlineContainer':
+      output = generateCodeOfInlineContainer(nodeAST, children);
       break;
     case 'Image':
-      output = generateCodeOfImage(nodeAST);
+      output = generateCodeOfImage(nodeAST, id);
+      break;
+    case 'Text':
+      output = generateCodeOfText(nodeAST);
+      break;
+    case 'Paragraph':
+      output = generateCodeOfParagraph(nodeAST, declarations, context);
       break;
     default:
       break;

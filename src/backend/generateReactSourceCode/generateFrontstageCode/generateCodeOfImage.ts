@@ -2,12 +2,23 @@ import { ImageProps, NodeAST } from '@/backend/types/frontstage';
 import { createGenerateCodeFnReturn } from '../utils';
 import { generateCodeOfProp } from '../generateCodeOfProp';
 
-export const generateCodeOfImage = (nodeAST: NodeAST) => {
-  const { props } = nodeAST;
-  const { src, layout, width, height, ratio, borderRadius, saveable, margin } =
-    props as ImageProps;
+export const generateCodeOfImage = (nodeAST: NodeAST, id: number) => {
+  const { props, key } = nodeAST;
+  const {
+    src,
+    layout,
+    width,
+    height,
+    ratio,
+    borderRadius,
+    saveable,
+    margin,
+    objectFit,
+    objectPosition,
+    style,
+  } = props as ImageProps;
 
-  const componentName = layout === 'block' ? `ImageBlock` : `Image`;
+  const componentName = layout === 'block' ? `ImageBlock_${id}` : `Image_${id}`;
 
   const marginCss = margin
     ? typeof margin === 'number'
@@ -26,24 +37,39 @@ export const generateCodeOfImage = (nodeAST: NodeAST) => {
   const objectCss =
     height || ratio
       ? `
-  object-fit: cover;
-  object-position: center;
+  object-fit: ${objectFit || 'cover'};
+  object-position: ${objectPosition || 'center'};
   `
-      : '';
+      : `${objectFit ? `object-fit: ${objectFit};` : ''}
+      ${objectPosition ? `object-position: ${objectPosition};` : ''}`;
 
   const BlockImageWrapperComponent = `
-    const BlockImageWrapper_inner = styled.div\`
+    const BlockImageWrapper_inner_${id} = styled.div\`
         ${marginCss}
+        ${
+          width
+            ? `width: ${typeof width === 'number' ? `${width}px` : width};`
+            : ''
+        }
+        ${
+          ratio
+            ? width
+              ? `height: ${(parseFloat(width as string) / ratio).toFixed(1)}px;`
+              : ''
+            : height
+            ? `height: ${typeof height === 'number' ? `${height}px` : height};`
+            : ''
+        }
         ${borderRadiusCss}
         overflow: hidden;
     \`
   `;
 
   const BlockImageComponent = `
-    const BlockImage_inner = styled.img\`
+    const BlockImage_inner_${id} = styled.img\`
         display: inline-block;
         width: 100%;
-        ${ratio ? `height: ${(100 / ratio).toFixed(1)}%;` : ''}
+        ${ratio || height ? 'height: 100%;' : ''}
         ${objectCss}
         ${borderRadiusCss}
         ${saveableCss}
@@ -51,7 +77,7 @@ export const generateCodeOfImage = (nodeAST: NodeAST) => {
   `;
 
   const InlineImageComponent = `
-    const InlineImage_inner = styled.img\`
+    const InlineImage_inner_${id} = styled.img\`
         ${marginCss}
         display: inline-block;
         ${
@@ -61,7 +87,7 @@ export const generateCodeOfImage = (nodeAST: NodeAST) => {
         }
         ${
           ratio
-            ? `height: ${(100 / ratio).toFixed(1)}%;`
+            ? `height: ${(parseFloat(width as string) / ratio).toFixed(1)}px;`
             : height
             ? `height: ${typeof height === 'number' ? `${height}px` : height};`
             : ''
@@ -78,19 +104,22 @@ export const generateCodeOfImage = (nodeAST: NodeAST) => {
       ${BlockImageWrapperComponent}
       ${BlockImageComponent}
 
-      const ${componentName} = ({ src }) => {
-        return (<BlockImageWrapper_inner><BlockImage_inner src={src} /></BlockImageWrapper_inner>)
+      const ${componentName} = ({ src, style }) => {
+        return (<BlockImageWrapper_inner_${id} style={style}><BlockImage_inner_${id} src={src} /></BlockImageWrapper_inner_${id}>)
       };
     `
       : `
       ${InlineImageComponent}
 
-      const ${componentName} = ({ src }) => {
-        return (<InlineImage_inner src={src} />)
+      const ${componentName} = ({ src, style }) => {
+        return (<InlineImage_inner_${id} style={style} src={src} />)
       };
     `;
 
-  const componentCall = `<${componentName}${generateCodeOfProp('src', src)} />`;
+  const componentCall = `<${componentName}${generateCodeOfProp(
+    'key',
+    key,
+  )}${generateCodeOfProp('src', src)}${generateCodeOfProp('style', style)} />`;
 
   return createGenerateCodeFnReturn({
     componentName,

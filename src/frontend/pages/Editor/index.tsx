@@ -54,7 +54,7 @@ const Editor = () => {
   };
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{ display: 'flex', width: '100vw' }}>
       <div style={{ flex: '0 0 300px' }}>
         <Input value={key} onChange={(e) => setKey(e.target.value)} />
         <Input.TextArea
@@ -88,7 +88,7 @@ const Editor = () => {
       </div>
       <div
         id="lubanAppContainer"
-        style={{ flex: 1, border: '1px solid #eee' }}
+        style={{ width: '375px', border: '1px solid #eee' }}
         key="container"
       />
     </div>

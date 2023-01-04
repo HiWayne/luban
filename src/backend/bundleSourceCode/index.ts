@@ -1,6 +1,7 @@
 import fs from 'fs';
 // import * as swc from '@swc/core';
 import { build, OutputFile } from 'esbuild';
+import { lessLoader } from 'esbuild-plugin-less';
 import { TEMP_FILE_PATH } from '../config';
 
 export const bundleSourceCode = async (
@@ -20,9 +21,15 @@ export const bundleSourceCode = async (
           format: 'iife',
           bundle: true,
           loader: { '.js': 'jsx', '.css': 'css', '.ts': 'ts', '.tsx': 'tsx' },
+          outdir: './dist',
           sourcemap: false,
           write: false,
           minify: true,
+          plugins: [
+            lessLoader({
+              javascriptEnabled: true,
+            }),
+          ],
         }).finally(() => {
           fs.rm(filePath, (rmError) => {
             if (rmError) {

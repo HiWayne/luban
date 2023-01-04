@@ -1,4 +1,9 @@
-import { isVariableName, isString, isBuiltInFunctionCode } from './utils';
+import {
+  isVariableName,
+  isString,
+  isBuiltInFunctionCode,
+  isBuiltInVariableCode,
+} from './utils';
 import { generateCodeOfValue } from './generateBackstageCode/generateCodeOfLiteral';
 
 export const generateCodeOfProp = (propName: string, propValue?: any) =>
@@ -6,7 +11,7 @@ export const generateCodeOfProp = (propName: string, propValue?: any) =>
     ? isVariableName(propValue) ||
       !isString(propValue) ||
       isBuiltInFunctionCode(propValue)
-      ? isBuiltInFunctionCode(propValue)
+      ? isBuiltInFunctionCode(propValue) || isBuiltInVariableCode(propValue)
         ? ` ${propName}={${propValue.code}}`
         : typeof propValue === 'object'
         ? ` ${propName}={${generateCodeOfValue(propValue)}}`

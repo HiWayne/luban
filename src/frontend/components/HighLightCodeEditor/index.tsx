@@ -88,7 +88,7 @@ export const HighLightCodeEditor: FC<HighLightCodeEditorProps> = ({
   return (
     <Wrapper style={wrapperStyles}>
       <Editor
-        value={code}
+        value={code || ''}
         onValueChange={onValueChange}
         highlight={highlight}
         padding={10}

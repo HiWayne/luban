@@ -110,7 +110,7 @@ export interface TableProps {
     width?: number;
     fixed?: boolean;
     render?: {
-      iterate_scope_variable_name: string;
+      iterate_scope_variable: string;
       // eslint-disable-next-line no-use-before-define
       render: NodeAST[] | undefined;
     };
@@ -341,7 +341,7 @@ export interface ListProps {
   itemLayout?: 'horizontal' | 'vertical';
   emptyText?: string;
   renderItem: {
-    iterate_scope_variable_name: string;
+    iterate_scope_variable: string;
     // eslint-disable-next-line no-use-before-define
     render: NodeAST;
   };

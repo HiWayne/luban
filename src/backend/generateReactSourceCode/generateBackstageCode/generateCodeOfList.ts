@@ -33,8 +33,8 @@ export const generateCodeOfList = (
 
   const renderItemCode = {
     _builtInType: 'function',
-    code: `(iterate_scope_variable_name_${
-      renderItem.iterate_scope_variable_name
+    code: `(iterate_scope_variable_${
+      renderItem.iterate_scope_variable
     }) => ${
       astToReactNodeCodeOfBackstage(renderItem.render, declarations, context)
         .call

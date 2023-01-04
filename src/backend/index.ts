@@ -18,7 +18,7 @@ app.get('/lubanApp/', async (req, reply) => {
   const { content } = req.query || ({} as any);
   if (content) {
     try {
-      const pageModel: PageModel = JSON.parse(decodeURIComponent(content));
+      const pageModel: PageModel = JSON.parse(content);
       const mode = pageModel.meta.mode;
       const isDevelopment = mode === 'development';
       const { htmlContent } =
@@ -26,7 +26,8 @@ app.get('/lubanApp/', async (req, reply) => {
       if (isDevelopment) {
         reply.headers({ 'content-type': 'text/html' }).send(htmlContent);
       }
-    } catch {
+    } catch (e) {
+      console.log(e);
       reply
         .code(500)
         .send({ status: 0, data: null, message: '参数错误或服务器错误' });
@@ -59,7 +60,7 @@ app.get('/compileToSourceCode/', async (req, reply) => {
   if (content) {
     try {
       let sourceCode = '';
-      const pageModel: PageModel = JSON.parse(decodeURIComponent(content));
+      const pageModel: PageModel = JSON.parse(content);
       if (pageModel.meta.env.includes('pc')) {
         sourceCode = generateReactSourceCodeOfBackstage(pageModel);
       } else if (pageModel.meta.env.includes('mobile')) {
@@ -69,7 +70,8 @@ app.get('/compileToSourceCode/', async (req, reply) => {
       sourceCode = beautifyCode(sourceCode);
 
       reply.send({ status: 1, data: sourceCode, message: '' });
-    } catch {
+    } catch (e) {
+      console.log(e);
       reply
         .code(500)
         .send({ status: 0, data: null, message: '参数错误或服务器错误' });

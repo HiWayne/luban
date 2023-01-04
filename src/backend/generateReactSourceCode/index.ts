@@ -31,7 +31,7 @@ export const astToReactNodeCodeOfBackstage = (
   nodeAST: NodeASTOfBackstage,
   declarations: Declarations,
   context: Context,
-) => {
+): { declarations: Declarations; call: string } => {
   const id = ++context.idRef.current;
   let childrenCode = '';
   if (
@@ -65,7 +65,7 @@ export const astToReactNodeCodeOfBackstage = (
   }
 
   return {
-    declarations: declarations.toString(),
+    declarations,
     call,
   };
 };
@@ -74,7 +74,7 @@ export const astToReactNodeCodeOfFrontstage = (
   nodeAST: NodeASTOfFrontstage,
   declarations: Declarations,
   context: Context,
-): { declarations: string; call: string } => {
+): { declarations: Declarations; call: string } => {
   const id = ++context.idRef.current;
   let childrenCode = '';
   if (
@@ -108,7 +108,7 @@ export const astToReactNodeCodeOfFrontstage = (
   }
 
   return {
-    declarations: declarations.toString(),
+    declarations,
     call,
   };
 };
@@ -179,7 +179,7 @@ export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
 
   ${generateCommonCodeOfBackstage()}
   
-  ${declarations}
+  ${declarations.toString()}
 
   const ${componentName} = () => {
     ${astToReactLogicCode(pageModel.logics)}
@@ -211,6 +211,7 @@ export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
   import { produce } from 'immer';
   import axios from 'axios';
   import styled from 'styled-components';
+  import { ScrollList } from '@duitang/dt-react-mobile';
   import dayjs from 'dayjs';
   import 'dayjs/locale/zh-cn';
 
@@ -218,7 +219,8 @@ export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
 
   ${generateCommonCodeOfFrontstage()}
 
-  ${declarations}
+  ${declarations.toString()}
+
   const ${componentName} = () => {
     ${astToReactLogicCode(pageModel.logics)}
 
