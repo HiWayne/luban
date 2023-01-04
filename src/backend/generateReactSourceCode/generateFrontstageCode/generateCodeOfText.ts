@@ -13,6 +13,7 @@ export const generateCodeOfText = (nodeAST: NodeAST) => {
     italic,
     fontFamily,
     width,
+    height,
     textDecoration,
     margin,
     padding,
@@ -23,10 +24,11 @@ export const generateCodeOfText = (nodeAST: NodeAST) => {
 
   const componentName = 'Text';
 
-  const componentDeclaration = `const ${componentName} = ({ width, italic, text, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, ellipsisStyle = {}, style = {} }) => {
+  const componentDeclaration = `const ${componentName} = ({ width, height, italic, text, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, ellipsisStyle = {}, style = {} }) => {
     const textStyle = useMemo(() => ({
         display: 'inline-block',
         width,
+        height,
         color,
         fontSize,
         fontWeight,
@@ -68,12 +70,12 @@ export const generateCodeOfText = (nodeAST: NodeAST) => {
     'fontFamily',
     fontFamily,
   )}${generateCodeOfProp('width', width)}${generateCodeOfProp(
-    'textDecoration',
-    textDecoration,
-  )}${generateCodeOfProp('margin', margin)}${generateCodeOfProp(
-    'padding',
-    padding,
-  )}${generateCodeOfProp(
+    'height',
+    height,
+  )}${generateCodeOfProp('textDecoration', textDecoration)}${generateCodeOfProp(
+    'margin',
+    margin,
+  )}${generateCodeOfProp('padding', padding)}${generateCodeOfProp(
     'backgroundColor',
     backgroundColor,
   )}${generateCodeOfProp('ellipsisStyle', ellipsisStyle)}${generateCodeOfProp(

@@ -8,9 +8,11 @@ type NodeType =
   | 'ScrollList'
   | 'Image'
   | 'Text'
-  | 'Paragraph';
+  | 'Paragraph'
+  | 'FlexContainer'
+  | 'GridContainer';
 
-export interface BlockContainerProps {
+interface CommonContainerProps {
   width?: number | string;
   height?: number | string;
   margin?: number | string;
@@ -24,18 +26,28 @@ export interface BlockContainerProps {
   style?: CSSProperties;
 }
 
-export interface InlineContainerProps {
-  width?: number | string;
-  height?: number | string;
-  margin?: number | string;
-  padding?: number | string;
-  borderRadius?: number | string;
-  backgroundColor?: string;
-  backgroundImage?: string;
-  backgroundPosition?: 'left' | 'right' | 'center' | 'top' | 'bottom';
-  backgroundFit?: 'cover' | 'contain';
-  backgroundRepeat?: boolean;
-  style?: CSSProperties;
+export interface BlockContainerProps extends CommonContainerProps {}
+
+export interface InlineContainerProps extends CommonContainerProps {}
+
+export interface FlexContainerProps extends CommonContainerProps {
+  direction?: 'row' | 'column';
+  justifyContent?: 'flex-start' | 'flex-end' | 'center';
+  alignItems?: 'flex-start' | 'flex-end' | 'center';
+}
+
+export interface GridContainerProps extends CommonContainerProps {
+  // 行数
+  rows: number;
+  // 列数
+  columns: number;
+  // 间隙
+  space: number | string;
+  renderItem: {
+    iterate_scope_variable: string;
+    render: NodeAST;
+  };
+  rowKey?: string;
 }
 
 export interface ScrollListProps {
@@ -66,6 +78,7 @@ export interface ImageProps {
 export interface TextProps {
   text: string | VariableName;
   width?: number | string;
+  height?: number | string;
   color?: string;
   fontSize?: number | string;
   lineHeight?: number | string;
@@ -105,6 +118,8 @@ export interface NodeAST {
   props?:
     | BlockContainerProps
     | InlineContainerProps
+    | FlexContainerProps
+    | GridContainerProps
     | ScrollListProps
     | ImageProps
     | TextProps
