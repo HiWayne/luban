@@ -231,11 +231,11 @@ createRoot(document.getElementById('root')).render(<App />);
 
 #### 编译写法二总结
 
-canHoist: false 代表不可以提升到全局声明，于是它只会在 App 里直接调用(调用 componentCall 或 componentElement 的代码)。相比写法一更适合简单组件的编译，可以不需要 componentName，因为没有声明，不需要根据 name 去重。缺点是不支持状态逻辑的编写，因为它连组件声明都没有。如果复杂组件使用这种方式编译，会造成代码冗余、可读性差的问题。
+canHoist: false 代表不可以提升到全局声明，于是它只会在 App 里直接调用(直接使用 componentCall 或 componentElement 的代码)。相比写法一更适合简单组件的编译，可以不需要 componentName，因为没有声明，不需要根据 name 去重。缺点是不支持状态逻辑的编写，因为它连组件声明都没有。如果复杂组件使用这种方式编译，会造成代码冗余、可读性差的问题，建议用写法一。
 
 ### 编译写法三。组件如何接收 children。
 
-有些组件是有子组件的，比如 BlockContainer 这个块级容器，下面看看编译时怎么让父组件带上 children 的编译结果。
+有些组件是有子组件的，比如 BlockContainer 这个块级容器，只是负责占用整行，children 一定有实际负责展示的 UI 组件。下面看看编译时怎么让父组件带上 children 的编译结果。
 
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
@@ -245,7 +245,7 @@ import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译BlockContainer组件
 const generateCodeOfBlockContainer = (nodeAST, children) => {
-  // 因为是简单组件，所以用写法二，直接在App里调用reactElement就行
+  // 因为是简单组件，所以用写法二，将来直接在App里调用reactElement就行（<xxx></xxx>）
   const componentCall = `<div>${children}</div>`;
 
   return createGenerateCodeFnReturn({
@@ -255,9 +255,9 @@ const generateCodeOfBlockContainer = (nodeAST, children) => {
 };
 ```
 
-参数`children`就是 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`）
+上面的参数`children`就是由 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`）
 
-如果需要提升组件声明同时不想像写法一那样写太多也不需要状态逻辑，可以用写法一的简化版：
+如果需要提升组件声明同时不想像写法一那样太繁琐也不需要状态逻辑，可以用写法一的简化版：
 
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
@@ -277,9 +277,11 @@ const generateCodeOfBlockContainer = (nodeAST) => {
 };
 ```
 
-`{children}`会自动被外部替换成 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`）
+`componentElement`会被自动封装成`const BlockContainer = ({children}) => (<div>{children}</div>)`函数，相当于自动帮你写好了`componentDeclaration`。
 
-如果需要状态逻辑，那自然使用完全版的写法一就可以了，children 像 `const componentCall = '<div>${children}</div>';` 里面一样使用即可
+如果你不想有组件声明，加上`canHoist: false`, `{children}`会自动被外部替换成 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`），直接在 App 里调用。
+
+如果需要状态逻辑，那自然使用完全版的写法一就可以了，children 像 `const componentCall = '<div>${children}</div>';` 里面一样使用即可。
 
 ### 编译写法四。如果某个 prop 也是 nodeAST 怎么办。
 
@@ -305,7 +307,7 @@ const generateCodeOfBlockContainer = (nodeAST) => {
 }
 ```
 
-上面的配置表示：有一个列表容器`List`，里面会根据 `component_scope_variable_list` 变量循环渲染 renderItem.render 里的 nodeAST，它是`Text`。循环函数的参数名是`iterate_scope_variable_item`。Text 的文本是一个变量，变量内容是`iterate_scope_variable_item.text`。下面我们来看看`List`该如何编译：
+上面的配置表示：root nodeAST 是一个列表容器`List`，里面会根据 `component_scope_variable_list` 变量循环渲染 renderItem.render 里的 nodeAST，它是`Text`。循环函数的参数名是`iterate_scope_variable_item`。Text 的文本取自一个变量，变量内容是`iterate_scope_variable_item.text`。下面我们来看看`List`该如何编译：
 
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
@@ -320,14 +322,15 @@ const generateCodeOfList = (nodeAST, declarations, context) => {
   const { props } = nodeAST;
   const { data, renderItem } = props;
 
-  // 因为只是介绍nodeAST如何渲染，所以我们简单使用写法二，直接在App调用，也就是componentCall或componentElement
-  /** 因为children是nodeAST，所以需要astToReactNodeCodeOfFrontstage将它编译成代码
-   * declarations, context参数你不知道不要慌，可以从外部(同目录下的index.ts)传进来的
-   * 一定要记得.call，因为需要的是组件调用代码（<xxx></xxx>），所以取astToReactNodeCodeOfFrontstage的返回值里的call
+  // 因为只是介绍nodeAST如何渲染，所以我们简单一点，使用写法二，直接在App调用，也就是componentCall或componentElement
+  /** 因为children是nodeAST，所以需要astToReactNodeCodeOfFrontstage将它编译成react代码
+   * declarations, context参数不知道是什么也不要慌，它们是从外部(同目录下的index.ts)传进来的
+   * 一定要记得用.call，因为需要的是组件调用代码（<xxx></xxx>），所以取astToReactNodeCodeOfFrontstage的返回值里的call属性
    */
   const componentCall = `<div>
     {${data}.map((iterate_scope_variable_item) => (${
-    astToReactNodeCodeOfFrontstage(children, declarations, context).call
+    astToReactNodeCodeOfFrontstage(renderItem.render, declarations, context)
+      .call
   }))}
   </div>`;
 
@@ -339,6 +342,10 @@ const generateCodeOfList = (nodeAST, declarations, context) => {
 ```
 
 最终 componentCall 的结果就是类似`<div>{component_scope_variable_list.map((iterate_scope_variable_item) => (<span>{iterate_scope_variable_item.text}</span>))}</div>`这样的了
+
+### 总结
+
+其实只要明确了`componentName`、`componentDeclaration`、`componentCall`、`componentElement`的含义，写几个例子实验一下结果，同时理清楚`编译`和`运行时`代码的区别，那么面对新模块开发起来就基本没什么问题了。
 
 ## 配置后台页面权限
 
