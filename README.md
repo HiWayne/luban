@@ -65,7 +65,7 @@ npm run dev-backend
 ```jsx
 // 空模块时
 
-import { <StrictMode> } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 const App = () => {
@@ -128,27 +128,30 @@ const generateCodeOfImage2 = (nodeAST, id) => {
 ```jsx
 // 写法一的编译结果
 
-import { <StrictMode> } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-const Image = ({src}) => (<img src={src} />);
+const Image = ({ src }) => <img src={src} />;
 
 const App = () => {
-  return <StrictMode>
-    <Image src="url" />
-  </StrictMode>
+  return (
+    <StrictMode>
+      <Image src="url" />
+    </StrictMode>
+  );
 };
 
 createRoot(document.getElementById('root')).render(<App />);
 
-
 // 简化版写法一的编译结果（假设id是1）
-const Image_1 = ({children}) => (<img src="url" />);
+const Image_1 = ({ children }) => <img src="url" />;
 
 const App = () => {
-  return <StrictMode>
-    <Image_1 />
-  </StrictMode>
+  return (
+    <StrictMode>
+      <Image_1 />
+    </StrictMode>
+  );
 };
 
 createRoot(document.getElementById('root')).render(<App />);
@@ -210,13 +213,17 @@ const generateCodeOfA = (nodeAST) => {
 假设 href: "url", target: "\_blank", text: "跳转"，编译结果如下：
 
 ```jsx
-import { <StrictMode> } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 const App = () => {
-  return <StrictMode>
-    <a href="url" target="_blank">跳转</a>
-  </StrictMode>
+  return (
+    <StrictMode>
+      <a href="url" target="_blank">
+        跳转
+      </a>
+    </StrictMode>
+  );
 };
 
 createRoot(document.getElementById('root')).render(<App />);
