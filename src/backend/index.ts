@@ -1,5 +1,6 @@
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
+import fs from 'fs';
 import { generateEntrySourceCode } from './generateEntrySourceCode';
 import { PageModel } from './types';
 import {
@@ -7,6 +8,7 @@ import {
   generateReactSourceCodeOfFrontstage,
 } from './generateReactSourceCode';
 import { beautifyCode } from './beautifyCode';
+import { TEMP_FILE_PATH } from './config';
 
 const app = fastify();
 
@@ -14,53 +16,79 @@ app.register(fastifyCors, {
   origin: (receivedOrigin, cb) => cb(null, true),
 });
 
-app.get('/lubanApp/', async (req, reply) => {
-  const { content } = req.query || ({} as any);
-  if (content) {
-    try {
-      const pageModel: PageModel = JSON.parse(content);
+app.post('/lubanApp/', async (req, reply) => {
+  try {
+    const pageModel: PageModel = JSON.parse(req.body as string);
+    if (pageModel) {
       const mode = pageModel.meta.mode;
       const isDevelopment = mode === 'development';
       const { htmlContent } =
         (await generateEntrySourceCode(isDevelopment, pageModel, true)) || {};
       if (isDevelopment) {
-        reply.headers({ 'content-type': 'text/html' }).send(htmlContent);
+        reply.send({ status: 1, data: { htmlPath: htmlContent }, message: '' });
       }
-    } catch (e) {
-      console.log(e);
-      reply
-        .code(500)
-        .send({ status: 0, data: null, message: '参数错误或服务器错误' });
+    } else {
+      reply.code(400).send({ status: 0, data: null, message: '内容不能为空' });
     }
-  } else {
-    reply.code(400).send({ status: 0, data: null, message: '内容不能为空' });
+  } catch (e) {
+    console.log(e);
+    reply
+      .code(500)
+      .send({ status: 0, data: null, message: '参数错误或服务器错误' });
   }
 });
 
 app.get('/virtual/*', async (req, reply) => {
   const fileNameParam = (req.params as any)['*'];
-  const fileName = fileNameParam.replace(/\.js$/, '');
-  const mode = 'development';
+  if (/\.html$/.test(fileNameParam)) {
+    const htmlPath = `${TEMP_FILE_PATH}/${fileNameParam}`;
+    const readHtml = () =>
+      new Promise((resolve, reject) => {
+        fs.readFile(htmlPath, { encoding: 'utf-8' }, (err, data) => {
+          if (!err) {
+            resolve(data);
+          } else {
+            reject();
+          }
+        });
+      });
+    try {
+      const html = await readHtml();
+      reply
+        .headers({ 'content-type': 'text/html' })
+        .send(html)
+        .then(
+          () => {
+            fs.rm(htmlPath, () => {});
+          },
+          () => {},
+        );
+    } catch {
+      reply.code(500).send({ status: 0, data: null, message: '找不到文件' });
+    }
+  } else {
+    const fileName = fileNameParam.replace(/\.js$/, '');
+    const mode = 'development';
 
-  const isDevelopment = mode === 'development';
-  const { jsContent: microAppJsText } =
-    (await generateEntrySourceCode(
-      isDevelopment,
-      undefined,
-      false,
-      fileName,
-    )) || {};
-  if (isDevelopment) {
-    reply.headers({ 'content-type': 'text/javascript' }).send(microAppJsText);
+    const isDevelopment = mode === 'development';
+    const { jsContent: microAppJsText } =
+      (await generateEntrySourceCode(
+        isDevelopment,
+        undefined,
+        false,
+        fileName,
+      )) || {};
+    if (isDevelopment) {
+      reply.headers({ 'content-type': 'text/javascript' }).send(microAppJsText);
+    }
   }
 });
 
-app.get('/compileToSourceCode/', async (req, reply) => {
-  const { content } = req.query || ({} as any);
-  if (content) {
-    try {
+app.post('/compileToSourceCode/', async (req, reply) => {
+  try {
+    const pageModel: PageModel = JSON.parse(req.body as string);
+    if (pageModel) {
       let sourceCode = '';
-      const pageModel: PageModel = JSON.parse(content);
       if (pageModel.meta.env.includes('pc')) {
         sourceCode = generateReactSourceCodeOfBackstage(pageModel);
       } else if (pageModel.meta.env.includes('mobile')) {
@@ -70,14 +98,14 @@ app.get('/compileToSourceCode/', async (req, reply) => {
       sourceCode = beautifyCode(sourceCode);
 
       reply.send({ status: 1, data: sourceCode, message: '' });
-    } catch (e) {
-      console.log(e);
-      reply
-        .code(500)
-        .send({ status: 0, data: null, message: '参数错误或服务器错误' });
+    } else {
+      reply.code(400).send({ status: 0, data: null, message: '内容不能为空' });
     }
-  } else {
-    reply.code(400).send({ status: 0, data: null, message: '内容不能为空' });
+  } catch (e) {
+    console.log(e);
+    reply
+      .code(500)
+      .send({ status: 0, data: null, message: '参数错误或服务器错误' });
   }
 });
 

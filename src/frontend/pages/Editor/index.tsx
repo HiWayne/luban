@@ -25,29 +25,36 @@ const Editor = () => {
     setContent(JSON.stringify(pageModel));
   }, [key]);
 
-  const previewPage = (pageModelContent: string) => {
+  const previewPage = async (pageModelContent: string) => {
     const suffix = getRandomString();
     const randomKey = `${key}${suffix}`;
     const pageModelObj: PageModel = JSON.parse(pageModelContent);
     pageModelObj.meta.key = randomKey;
-    if (microAppRef.current) {
-      microAppRef.current.unmount();
+    const data: any = await fetch('//localhost:8000/lubanApp/', {
+      method: 'post',
+      body: JSON.stringify(pageModelObj),
+    }).then((response) => response.json());
+    console.log(data);
+    if (data && data.data) {
+      const htmlPath = data.data.htmlPath;
+      if (htmlPath) {
+        if (microAppRef.current) {
+          microAppRef.current.unmount();
+        }
+        microAppRef.current = loadMicroApp({
+          name: `luban-app-${randomKey}`,
+          entry: `//localhost:8000${htmlPath}`,
+          container: '#lubanAppContainer',
+        });
+      }
     }
-    microAppRef.current = loadMicroApp({
-      name: `luban-app-${randomKey}`,
-      entry: `//localhost:8000/lubanApp/?content=${encodeURIComponent(
-        JSON.stringify(pageModelObj),
-      )}`,
-      container: '#lubanAppContainer',
-    });
   };
 
   const getReactCode = async () => {
-    const code = await fetch(
-      `//localhost:8000/compileToSourceCode/?content=${encodeURIComponent(
-        content,
-      )}`,
-    )
+    const code = await fetch('//localhost:8000/compileToSourceCode/', {
+      method: 'post',
+      body: content,
+    })
       .then((response) => response.json())
       .then((json) => json.data);
     setSourceCode(code);

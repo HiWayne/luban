@@ -7,6 +7,8 @@ import { generateCodeOfImage } from './generateCodeOfImage';
 import { generateCodeOfInlineContainer } from './generateCodeOfInlineContainer';
 import { generateCodeOfText } from './generateCodeOfText';
 import { generateCodeOfParagraph } from './generateCodeOfParagraph';
+import { generateCodeOfFlexContainer } from './generateCodeOfFlexContainer';
+import { generateCodeOfGridContainer } from './generateCodeOfGridContainer';
 
 export const generateCodeByNodeAST = (
   id: number,
@@ -27,13 +29,30 @@ export const generateCodeByNodeAST = (
 
   switch (type) {
     case 'ScrollList':
-      output = generateCodeOfScrollList(nodeAST, id, declarations, context);
+      output = generateCodeOfScrollList(
+        nodeAST,
+        id,
+        children,
+        declarations,
+        context,
+      );
       break;
     case 'BlockContainer':
       output = generateCodeOfBlockContainer(nodeAST, children);
       break;
     case 'InlineContainer':
       output = generateCodeOfInlineContainer(nodeAST, children);
+      break;
+    case 'FlexContainer':
+      output = generateCodeOfFlexContainer(nodeAST, children);
+      break;
+    case 'GridContainer':
+      output = generateCodeOfGridContainer(
+        nodeAST,
+        children,
+        declarations,
+        context,
+      );
       break;
     case 'Image':
       output = generateCodeOfImage(nodeAST, id);

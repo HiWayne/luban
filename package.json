@@ -15,7 +15,7 @@
   "dependencies": {
     "@babel/core": ">=7.0.0 <8.0.0",
     "@duitang/dt-base": "^2.1.11",
-    "@duitang/dt-react-mobile": "^3.1.13",
+    "@duitang/dt-react-mobile": "^3.1.17",
     "@fastify/cors": "^8.2.0",
     "antd": "^5.0.2",
     "axios": "^1.2.1",

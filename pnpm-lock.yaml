@@ -5,7 +5,7 @@ specifiers:
   '@commitlint/cli': ^17.3.0
   '@commitlint/config-angular': ^17.3.0
   '@duitang/dt-base': ^2.1.11
-  '@duitang/dt-react-mobile': ^3.1.13
+  '@duitang/dt-react-mobile': ^3.1.17
   '@fastify/cors': ^8.2.0
   '@swc/cli': ^0.1.57
   '@swc/core': ^1.3.20
@@ -61,7 +61,7 @@ specifiers:
 dependencies:
   '@babel/core': 7.20.5
   '@duitang/dt-base': 2.1.11
-  '@duitang/dt-react-mobile': 3.1.13_34ch25xmpqfrx6wylcxtcsskau
+  '@duitang/dt-react-mobile': 3.1.17_34ch25xmpqfrx6wylcxtcsskau
   '@fastify/cors': 8.2.0
   antd: 5.0.2_biqbaboplfbrettd7655fr4n2y
   axios: 1.2.1
@@ -778,14 +778,20 @@ packages:
       md5: 2.3.0
     dev: false
 
-  /@duitang/dt-react-mobile/3.1.13_34ch25xmpqfrx6wylcxtcsskau:
-    resolution: {integrity: sha512-Ziy2REDkwj8SrWBNps1ef2sYJNHXjowcEH/3AACn9mYSpIHQNKu7k1IqKkcCpiVApCXg9CW0XzP+SSFSqHEmqw==}
+  /@duitang/dt-base/2.1.13:
+    resolution: {integrity: sha512-fyGdkLwyANT4auYE+ETrTFCxoS/0KrfhXt1pBqSoejdWijHSTYJy0hLTiR9I4H4pewdmStmlWF4UI/qq8/cazg==}
+    dependencies:
+      md5: 2.3.0
+    dev: false
+
+  /@duitang/dt-react-mobile/3.1.17_34ch25xmpqfrx6wylcxtcsskau:
+    resolution: {integrity: sha512-swYbGzlrzbmyxA+9CVJW9qmlqUdzHYfsvfHmgJuhnHQnOB5IABJkWUHuIk47sAIh9mFQiZ9RfAJRmylErgVR5A==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
     dependencies:
       '@better-scroll/core': 2.5.0
-      '@duitang/dt-base': 2.1.11
+      '@duitang/dt-base': 2.1.13
       '@emotion/react': 11.10.5_hebjedjhazelsvuzebr6t7ng24
       antd-mobile: 2.3.4_biqbaboplfbrettd7655fr4n2y
       better-scroll: 1.15.2

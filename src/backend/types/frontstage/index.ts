@@ -21,7 +21,7 @@ interface CommonContainerProps {
   backgroundColor?: string;
   backgroundImage?: string;
   backgroundPosition?: 'left' | 'right' | 'center' | 'top' | 'bottom';
-  backgroundFit?: 'cover' | 'contain';
+  backgroundSize?: 'cover' | 'contain' | string | number;
   backgroundRepeat?: boolean;
   style?: CSSProperties;
 }
@@ -30,31 +30,40 @@ export interface BlockContainerProps extends CommonContainerProps {}
 
 export interface InlineContainerProps extends CommonContainerProps {}
 
+type FlexAlign =
+  | 'flex-start'
+  | 'flex-end'
+  | 'center'
+  | 'space-around'
+  | 'space-between';
+
 export interface FlexContainerProps extends CommonContainerProps {
+  layout?: 'block' | 'inline';
   direction?: 'row' | 'column';
-  justifyContent?: 'flex-start' | 'flex-end' | 'center';
-  alignItems?: 'flex-start' | 'flex-end' | 'center';
+  justifyContent?: FlexAlign;
+  alignItems?: FlexAlign;
 }
 
 export interface GridContainerProps extends CommonContainerProps {
-  // 行数
-  rows: number;
+  data?: VariableName;
+  layout?: 'block' | 'inline';
   // 列数
-  columns: number;
-  // 间隙
-  space: number | string;
-  renderItem: {
+  columns?: number;
+  // 间隙（最边缘的item与外层没有间隙），10-上下左右间隙10px、"10vw"-上下左右间隙10vw、"10vw 20px"-上下10vw间隙 左右20px间隙
+  space?: number | string;
+  // 每行item的对齐方式
+  justifyContent?: FlexAlign;
+  renderItem?: {
     iterate_scope_variable: string;
     render: NodeAST;
   };
-  rowKey?: string;
 }
 
 export interface ScrollListProps {
-  data: VariableName;
+  data?: VariableName;
   wrapperStyle?: CSSProperties;
   listStyle?: CSSProperties;
-  renderItem: {
+  renderItem?: {
     iterate_scope_variable: string;
     render: NodeAST;
   };
@@ -75,6 +84,8 @@ export interface ImageProps {
   style?: CSSProperties;
 }
 
+type TextAlign = 'left' | 'center' | 'right';
+
 export interface TextProps {
   text: string | VariableName;
   width?: number | string;
@@ -90,6 +101,8 @@ export interface TextProps {
   padding?: number | string;
   backgroundColor?: string;
   ellipsis?: boolean;
+  // 当设置width时，文字对齐会有作用
+  textAlign?: TextAlign;
   style?: CSSProperties;
 }
 
@@ -103,7 +116,7 @@ export interface ParagraphProps {
   padding?: number | string;
   width?: number | string;
   height?: number | string;
-  textAlign?: 'left' | 'center' | 'right';
+  textAlign?: TextAlign;
   textIndent?: string;
   wrap?: boolean;
   ellipsis?: Ellipsis;

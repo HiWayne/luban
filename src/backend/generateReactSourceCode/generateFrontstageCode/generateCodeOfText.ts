@@ -19,16 +19,20 @@ export const generateCodeOfText = (nodeAST: NodeAST) => {
     padding,
     backgroundColor,
     ellipsis,
+    textAlign,
     style,
   } = props as TextProps;
 
   const componentName = 'Text';
 
-  const componentDeclaration = `const ${componentName} = ({ width, height, italic, text, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, ellipsisStyle = {}, style = {} }) => {
+  const componentDeclaration = `const ${componentName} = ({ width, height, italic, text, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, textAlign, ellipsisStyle = {}, style = {} }) => {
     const textStyle = useMemo(() => ({
         display: 'inline-block',
+        wordBreak: 'break-all',
+        whiteSpace: 'pre-wrap',
         width,
         height,
+        textAlign,
         color,
         fontSize,
         fontWeight,
@@ -40,7 +44,7 @@ export const generateCodeOfText = (nodeAST: NodeAST) => {
         backgroundColor,
         ...ellipsisStyle,
         ...style,
-    }), [])
+    }), [width, height, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, textAlign, ...Object.values(ellipsisStyle), ...Object.values(style)])
 
     if (italic) {
         return <i style={textStyle}>{text}</i>
@@ -63,25 +67,28 @@ export const generateCodeOfText = (nodeAST: NodeAST) => {
   )}${generateCodeOfProp('color', color)}${generateCodeOfProp(
     'fontSize',
     fontSize,
-  )}${generateCodeOfProp('lineHeight', lineHeight)}${generateCodeOfProp(
-    'fontWeight',
-    fontWeight,
-  )}${generateCodeOfProp('italic', italic)}${generateCodeOfProp(
-    'fontFamily',
-    fontFamily,
-  )}${generateCodeOfProp('width', width)}${generateCodeOfProp(
-    'height',
-    height,
-  )}${generateCodeOfProp('textDecoration', textDecoration)}${generateCodeOfProp(
-    'margin',
-    margin,
-  )}${generateCodeOfProp('padding', padding)}${generateCodeOfProp(
+  )}${generateCodeOfProp(
+    'lineHeight',
+    typeof lineHeight === 'number' ? `${lineHeight}px` : lineHeight,
+  )}${generateCodeOfProp('fontWeight', fontWeight)}${generateCodeOfProp(
+    'italic',
+    italic,
+  )}${generateCodeOfProp('fontFamily', fontFamily)}${generateCodeOfProp(
+    'width',
+    width,
+  )}${generateCodeOfProp('height', height)}${generateCodeOfProp(
+    'textDecoration',
+    textDecoration,
+  )}${generateCodeOfProp('margin', margin)}${generateCodeOfProp(
+    'padding',
+    padding,
+  )}${generateCodeOfProp(
     'backgroundColor',
     backgroundColor,
-  )}${generateCodeOfProp('ellipsisStyle', ellipsisStyle)}${generateCodeOfProp(
-    'style',
-    style,
-  )} />`;
+  )}${generateCodeOfProp('textAlign', textAlign)}${generateCodeOfProp(
+    'ellipsisStyle',
+    ellipsisStyle,
+  )}${generateCodeOfProp('style', style)} />`;
 
   return createGenerateCodeFnReturn({
     componentName,

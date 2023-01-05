@@ -14,13 +14,13 @@ export const generateCodeOfBlockContainer = (
     margin,
     padding,
     backgroundColor,
-    backgroundFit,
+    backgroundSize,
     backgroundImage,
     backgroundPosition,
     backgroundRepeat,
     borderRadius,
     style,
-  } = props as BlockContainerProps;
+  } = (props as BlockContainerProps) || {};
 
   const componentName = 'BlockContainer';
 
@@ -31,10 +31,12 @@ export const generateCodeOfBlockContainer = (
     padding,
     borderRadius,
     backgroundColor,
-    backgroundFit,
-    backgroundImage,
+    backgroundSize,
+    backgroundImage: backgroundImage
+      ? `url(\\'${backgroundImage}\\')`
+      : undefined,
     backgroundPosition,
-    backgroundRepeat,
+    backgroundRepeat: backgroundRepeat ? 'repeat' : 'no-repeat',
     ...(style || {}),
   };
 

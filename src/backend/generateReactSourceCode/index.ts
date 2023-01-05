@@ -219,6 +219,12 @@ export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
 
   ${generateCommonCodeOfFrontstage()}
 
+  const Root = styled.div\`
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+  \`
+
   ${declarations.toString()}
 
   const ${componentName} = () => {
@@ -227,7 +233,7 @@ export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
     return (${call})
   };
 
-  const App = () => <StrictMode><${componentName} /></StrictMode>`;
+  const App = () => <StrictMode><Root><${componentName} /></Root></StrictMode>`;
 
   return reactCode;
 };

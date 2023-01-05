@@ -33,7 +33,7 @@ export const generateCodeOfParagraph = (
         textIndent,
         whiteSpace: wrap ? undefined : 'no-wrap',
         ...ellipsisStyle,
-    }), [])
+    }), [margin, padding, width, height, textAlign, textIndent, wrap, ...Object.values(ellipsisStyle)])
 
     return (<p style={pStyle}>{children}</p>)
   };`;

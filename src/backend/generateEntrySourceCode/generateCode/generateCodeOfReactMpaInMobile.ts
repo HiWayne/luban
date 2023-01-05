@@ -34,13 +34,46 @@ export const generateCodeOfReactMpaInMobile = async (
     );
     if (virtual) {
       const name = `temp_${getRandomString()}`;
+      const htmlPath = `${tempDirPath}/${name}.html`;
       const filePath = `${tempDirPath}/${name}.js`;
       const pageMetaPath = `${tempDirPath}/${name}.json`;
+
+      const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <link rel="icon" type="image/svg+xml" href="${meta.icon}" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>${meta.title}</title>
+        </head>
+        <body>
+          <div id="root"></div>
+          <script src="/virtual/${name}.js></script>
+        </body>
+      </html>
+    `;
 
       await new Promise((resolve, reject) => {
         const appendFile = () => {
           resolve(
             Promise.all([
+              new Promise((resolve1, reject1) => {
+                fs.appendFile(
+                  htmlPath,
+                  htmlContent,
+                  {
+                    encoding: 'utf-8',
+                  },
+                  (appendFileError) => {
+                    if (appendFileError) {
+                      reject1(appendFileError);
+                    } else {
+                      resolve1(true);
+                    }
+                  },
+                );
+              }),
               new Promise((resolve1, reject1) => {
                 fs.appendFile(
                   filePath,
@@ -90,23 +123,10 @@ export const generateCodeOfReactMpaInMobile = async (
           appendFile();
         }
       });
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <link rel="icon" type="image/svg+xml" href="${meta.icon}" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>${meta.title}</title>
-          </head>
-          <body>
-            <div id="root"></div>
-            <script src="/virtual/${name}.js></script>
-          </body>
-        </html>
-      `;
+
       const jsContent = '';
-      return { htmlContent, jsContent };
+
+      return { htmlContent: `/virtual/${name}.html`, jsContent };
     } else {
       const htmlContent = `
         <!DOCTYPE html>

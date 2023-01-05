@@ -13,7 +13,7 @@ export const generateCodeOfInlineContainer = (
     margin,
     padding,
     backgroundColor,
-    backgroundFit,
+    backgroundSize,
     backgroundImage,
     backgroundPosition,
     backgroundRepeat,
@@ -30,10 +30,12 @@ export const generateCodeOfInlineContainer = (
     padding,
     borderRadius,
     backgroundColor,
-    backgroundFit,
-    backgroundImage,
+    backgroundSize,
+    backgroundImage: backgroundImage
+      ? `url(\\'${backgroundImage}\\')`
+      : undefined,
     backgroundPosition,
-    backgroundRepeat,
+    backgroundRepeat: backgroundRepeat ? 'repeat' : 'no-repeat',
     ...(style || {}),
   };
 

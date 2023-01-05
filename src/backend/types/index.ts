@@ -5,9 +5,11 @@ export type VariableName = `${string}_scope_variable_${string}`;
 
 export type FunctionCode = string;
 
+export type BuiltInType = 'function' | 'variable';
+
 // 内置类型代码。比如"index"应该在prop里编译成变量: index={index}，但实际它只是字符串: index="index"，所以需要内置类型来说明如何编译
 export interface BuiltInTypeCode {
-  _builtInType: 'function' | 'variable';
+  _builtInType: BuiltInType;
   code: string;
 }
 

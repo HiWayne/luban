@@ -54,7 +54,7 @@ npm run dev-backend
 
 后端代码在`/backend/*`，主要负责将后台发送过来的页面配置编译成前端代码（浏览器可直接运行）
 
-低代码搭建的页面中的最小粒度是 UI 模块，UI 模块都有 type 属性，不同 type 代表不同的 UI 模块，用以呈现各种特定外观、功能、交互的 UI 。后端编译服务也是以 UI 模块为粒度实现的，每个 UI 模块都有一个与之对应的编译函数，负责将 nodeAST（一个表示 UI 和逻辑的 DSL 配置）编译成 react 组件代码。toC 页面的编译函数在`/backend/generateReactSourceCode/generateFrontstageCode/*`，toB 页面的编译函数在`/backend/generateReactSourceCode/generateBackstageCode/*`。
+低代码搭建的页面中的最小粒度是 UI 模块（在配置中可以看作一个节点(node)），UI 模块都有 type 属性，不同 type 代表不同的 UI 模块，用以呈现各种特定外观、功能、交互的 UI 。后端编译服务也是以 UI 模块为粒度实现的，每个 UI 模块都有一个与之对应的编译函数，负责将 nodeAST（**一个表示 UI 和逻辑的 DSL(领域特定语言/配置)亦可把它看作 AST(抽象语法树)**）编译成 react 组件代码。toC 页面的编译函数在`/backend/generateReactSourceCode/generateFrontstageCode/*`，toB 页面的编译函数在`/backend/generateReactSourceCode/generateBackstageCode/*`。
 
 如需新增 UI 模块，在`/backend/generateReactSourceCode/generateFrontstageCode/*`或`/backend/generateReactSourceCode/generateBackstageCode/*`新增对应的编译函数即可（还需在同目录的 index.ts 的 switch case 中使用它）。
 
@@ -113,7 +113,7 @@ const generateCodeOfImage2 = (nodeAST, id) => {
   const { src } = props;
 
   const componentName = `Image_${id}`;
-  const componentElement = `<${componentName}${generateCodeOfProp(
+  const componentElement = `<img${generateCodeOfProp(
     'src',
     src,
   )} />`;
@@ -257,7 +257,7 @@ const generateCodeOfBlockContainer = (nodeAST, children) => {
 };
 ```
 
-上面的参数`children`就是由 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`）
+上面的参数`children`就是由 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`）。对 nodeAST 树的遍历是深度优先的，所以编译结束的顺序是自底向上，在父组件编译开始时就可以拿到 children 的结果。
 
 如果需要提升组件声明同时不想像写法一那样太繁琐也不需要状态逻辑，可以用写法一的简化版：
 
