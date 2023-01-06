@@ -281,7 +281,7 @@ export const treeDemo: NodeAST = {
                       id: 22,
                       type: 'Text',
                       props: {
-                        text: '手绘风圣诞情头🎄',
+                        text: '手绘风圣诞情头手绘风圣诞不可错过的美图',
                         margin: '8px 0 0 0',
                         fontSize: 12,
                         fontFamily: 'PingFangSC-Regular, PingFang SC',

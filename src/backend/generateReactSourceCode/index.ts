@@ -22,6 +22,7 @@ export interface Declarations {
 
 export interface Context {
   idRef: MutableRefObject<number>;
+  development: boolean;
 }
 
 /**
@@ -149,7 +150,10 @@ const createDeclarations = (): Declarations => ({
   },
 });
 
-export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
+export const generateReactSourceCodeOfBackstage = (
+  pageModel: PageModel,
+  development: boolean,
+) => {
   const componentName = createComponentName(pageModel.meta.key);
 
   const componentsDeclarations = createDeclarations();
@@ -159,6 +163,7 @@ export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
     componentsDeclarations,
     {
       idRef: { current: 0 },
+      development,
     },
   );
 
@@ -192,7 +197,10 @@ export const generateReactSourceCodeOfBackstage = (pageModel: PageModel) => {
   return reactCode;
 };
 
-export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
+export const generateReactSourceCodeOfFrontstage = (
+  pageModel: PageModel,
+  development: boolean,
+) => {
   const componentName = createComponentName(pageModel.meta.key);
 
   const componentsDeclarations = createDeclarations();
@@ -202,6 +210,7 @@ export const generateReactSourceCodeOfFrontstage = (pageModel: PageModel) => {
     componentsDeclarations,
     {
       idRef: { current: 0 },
+      development,
     },
   );
 

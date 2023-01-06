@@ -20,7 +20,7 @@ interface CommonContainerProps {
   borderRadius?: number | string;
   backgroundColor?: string;
   backgroundImage?: string;
-  backgroundPosition?: 'left' | 'right' | 'center' | 'top' | 'bottom';
+  backgroundPosition?: 'center' | string;
   backgroundSize?: 'cover' | 'contain' | string | number;
   backgroundRepeat?: boolean;
   style?: CSSProperties;
@@ -111,11 +111,17 @@ interface Ellipsis {
 }
 
 export interface ParagraphProps {
-  texts?: NodeAST[];
+  texts?: (NodeAST | string | VariableName)[];
   margin?: number | string;
   padding?: number | string;
   width?: number | string;
   height?: number | string;
+  color?: string;
+  fontSize?: number | string;
+  lineHeight?: number | string;
+  fontWeight?: number | string;
+  fontFamily?: string;
+  textDecoration?: 'line-through' | 'underline';
   textAlign?: TextAlign;
   textIndent?: string;
   wrap?: boolean;
@@ -123,7 +129,7 @@ export interface ParagraphProps {
 }
 
 export interface NodeAST {
-  id: number;
+  id?: number;
   key?: string | number | VariableName | BuiltInTypeCode;
   type: NodeType;
   // 左变量 === 右值 ? 渲染 : null

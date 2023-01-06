@@ -30,7 +30,7 @@ export const generateCodeOfReactMpaInMobile = async (
     const pageMeta = pageModel.meta;
     const meta = normalizePageMeta(pageMeta);
     const reactSourceCode = wrapReactMicroAppHooks(
-      generateReactSourceCodeOfFrontstage(pageModel),
+      generateReactSourceCodeOfFrontstage(pageModel, virtual),
     );
     if (virtual) {
       const name = `temp_${getRandomString()}`;

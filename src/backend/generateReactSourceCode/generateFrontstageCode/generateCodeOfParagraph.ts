@@ -1,7 +1,7 @@
 import { NodeAST, ParagraphProps } from '@/backend/types/frontstage';
 import { astToReactNodeCodeOfFrontstage, Context, Declarations } from '..';
 import { generateCodeOfProp } from '../generateCodeOfProp';
-import { createGenerateCodeFnReturn } from '../utils';
+import { createGenerateCodeFnReturn, isVariableName } from '../utils';
 
 export const generateCodeOfParagraph = (
   nodeAST: NodeAST,
@@ -19,11 +19,17 @@ export const generateCodeOfParagraph = (
     height,
     wrap,
     ellipsis,
+    color,
+    fontSize,
+    lineHeight,
+    fontWeight,
+    fontFamily,
+    textDecoration,
   } = props as ParagraphProps;
 
   const componentName = 'Paragraph';
 
-  const componentDeclaration = `const ${componentName} = ({ children, textAlign, textIndent, margin, padding, width, height, wrap, ellipsisStyle = {} }) => {
+  const componentDeclaration = `const ${componentName} = ({ children, textAlign, textIndent, margin, padding, width, height, wrap, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ellipsisStyle = {} }) => {
     const pStyle = useMemo(() => ({
         margin,
         padding,
@@ -32,8 +38,14 @@ export const generateCodeOfParagraph = (
         textAlign,
         textIndent,
         whiteSpace: wrap ? undefined : 'no-wrap',
+        color,
+        fontSize,
+        lineHeight,
+        fontWeight,
+        fontFamily,
+        textDecoration,
         ...ellipsisStyle,
-    }), [margin, padding, width, height, textAlign, textIndent, wrap, ...Object.values(ellipsisStyle)])
+    }), [margin, padding, width, height, textAlign, textIndent, wrap, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ...Object.values(ellipsisStyle)])
 
     return (<p style={pStyle}>{children}</p>)
   };`;
@@ -68,15 +80,28 @@ export const generateCodeOfParagraph = (
   )}${generateCodeOfProp('wrap', wrap)}${generateCodeOfProp(
     'ellipsisStyle',
     ellipsisStyle,
-  )}${generateCodeOfProp('textIndent', textIndent)}>${
+  )}${generateCodeOfProp('textIndent', textIndent)}${generateCodeOfProp(
+    'color',
+    color,
+  )}${generateCodeOfProp('fontSize', fontSize)}${generateCodeOfProp(
+    'lineHeight',
+    typeof lineHeight === 'number' ? `${lineHeight}px` : lineHeight,
+  )}${generateCodeOfProp('fontWeight', fontWeight)}${generateCodeOfProp(
+    'fontFamily',
+    fontFamily,
+  )}${generateCodeOfProp('textDecoration', textDecoration)}>${
     Array.isArray(texts)
       ? texts.reduce(
-          (childrenCode, textNode) =>
-            `${childrenCode}${astToReactNodeCodeOfFrontstage(
-              textNode,
-              declarations,
-              context,
-            )}`,
+          (childrenCode, text) =>
+            typeof text === 'string'
+              ? isVariableName(text)
+                ? `${childrenCode}{${text}}`
+                : `${childrenCode}${text}`
+              : `${childrenCode}${astToReactNodeCodeOfFrontstage(
+                  text,
+                  declarations,
+                  context,
+                )}`,
           '',
         )
       : ''

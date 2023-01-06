@@ -34,7 +34,6 @@ const Editor = () => {
       method: 'post',
       body: JSON.stringify(pageModelObj),
     }).then((response) => response.json());
-    console.log(data);
     if (data && data.data) {
       const htmlPath = data.data.htmlPath;
       if (htmlPath) {
