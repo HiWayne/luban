@@ -1,6 +1,6 @@
 import { NodeAST, RadioGroupWithLabelProps } from '@/backend/types/backstage';
 import { createGenerateCodeFnReturn, getMemberVariablePath } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 
 export const generateCodeOfRadioGroupWithLabel = (nodeAST: NodeAST) => {
   const { props } = nodeAST;

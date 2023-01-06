@@ -1,5 +1,5 @@
 import { AvatarProps, NodeAST } from '@/backend/types/backstage';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 import { generateCodeOfLiteral } from './generateCodeOfLiteral';
 

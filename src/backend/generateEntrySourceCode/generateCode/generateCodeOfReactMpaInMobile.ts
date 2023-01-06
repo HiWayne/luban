@@ -6,15 +6,17 @@ import { generateReactSourceCodeOfFrontstage } from '@/backend/generateReactSour
 import { wrapReactMicroAppHooks } from '@/backend/templates/wrapReactMicroAppHooks';
 import { bundleSourceCode } from '@/backend/bundleSourceCode';
 import { wrapMicroAppUmdFormation } from '@/backend/templates/wrapMicroAppUmdFormation';
-import { Meta, PageModel } from '@/backend/types';
+import { Meta, Mode, PageModel } from '@/backend/types';
 
 export const generateCodeOfReactMpaInMobile = async (
-  virtual: boolean,
+  mode: Mode,
   pageModel: PageModel | undefined,
   html: boolean,
   fileName?: string,
   _pageMeta?: Meta,
 ) => {
+  const isDeploy = mode === 'deploy';
+  const isDevelopment = mode === 'development';
   const tempDirPath = TEMP_FILE_PATH;
   if (!html && fileName) {
     const htmlContent = '';
@@ -30,9 +32,9 @@ export const generateCodeOfReactMpaInMobile = async (
     const pageMeta = pageModel.meta;
     const meta = normalizePageMeta(pageMeta);
     const reactSourceCode = wrapReactMicroAppHooks(
-      generateReactSourceCodeOfFrontstage(pageModel, virtual),
+      generateReactSourceCodeOfFrontstage(pageModel, isDevelopment),
     );
-    if (virtual) {
+    if (!isDeploy) {
       const name = `temp_${getRandomString()}`;
       const htmlPath = `${tempDirPath}/${name}.html`;
       const filePath = `${tempDirPath}/${name}.js`;

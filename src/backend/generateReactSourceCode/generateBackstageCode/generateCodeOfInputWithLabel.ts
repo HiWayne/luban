@@ -4,7 +4,7 @@ import {
   getMemberVariablePath,
   isVariableName,
 } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 
 export const generateCodeOfInputWithLabel = (nodeAST: NodeAST) => {
   const { props } = nodeAST;

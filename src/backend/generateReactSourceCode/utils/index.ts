@@ -5,3 +5,4 @@ export * from './getRandomString';
 export * from './isBuiltInTypeCode';
 export * from './getMemberVariablePath';
 export * from './createGenerateCodeFnReturn';
+export * from './idAttrInDev';

@@ -15,7 +15,7 @@ export interface BuiltInTypeCode {
 
 export type Env = ('pc' | 'mobile' | 'app' | 'react' | 'vue' | 'mpa' | 'spa')[];
 
-export type Mode = 'development' | 'production';
+export type Mode = 'development' | 'production' | 'deploy';
 
 export interface Meta {
   title: string;
@@ -42,4 +42,37 @@ export interface PageModel {
   meta: Meta;
   logics?: LogicAST[];
   view: NodeASTOfBackstage | NodeASTOfFrontstage;
+}
+
+export interface FetchData {
+  url: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  params?: VariableName;
+  body?: VariableName;
+  computeParams?: FunctionCode;
+  computeBody?: FunctionCode;
+  computeResponse?: FunctionCode;
+}
+
+export interface InteractData {
+  setState: VariableName;
+  // 覆盖 | 增量
+  mode: 'Cover' | 'Increase';
+}
+
+export interface PaginationStartComputeData {
+  code: string;
+}
+
+export interface NavigateData {
+  url?: string;
+  method?: '_blank' | 'self';
+}
+
+export interface Action {
+  type: 'Fetch' | 'Interact' | 'PaginationStartCompute' | 'Navigate';
+  data: FetchData | InteractData | PaginationStartComputeData | NavigateData;
+  output?: VariableName;
+  receive?: VariableName | number | string;
+  next?: Action;
 }

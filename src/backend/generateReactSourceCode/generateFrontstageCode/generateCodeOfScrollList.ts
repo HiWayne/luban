@@ -1,7 +1,11 @@
 import { NodeAST, ScrollListProps } from '@/backend/types/frontstage';
 import { astToReactNodeCodeOfFrontstage, Context, Declarations } from '..';
-import { generateCodeOfProp } from '../generateCodeOfProp';
-import { createGenerateCodeFnReturn, _BUILT_IN_TYPE } from '../utils';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
+import {
+  createGenerateCodeFnReturn,
+  createIdAttrInDev,
+  _BUILT_IN_TYPE,
+} from '../utils';
 
 export const generateCodeOfScrollList = (
   nodeAST: NodeAST,
@@ -45,16 +49,18 @@ export const generateCodeOfScrollList = (
 
   const componentName = `ScrollList`;
 
-  const componentElement = `<${componentName}${generateCodeOfProp(
-    'key',
-    key,
-  )}${generateCodeOfProp('data', data)}${generateCodeOfProp(
-    'wrapperStyle',
-    wrapperStyle,
-  )}${generateCodeOfProp('listStyle', listStyle)}${generateCodeOfProp(
-    'renderItem',
-    renderItemCodeOfProp,
-  )}>${children || ''}</${componentName}>`;
+  const componentElement = `<div${createIdAttrInDev(
+    context.development,
+    id,
+  )}><${componentName}${generateCodeOfProp('key', key)}${generateCodeOfProp(
+    'data',
+    data,
+  )}${generateCodeOfProp('wrapperStyle', wrapperStyle)}${generateCodeOfProp(
+    'listStyle',
+    listStyle,
+  )}${generateCodeOfProp('renderItem', renderItemCodeOfProp)}>${
+    children || ''
+  }</${componentName}></div>`;
 
   return createGenerateCodeFnReturn({
     componentName,

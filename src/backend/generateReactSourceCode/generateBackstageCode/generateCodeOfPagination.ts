@@ -1,6 +1,6 @@
 import { Pagination } from '@/backend/types/backstage';
-import { generateCodeOfAction } from './generateCodeOfAction';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 
 export const generateCodeOfPagination = (pagination: Pagination) => {

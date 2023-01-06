@@ -1,8 +1,8 @@
 import { ModalProps, NodeAST } from '@/backend/types/backstage';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { astToReactNodeCodeOfBackstage, Context, Declarations } from '../index';
 import { createGenerateCodeFnReturn } from '../utils';
-import { generateCodeOfAction } from './generateCodeOfAction';
+import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
 
 export const generateCodeOfModal = (
   nodeAST: NodeAST,

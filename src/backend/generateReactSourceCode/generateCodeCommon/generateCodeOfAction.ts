@@ -2,8 +2,9 @@ import {
   Action,
   FetchData,
   InteractData,
+  NavigateData,
   PaginationStartComputeData,
-} from '@/backend/types/backstage';
+} from '@/backend/types/index';
 
 export const generateCodeOfAction = (action: Action) => {
   let actionCode = '';
@@ -66,6 +67,19 @@ export const generateCodeOfAction = (action: Action) => {
           ? generateCodeOfAction(next)
           : '';
 
+      break;
+    case 'Navigate':
+      const { url: navigateUrl, method: navigateMethod } =
+        action.data as NavigateData;
+      if (navigateMethod === '_blank') {
+        actionCode = `window.open("${navigateUrl || receive}");${
+          next ? generateCodeOfAction(next) : ''
+        }`;
+      } else {
+        actionCode = `window.location.href = "${navigateUrl || receive}";${
+          next ? generateCodeOfAction(next) : ''
+        }`;
+      }
       break;
     default:
       break;

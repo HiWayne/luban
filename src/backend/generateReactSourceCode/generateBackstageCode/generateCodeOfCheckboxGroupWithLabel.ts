@@ -3,7 +3,7 @@ import {
   NodeAST,
 } from '@/backend/types/backstage';
 import { createGenerateCodeFnReturn, getMemberVariablePath } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 
 export const generateCodeOfCheckboxGroupWithLabel = (nodeAST: NodeAST) => {
   const { props } = nodeAST;

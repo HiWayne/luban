@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
-import { BuiltInTypeCode, Condition, VariableName } from '..';
+import { Action, BuiltInTypeCode, Condition, VariableName } from '..';
 
 type NodeType =
   | 'BlockContainer'
@@ -24,6 +24,7 @@ interface CommonContainerProps {
   backgroundSize?: 'cover' | 'contain' | string | number;
   backgroundRepeat?: boolean;
   style?: CSSProperties;
+  action?: Action;
 }
 
 export interface BlockContainerProps extends CommonContainerProps {}
@@ -82,6 +83,7 @@ export interface ImageProps {
   objectFit?: 'cover' | 'contain';
   objectPosition?: 'center' | 'top' | 'bottom' | 'left' | 'right';
   style?: CSSProperties;
+  action: Action;
 }
 
 type TextAlign = 'left' | 'center' | 'right';
@@ -104,6 +106,7 @@ export interface TextProps {
   // 当设置width时，文字对齐会有作用
   textAlign?: TextAlign;
   style?: CSSProperties;
+  action?: Action;
 }
 
 interface Ellipsis {

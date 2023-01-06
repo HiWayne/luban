@@ -1,6 +1,6 @@
 import { NodeAST, ParagraphProps } from '@/backend/types/backstage';
 import { createGenerateCodeFnReturn, isVariableName } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 
 export const generateCodeOfParagraph = (nodeAST: NodeAST, id: number) => {
   const { props } = nodeAST;

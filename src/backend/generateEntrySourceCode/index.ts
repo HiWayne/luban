@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { TEMP_FILE_PATH } from '../config';
-import { Meta, PageModel } from '../types';
+import { Meta, Mode, PageModel } from '../types';
 import {
   generateCodeOfReactMpaInMobile,
   generateCodeOfReactMpaInPc,
@@ -8,7 +8,7 @@ import {
 import { whichEnv } from './utils';
 
 export const generateEntrySourceCode = async (
-  virtual: boolean,
+  mode: Mode,
   pageModel: PageModel | undefined,
   html: boolean,
   fileName?: string,
@@ -37,9 +37,9 @@ export const generateEntrySourceCode = async (
     //   const isVueMpaInApp = whichEnv(pageMeta.env, ['vue', 'mpa', 'app']);
 
     if (isReactMpaInPc) {
-      return generateCodeOfReactMpaInPc(virtual, pageModel, html);
+      return generateCodeOfReactMpaInPc(mode, pageModel, html);
     } else if (isReactMpaInMobile) {
-      return generateCodeOfReactMpaInMobile(virtual, pageModel, html);
+      return generateCodeOfReactMpaInMobile(mode, pageModel, html);
     }
   } else {
     const tempDirPath = TEMP_FILE_PATH;
@@ -69,7 +69,7 @@ export const generateEntrySourceCode = async (
     ]);
     if (isReactMpaInPc) {
       return generateCodeOfReactMpaInPc(
-        virtual,
+        mode,
         pageModel,
         html,
         fileName,
@@ -77,7 +77,7 @@ export const generateEntrySourceCode = async (
       );
     } else if (isReactMpaInMobile) {
       return generateCodeOfReactMpaInMobile(
-        virtual,
+        mode,
         pageModel,
         html,
         fileName,

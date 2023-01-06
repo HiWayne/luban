@@ -314,6 +314,13 @@ export const treeDemo: NodeAST = {
                         fontFamily: 'PingFangSC-Medium, PingFang SC',
                         fontWeight: 500,
                         color: '#FF5959',
+                        action: {
+                          type: 'Navigate',
+                          data: {
+                            url: 'https://www.duitang.com',
+                            method: '_blank',
+                          },
+                        },
                       },
                     },
                   ],

@@ -1,6 +1,6 @@
 import { NodeAST, SpaceProps } from '@/backend/types/backstage';
 import { astToReactNodeCodeOfBackstage, Context, Declarations } from '../index';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 
 export const generateCodeOfSpace = (

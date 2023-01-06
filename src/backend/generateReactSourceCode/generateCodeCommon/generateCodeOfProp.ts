@@ -3,8 +3,8 @@ import {
   isString,
   isBuiltInFunctionCode,
   isBuiltInVariableCode,
-} from './utils';
-import { generateCodeOfValue } from './generateBackstageCode/generateCodeOfLiteral';
+} from '../utils';
+import { generateCodeOfValue } from '../generateBackstageCode/generateCodeOfLiteral';
 
 export const generateCodeOfProp = (propName: string, propValue?: any) =>
   propValue !== undefined

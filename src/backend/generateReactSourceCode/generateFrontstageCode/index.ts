@@ -38,30 +38,31 @@ export const generateCodeByNodeAST = (
       );
       break;
     case 'BlockContainer':
-      output = generateCodeOfBlockContainer(nodeAST, children);
+      output = generateCodeOfBlockContainer(nodeAST, id, children, context);
       break;
     case 'InlineContainer':
-      output = generateCodeOfInlineContainer(nodeAST, children);
+      output = generateCodeOfInlineContainer(nodeAST, id, children, context);
       break;
     case 'FlexContainer':
-      output = generateCodeOfFlexContainer(nodeAST, children);
+      output = generateCodeOfFlexContainer(nodeAST, id, children, context);
       break;
     case 'GridContainer':
       output = generateCodeOfGridContainer(
         nodeAST,
+        id,
         children,
         declarations,
         context,
       );
       break;
     case 'Image':
-      output = generateCodeOfImage(nodeAST, id);
+      output = generateCodeOfImage(nodeAST, id, context);
       break;
     case 'Text':
-      output = generateCodeOfText(nodeAST);
+      output = generateCodeOfText(nodeAST, id, context);
       break;
     case 'Paragraph':
-      output = generateCodeOfParagraph(nodeAST, declarations, context);
+      output = generateCodeOfParagraph(nodeAST, id, declarations, context);
       break;
     default:
       break;

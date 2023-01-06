@@ -1,10 +1,18 @@
 import { FlexContainerProps, NodeAST } from '@/backend/types/frontstage';
-import { generateCodeOfProp } from '../generateCodeOfProp';
-import { createGenerateCodeFnReturn } from '../utils';
+import { Context } from '..';
+import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
+import {
+  createBuiltInTypeCode,
+  createGenerateCodeFnReturn,
+  createIdAttrInDev,
+} from '../utils';
 
 export const generateCodeOfFlexContainer = (
   nodeAST: NodeAST,
+  id: number,
   children: string | undefined,
+  context: Context,
 ) => {
   const { props } = nodeAST;
   const {
@@ -23,11 +31,12 @@ export const generateCodeOfFlexContainer = (
     backgroundRepeat,
     borderRadius,
     style,
+    action,
   } = props as FlexContainerProps;
 
   const componentName = 'FlexContainer';
 
-  const componentDeclaration = `const ${componentName} = ({ layout, direction = 'row', justifyContent = 'center', alignItems = 'center', style = {}, children }) => {
+  const componentDeclaration = `const ${componentName} = ({ id, layout, direction = 'row', justifyContent = 'center', alignItems = 'center', style = {}, onClick, children }) => {
     const flexStyle = useMemo(() => ({
         display: layout === 'inline' ? 'inline-flex' : 'flex',
         flexDirection: direction,
@@ -36,7 +45,7 @@ export const generateCodeOfFlexContainer = (
         ...style,
     }), [layout, direction, justifyContent, alignItems, ...Object.values(style)])
 
-    return <div style={flexStyle}>{children}</div>
+    return <div id={id} style={flexStyle} onClick={onClick}>{children}</div>
   };`;
 
   const styleObject = {
@@ -55,15 +64,26 @@ export const generateCodeOfFlexContainer = (
     ...(style || {}),
   };
 
-  const componentCall = `<${componentName}${generateCodeOfProp(
-    'layout',
-    layout,
-  )}${generateCodeOfProp('direction', direction)}${generateCodeOfProp(
-    'justifyContent',
-    justifyContent,
-  )}${generateCodeOfProp('alignItems', alignItems)}${generateCodeOfProp(
-    'style',
-    styleObject,
+  const onClickCode =
+    !context.development && action
+      ? createBuiltInTypeCode(
+          'function',
+          `async () => {${generateCodeOfAction(action)}}`,
+        )
+      : undefined;
+
+  const componentCall = `<${componentName}${createIdAttrInDev(
+    context.development,
+    id,
+  )}${generateCodeOfProp('layout', layout)}${generateCodeOfProp(
+    'direction',
+    direction,
+  )}${generateCodeOfProp('justifyContent', justifyContent)}${generateCodeOfProp(
+    'alignItems',
+    alignItems,
+  )}${generateCodeOfProp('style', styleObject)}${generateCodeOfProp(
+    'onClick',
+    onClickCode,
   )}>${children || ''}</${componentName}>`;
 
   return createGenerateCodeFnReturn({

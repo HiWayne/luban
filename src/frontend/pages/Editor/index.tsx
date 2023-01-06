@@ -49,6 +49,31 @@ const Editor = () => {
     }
   };
 
+  const runPage = async (pageModelContent: string) => {
+    const suffix = getRandomString();
+    const randomKey = `${key}${suffix}`;
+    const pageModelObj: PageModel = JSON.parse(pageModelContent);
+    pageModelObj.meta.key = randomKey;
+    pageModelObj.meta.mode = 'production';
+    const data: any = await fetch('//localhost:8000/lubanApp/', {
+      method: 'post',
+      body: JSON.stringify(pageModelObj),
+    }).then((response) => response.json());
+    if (data && data.data) {
+      const htmlPath = data.data.htmlPath;
+      if (htmlPath) {
+        if (microAppRef.current) {
+          microAppRef.current.unmount();
+        }
+        microAppRef.current = loadMicroApp({
+          name: `luban-app-${randomKey}`,
+          entry: `//localhost:8000${htmlPath}`,
+          container: '#lubanAppContainer',
+        });
+      }
+    }
+  };
+
   const getReactCode = async () => {
     const code = await fetch('//localhost:8000/compileToSourceCode/', {
       method: 'post',
@@ -68,8 +93,15 @@ const Editor = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
-        <div>
-          <Button onClick={() => previewPage(content)}>预览页面</Button>
+        <div style={{ marginTop: '20px' }}>
+          <Button onClick={() => previewPage(content)}>
+            预览页面（不能交互，防止和配置交互冲突）
+          </Button>
+          <Button
+            style={{ marginLeft: '20px' }}
+            onClick={() => runPage(content)}>
+            运行页面（可以交互）
+          </Button>
         </div>
         <div style={{ marginTop: '20px' }}>
           <Button onClick={getReactCode}>预览代码</Button>

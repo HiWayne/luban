@@ -21,12 +21,10 @@ app.post('/lubanApp/', async (req, reply) => {
     const pageModel: PageModel = JSON.parse(req.body as string);
     if (pageModel) {
       const mode = pageModel.meta.mode;
-      const isDevelopment = mode === 'development';
       const { htmlContent } =
-        (await generateEntrySourceCode(isDevelopment, pageModel, true)) || {};
-      if (isDevelopment) {
-        reply.send({ status: 1, data: { htmlPath: htmlContent }, message: '' });
-      }
+        (await generateEntrySourceCode(mode, pageModel, true)) || {};
+
+      reply.send({ status: 1, data: { htmlPath: htmlContent }, message: '' });
     } else {
       reply.code(400).send({ status: 0, data: null, message: '内容不能为空' });
     }
@@ -72,12 +70,7 @@ app.get('/virtual/*', async (req, reply) => {
 
     const isDevelopment = mode === 'development';
     const { jsContent: microAppJsText } =
-      (await generateEntrySourceCode(
-        isDevelopment,
-        undefined,
-        false,
-        fileName,
-      )) || {};
+      (await generateEntrySourceCode(mode, undefined, false, fileName)) || {};
     if (isDevelopment) {
       reply.headers({ 'content-type': 'text/javascript' }).send(microAppJsText);
     }
@@ -90,9 +83,9 @@ app.post('/compileToSourceCode/', async (req, reply) => {
     if (pageModel) {
       let sourceCode = '';
       if (pageModel.meta.env.includes('pc')) {
-        sourceCode = generateReactSourceCodeOfBackstage(pageModel);
+        sourceCode = generateReactSourceCodeOfBackstage(pageModel, false);
       } else if (pageModel.meta.env.includes('mobile')) {
-        sourceCode = generateReactSourceCodeOfFrontstage(pageModel);
+        sourceCode = generateReactSourceCodeOfFrontstage(pageModel, false);
       }
 
       sourceCode = beautifyCode(sourceCode);

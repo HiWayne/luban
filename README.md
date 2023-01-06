@@ -79,6 +79,37 @@ createRoot(document.getElementById('root')).render(<App />);
 
 让我们看看编译函数不同的写法对编译结果有什么影响：
 
+### 0. 必须写法（主要和编辑环境下的特殊处理相关）。
+
+```js
+/**
+ * 每个编译函数至少需要接受这三个参数（来自同目录下的index.ts，去看了就知道）
+ * nodeAST-该UI节点的ast、id-唯一id、context-上下文信息，里面有用的是development-是否是开发(编辑)环境
+ */
+const generateCodeOfXxx = (nodeAST, id, context) => {
+  // 一：
+  /**
+   * context的作用除了给 astToReactNodeCodeOfFrontstage 提供参数（后面的写法里会讲到它），还有必须的作用是：
+   * 开发环境或者叫编辑环境，是低代码后台编辑页面时所在的环境
+   * 这种环境下，UI本身应该不能交互，否则会和低代码后台的交互（比如拖拽、点击）冲突
+   * 所以需要根据context.development决定是否不编译交互相关的代码
+   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBlockContainer.ts 里的onClickCode
+   */
+  // 二：
+  /**
+   * id的作用除了封装组件时生成唯一name（后面的写法里会讲到它），还有必须的作用是：
+   * 低代码后台在配置页面时，可以通过点击某个页面UI，唤起它的配置面板，或者可以拖拽某个UI和其他调换位置等操作
+   * 但是低代码后台是不知道预览页面里的UI和组件模块的对应关系的
+   * 所以需要编译时，在development环境下，给组件的最外层元素加上特殊的id，用来标记这是一个组件模块。如果id=1，那就是<div id="luban_1"></div>
+   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBlockContainer.ts 里的createIdAttrInDev，它帮你封装好了根据context.development是否添加id属性的逻辑
+   */
+};
+```
+
+> 总结一下必须写法：1. 如果 UI 模块有交互事件，必须根据 context.development 确定是否不能交互。2. 如果在 development 环境下，最外层元素需要有特殊的 id 属性
+
+> 下面会讲各种不同的编译写法以及用处，它们可能为了讲述重点，所以省略了一些上述的必须写法，真正开发的时候不要忘记。
+
 ### 1. 编译写法一。希望创建组件声明函数。
 
 ```js
@@ -88,7 +119,7 @@ import { generateCodeOfProp } from '../generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译图片组件1
-const generateCodeOfImage1 = (nodeAST) => {
+const generateCodeOfImage1 = (nodeAST, id, context) => {
   const { props } = nodeAST;
   // 根据src等配置生成代码
   const { src } = props;
@@ -107,16 +138,13 @@ const generateCodeOfImage1 = (nodeAST) => {
 // 或者还有一种简化写法
 // 编译图片组件2
 // id是外部给的，保证唯一
-const generateCodeOfImage2 = (nodeAST, id) => {
+const generateCodeOfImage2 = (nodeAST, id, context) => {
   const { props } = nodeAST;
   // 根据src等配置生成代码
   const { src } = props;
 
   const componentName = `Image_${id}`;
-  const componentElement = `<img${generateCodeOfProp(
-    'src',
-    src,
-  )} />`;
+  const componentElement = `<img${generateCodeOfProp('src', src)} />`;
 
   return createGenerateCodeFnReturn({
     componentName,
@@ -193,7 +221,7 @@ import { generateCodeOfProp } from '../generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译a标签组件
-const generateCodeOfA = (nodeAST) => {
+const generateCodeOfA = (nodeAST, id, context) => {
   const { props } = nodeAST;
   // 根据href等配置生成代码，text是a标签的文本
   const { href, target, text } = props;
@@ -246,7 +274,7 @@ import { generateCodeOfProp } from '../generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译BlockContainer组件
-const generateCodeOfBlockContainer = (nodeAST, children) => {
+const generateCodeOfBlockContainer = (nodeAST, id, children, context) => {
   // 因为是简单组件，所以用写法二，将来直接在App里调用reactElement就行（<xxx></xxx>）
   const componentCall = `<div>${children}</div>`;
 
@@ -268,7 +296,7 @@ import { generateCodeOfProp } from '../generateCodeOfProp';
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译BlockContainer组件
-const generateCodeOfBlockContainer = (nodeAST) => {
+const generateCodeOfBlockContainer = (nodeAST, id, context) => {
   const componentName = 'BlockContainer';
   const componentElement = `<div>{children}</div>`;
 
@@ -320,7 +348,7 @@ import { createGenerateCodeFnReturn } from '../utils';
 import { astToReactNodeCodeOfFrontstage } from '../index';
 
 // 编译List
-const generateCodeOfList = (nodeAST, declarations, context) => {
+const generateCodeOfList = (nodeAST, id, declarations, context) => {
   const { props } = nodeAST;
   const { data, renderItem } = props;
 

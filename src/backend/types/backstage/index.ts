@@ -1,4 +1,4 @@
-import { Condition, FunctionCode, VariableName } from '..';
+import { Action, Condition, VariableName } from '..';
 
 export * from '../esAst';
 
@@ -117,34 +117,6 @@ export interface TableProps {
   }[];
   rowKey: string;
   pagination?: Pagination;
-}
-
-export interface FetchData {
-  url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  params?: VariableName;
-  body?: VariableName;
-  computeParams?: FunctionCode;
-  computeBody?: FunctionCode;
-  computeResponse?: FunctionCode;
-}
-
-export interface InteractData {
-  setState: VariableName;
-  // 覆盖 | 增量
-  mode: 'Cover' | 'Increase';
-}
-
-export interface PaginationStartComputeData {
-  code: string;
-}
-
-export interface Action {
-  type: 'Fetch' | 'Interact' | 'PaginationStartCompute';
-  data: FetchData | InteractData | PaginationStartComputeData;
-  output?: VariableName;
-  receive?: VariableName | number | string;
-  next?: Action;
 }
 
 export interface ButtonProps {

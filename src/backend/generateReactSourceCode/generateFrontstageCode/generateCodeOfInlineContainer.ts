@@ -1,10 +1,18 @@
 import { InlineContainerProps, NodeAST } from '@/backend/types/frontstage';
-import { generateCodeOfProp } from '../generateCodeOfProp';
-import { createGenerateCodeFnReturn } from '../utils';
+import { Context } from '..';
+import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
+import {
+  createBuiltInTypeCode,
+  createGenerateCodeFnReturn,
+  createIdAttrInDev,
+} from '../utils';
 
 export const generateCodeOfInlineContainer = (
   nodeAST: NodeAST,
+  id: number,
   children: string | undefined,
+  context: Context,
 ) => {
   const { props, key } = nodeAST;
   const {
@@ -19,6 +27,7 @@ export const generateCodeOfInlineContainer = (
     backgroundRepeat,
     borderRadius,
     style,
+    action,
   } = props as InlineContainerProps;
 
   const componentName = 'InlineContainer';
@@ -39,12 +48,23 @@ export const generateCodeOfInlineContainer = (
     ...(style || {}),
   };
 
-  const componentDeclaration = `const ${componentName} = ({ children, style = {} }) => (<div style={{display: 'inline-block', ...style}}>{children}</div>);`;
+  const componentDeclaration = `const ${componentName} = ({ id, children, onClick, style = {} }) => (<div id={id} style={{display: 'inline-block', ...style}} onClick={onClick}>{children}</div>);`;
 
-  const componentCall = `<${componentName}${generateCodeOfProp(
-    'key',
-    key,
-  )}${generateCodeOfProp('style', inlineContainerStyle)}>${
+  const onClickCode =
+    !context.development && action
+      ? createBuiltInTypeCode(
+          'function',
+          `async () => {${generateCodeOfAction(action)}}`,
+        )
+      : undefined;
+
+  const componentCall = `<${componentName}${createIdAttrInDev(
+    context.development,
+    id,
+  )}${generateCodeOfProp('key', key)}${generateCodeOfProp(
+    'style',
+    inlineContainerStyle,
+  )}${generateCodeOfProp('onClick', onClickCode)}>${
     children || ''
   }</${componentName}>`;
 

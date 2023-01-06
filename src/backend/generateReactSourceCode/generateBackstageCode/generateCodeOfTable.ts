@@ -1,5 +1,5 @@
 import { NodeAST, TableProps } from '@/backend/types/backstage';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { astToReactNodeCodeOfBackstage, Context, Declarations } from '../index';
 import { createGenerateCodeFnReturn } from '../utils';
 import { generateCodeOfLiteral } from './generateCodeOfLiteral';

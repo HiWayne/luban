@@ -1,10 +1,15 @@
 import { NodeAST, ParagraphProps } from '@/backend/types/frontstage';
 import { astToReactNodeCodeOfFrontstage, Context, Declarations } from '..';
-import { generateCodeOfProp } from '../generateCodeOfProp';
-import { createGenerateCodeFnReturn, isVariableName } from '../utils';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
+import {
+  createGenerateCodeFnReturn,
+  createIdAttrInDev,
+  isVariableName,
+} from '../utils';
 
 export const generateCodeOfParagraph = (
   nodeAST: NodeAST,
+  id: number,
   declarations: Declarations,
   context: Context,
 ) => {
@@ -29,7 +34,7 @@ export const generateCodeOfParagraph = (
 
   const componentName = 'Paragraph';
 
-  const componentDeclaration = `const ${componentName} = ({ children, textAlign, textIndent, margin, padding, width, height, wrap, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ellipsisStyle = {} }) => {
+  const componentDeclaration = `const ${componentName} = ({ id, children, textAlign, textIndent, margin, padding, width, height, wrap, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ellipsisStyle = {} }) => {
     const pStyle = useMemo(() => ({
         margin,
         padding,
@@ -47,7 +52,7 @@ export const generateCodeOfParagraph = (
         ...ellipsisStyle,
     }), [margin, padding, width, height, textAlign, textIndent, wrap, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ...Object.values(ellipsisStyle)])
 
-    return (<p style={pStyle}>{children}</p>)
+    return (<p id={id} style={pStyle}>{children}</p>)
   };`;
 
   const ellipsisStyle =
@@ -68,22 +73,25 @@ export const generateCodeOfParagraph = (
           }
       : undefined;
 
-  const componentCall = `<${componentName}${generateCodeOfProp(
-    'textAlign',
-    textAlign,
-  )}${generateCodeOfProp('margin', margin)}${generateCodeOfProp(
-    'padding',
-    padding,
-  )}${generateCodeOfProp('width', width)}${generateCodeOfProp(
-    'height',
-    height,
-  )}${generateCodeOfProp('wrap', wrap)}${generateCodeOfProp(
-    'ellipsisStyle',
-    ellipsisStyle,
-  )}${generateCodeOfProp('textIndent', textIndent)}${generateCodeOfProp(
-    'color',
-    color,
-  )}${generateCodeOfProp('fontSize', fontSize)}${generateCodeOfProp(
+  const componentCall = `<${componentName}${createIdAttrInDev(
+    context.development,
+    id,
+  )}${generateCodeOfProp('textAlign', textAlign)}${generateCodeOfProp(
+    'margin',
+    margin,
+  )}${generateCodeOfProp('padding', padding)}${generateCodeOfProp(
+    'width',
+    width,
+  )}${generateCodeOfProp('height', height)}${generateCodeOfProp(
+    'wrap',
+    wrap,
+  )}${generateCodeOfProp('ellipsisStyle', ellipsisStyle)}${generateCodeOfProp(
+    'textIndent',
+    textIndent,
+  )}${generateCodeOfProp('color', color)}${generateCodeOfProp(
+    'fontSize',
+    fontSize,
+  )}${generateCodeOfProp(
     'lineHeight',
     typeof lineHeight === 'number' ? `${lineHeight}px` : lineHeight,
   )}${generateCodeOfProp('fontWeight', fontWeight)}${generateCodeOfProp(

@@ -1,6 +1,6 @@
 import { ImageGroupProps, NodeAST } from '@/backend/types/backstage';
 import { createGenerateCodeFnReturn, isVariableName } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { generateCodeOfScript } from './generateCodeOfScript';
 
 export const generateCodeOfImageGroup = (nodeAST: NodeAST) => {

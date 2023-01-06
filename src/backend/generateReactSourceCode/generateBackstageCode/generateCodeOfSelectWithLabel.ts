@@ -1,6 +1,6 @@
 import { NodeAST, SelectWithLabelProps } from '@/backend/types/backstage';
 import { createGenerateCodeFnReturn, getMemberVariablePath } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 
 export const generateCodeOfSelectWithLabel = (nodeAST: NodeAST) => {
   const { props } = nodeAST;

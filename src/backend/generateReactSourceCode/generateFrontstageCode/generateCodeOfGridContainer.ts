@@ -1,10 +1,16 @@
 import { GridContainerProps, NodeAST } from '@/backend/types/frontstage';
 import { astToReactNodeCodeOfFrontstage, Context, Declarations } from '..';
-import { generateCodeOfProp } from '../generateCodeOfProp';
-import { createBuiltInTypeCode, createGenerateCodeFnReturn } from '../utils';
+import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
+import {
+  createBuiltInTypeCode,
+  createGenerateCodeFnReturn,
+  createIdAttrInDev,
+} from '../utils';
 
 export const generateCodeOfGridContainer = (
   nodeAST: NodeAST,
+  id: number,
   children: string | undefined,
   declarations: Declarations,
   context: Context,
@@ -28,6 +34,7 @@ export const generateCodeOfGridContainer = (
     backgroundRepeat,
     borderRadius,
     style,
+    action,
   } = props as GridContainerProps;
 
   const componentName = 'GridContainer';
@@ -49,7 +56,7 @@ export const generateCodeOfGridContainer = (
         margin-top: \${props => props.marginTop};
     \`
 
-  const ${componentName} = ({ data, layout, columns = 3, verticalSpace, horizontalSpace, children, renderItem: RenderItem, justifyContent, style = {} }) => {
+  const ${componentName} = ({ id, data, layout, columns = 3, verticalSpace, horizontalSpace, children, renderItem: RenderItem, justifyContent, onClick, style = {} }) => {
     const wrapperStyle = useMemo(() => ({
         display: layout === 'inline' ? 'inline-block' : 'block',
         ...style,
@@ -75,7 +82,7 @@ export const generateCodeOfGridContainer = (
         }
     }, [data, children])
 
-    return <div style={wrapperStyle}><div style={{marginLeft: \`-\${horizontalSpace}\`, marginTop: \`-\${verticalSpace}\`}}>{createArray(rowCount).map((_, rowIndex) => (<${LineName} key={rowIndex} justifyContent={justifyContent}>{createArray(columns).map((_, columnIndex) => <${ItemName} key={columnIndex} marginLeft={horizontalSpace} marginTop={verticalSpace}>{render(rowIndex, columnIndex)}</${ItemName}>)}</${LineName}>))}</div></div>
+    return <div id={id} style={wrapperStyle} onClick={onClick}><div style={{marginLeft: \`-\${horizontalSpace}\`, marginTop: \`-\${verticalSpace}\`}}>{createArray(rowCount).map((_, rowIndex) => (<${LineName} key={rowIndex} justifyContent={justifyContent}>{createArray(columns).map((_, columnIndex) => <${ItemName} key={columnIndex} marginLeft={horizontalSpace} marginTop={verticalSpace}>{render(rowIndex, columnIndex)}</${ItemName}>)}</${LineName}>))}</div></div>
   };`;
 
   const createSpaceObject = (): {
@@ -152,13 +159,21 @@ export const generateCodeOfGridContainer = (
     ...(style || {}),
   };
 
-  const componentCall = `<${componentName}${generateCodeOfProp(
-    'data',
-    data,
-  )}${generateCodeOfProp('layout', layout)}${generateCodeOfProp(
-    'columns',
-    columns,
-  )}${generateCodeOfProp(
+  const onClickCode =
+    !context.development && action
+      ? createBuiltInTypeCode(
+          'function',
+          `async () => {${generateCodeOfAction(action)}}`,
+        )
+      : undefined;
+
+  const componentCall = `<${componentName}${createIdAttrInDev(
+    context.development,
+    id,
+  )}${generateCodeOfProp('data', data)}${generateCodeOfProp(
+    'layout',
+    layout,
+  )}${generateCodeOfProp('columns', columns)}${generateCodeOfProp(
     'verticalSpace',
     spaceObject.verticalSpace,
   )}${generateCodeOfProp(
@@ -167,9 +182,10 @@ export const generateCodeOfGridContainer = (
   )}${generateCodeOfProp('justifyContent', justifyContent)}${generateCodeOfProp(
     'style',
     styleObject,
-  )}${generateCodeOfProp('renderItem', renderItemCode)}>${
-    children || ''
-  }</${componentName}>`;
+  )}${generateCodeOfProp('renderItem', renderItemCode)}${generateCodeOfProp(
+    'onClick',
+    onClickCode,
+  )}>${children || ''}</${componentName}>`;
 
   return createGenerateCodeFnReturn({
     componentName,

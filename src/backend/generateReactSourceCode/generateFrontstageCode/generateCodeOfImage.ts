@@ -1,8 +1,18 @@
 import { ImageProps, NodeAST } from '@/backend/types/frontstage';
-import { createGenerateCodeFnReturn } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import {
+  createBuiltInTypeCode,
+  createGenerateCodeFnReturn,
+  createIdAttrInDev,
+} from '../utils';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
+import { Context } from '..';
+import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
 
-export const generateCodeOfImage = (nodeAST: NodeAST, id: number) => {
+export const generateCodeOfImage = (
+  nodeAST: NodeAST,
+  id: number,
+  context: Context,
+) => {
   const { props, key } = nodeAST;
   const {
     src,
@@ -16,6 +26,7 @@ export const generateCodeOfImage = (nodeAST: NodeAST, id: number) => {
     objectFit,
     objectPosition,
     style,
+    action,
   } = props as ImageProps;
 
   const componentName = layout === 'block' ? `ImageBlock_${id}` : `Image_${id}`;
@@ -104,22 +115,36 @@ export const generateCodeOfImage = (nodeAST: NodeAST, id: number) => {
       ${BlockImageWrapperComponent}
       ${BlockImageComponent}
 
-      const ${componentName} = ({ src, style }) => {
-        return (<BlockImageWrapper_inner_${id} style={style}><BlockImage_inner_${id} src={src} /></BlockImageWrapper_inner_${id}>)
+      const ${componentName} = ({ id, src, style, onClick }) => {
+        return (<BlockImageWrapper_inner_${id} id={id} style={style} onClick={onClick}><BlockImage_inner_${id} src={src} /></BlockImageWrapper_inner_${id}>)
       };
     `
       : `
       ${InlineImageComponent}
 
-      const ${componentName} = ({ src, style }) => {
-        return (<InlineImage_inner_${id} style={style} src={src} />)
+      const ${componentName} = ({ id, src, style, onClick }) => {
+        return (<InlineImage_inner_${id} id={id} style={style} src={src} onClick={onClick} />)
       };
     `;
 
-  const componentCall = `<${componentName}${generateCodeOfProp(
-    'key',
-    key,
-  )}${generateCodeOfProp('src', src)}${generateCodeOfProp('style', style)} />`;
+  const onClickCode =
+    !context.development && action
+      ? createBuiltInTypeCode(
+          'function',
+          `async () => {${generateCodeOfAction(action)}}`,
+        )
+      : undefined;
+
+  const componentCall = `<${componentName}${createIdAttrInDev(
+    context.development,
+    id,
+  )}${generateCodeOfProp('key', key)}${generateCodeOfProp(
+    'src',
+    src,
+  )}${generateCodeOfProp('style', style)}${generateCodeOfProp(
+    'onClick',
+    onClickCode,
+  )} />`;
 
   return createGenerateCodeFnReturn({
     componentName,

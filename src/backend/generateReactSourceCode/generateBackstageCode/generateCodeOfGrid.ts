@@ -1,5 +1,5 @@
 import { GridProps, NodeAST } from '@/backend/types/backstage';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { generateCodeOfLiteral } from './generateCodeOfLiteral';
 import { astToReactNodeCodeOfBackstage, Context, Declarations } from '../index';
 import { createGenerateCodeFnReturn } from '../utils';

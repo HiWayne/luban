@@ -1,6 +1,6 @@
 import { NodeAST, RangePickerWithLabelProps } from '@/backend/types/backstage';
 import { createGenerateCodeFnReturn, getMemberVariablePath } from '../utils';
-import { generateCodeOfProp } from '../generateCodeOfProp';
+import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 
 export const generateCodeOfRangePickerWithLabel = (nodeAST: NodeAST) => {
   const { props } = nodeAST;
