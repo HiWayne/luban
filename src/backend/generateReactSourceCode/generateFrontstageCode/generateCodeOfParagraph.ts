@@ -22,7 +22,6 @@ export const generateCodeOfParagraph = (
     padding,
     width,
     height,
-    wrap,
     ellipsis,
     color,
     fontSize,
@@ -34,7 +33,7 @@ export const generateCodeOfParagraph = (
 
   const componentName = 'Paragraph';
 
-  const componentDeclaration = `const ${componentName} = ({ id, children, textAlign, textIndent, margin, padding, width, height, wrap, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ellipsisStyle = {} }) => {
+  const componentDeclaration = `const ${componentName} = ({ id, children, textAlign, textIndent, margin, padding, width, height, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ellipsisStyle = {} }) => {
     const pStyle = useMemo(() => ({
         margin,
         padding,
@@ -42,7 +41,6 @@ export const generateCodeOfParagraph = (
         height,
         textAlign,
         textIndent,
-        whiteSpace: wrap ? undefined : 'no-wrap',
         color,
         fontSize,
         lineHeight,
@@ -50,7 +48,7 @@ export const generateCodeOfParagraph = (
         fontFamily,
         textDecoration,
         ...ellipsisStyle,
-    }), [margin, padding, width, height, textAlign, textIndent, wrap, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ...Object.values(ellipsisStyle)])
+    }), [margin, padding, width, height, textAlign, textIndent, color, fontSize, lineHeight, fontWeight, fontFamily, textDecoration, ...Object.values(ellipsisStyle)])
 
     return (<p id={id} style={pStyle}>{children}</p>)
   };`;
@@ -76,15 +74,15 @@ export const generateCodeOfParagraph = (
   const componentCall = `<${componentName}${createIdAttrInDev(
     context.development,
     id,
-  )}${generateCodeOfProp('textAlign', textAlign)}${generateCodeOfProp(
-    'margin',
-    margin,
-  )}${generateCodeOfProp('padding', padding)}${generateCodeOfProp(
-    'width',
-    width,
-  )}${generateCodeOfProp('height', height)}${generateCodeOfProp(
-    'wrap',
-    wrap,
+  )}${generateCodeOfProp(
+    'textAlign',
+    textAlign ? `${textAlign}em` : undefined,
+  )}${generateCodeOfProp('margin', margin)}${generateCodeOfProp(
+    'padding',
+    padding,
+  )}${generateCodeOfProp('width', width)}${generateCodeOfProp(
+    'height',
+    height,
   )}${generateCodeOfProp('ellipsisStyle', ellipsisStyle)}${generateCodeOfProp(
     'textIndent',
     textIndent,

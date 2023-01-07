@@ -1,1 +1,1 @@
-export * from './toCComponents';
+export * from './toCComponentsConfig';

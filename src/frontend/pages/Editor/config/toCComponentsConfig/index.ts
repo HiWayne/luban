@@ -1,14 +1,28 @@
 import { FC } from 'react';
 import { NodeAST } from '@/backend/types/frontstage/index';
 import toCImageDemo from '../assets/toCImageDemo.svg';
+import {
+  actionConfig,
+  borderRadiusConfig,
+  commonContainerConfigs,
+  commonTextConfig,
+  heightConfig,
+  layoutConfig,
+  listDataConfig,
+  marginConfig,
+  paddingConfig,
+  renderItemConfig,
+  styleConfig,
+  widthConfig,
+} from './commonConfig';
 
-interface FormSchema {
+export interface FormSchema {
   type: 'input' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'image-upload';
   options: { label: string; value: any }[];
   defaultValue: any;
 }
 
-interface Config {
+export interface Config {
   name: string;
   description: string;
   formSchema?: FormSchema;
@@ -17,7 +31,7 @@ interface Config {
   propName: string;
 }
 
-interface ToCComponent {
+export interface ToCComponent {
   name: string;
   type:
     | 'BlockContainer'
@@ -32,90 +46,6 @@ interface ToCComponent {
   defaultAST: NodeAST;
   configs: Config[];
 }
-
-const commonContainerConfigs: Config[] = [
-  {
-    name: '宽度',
-    description:
-      '容器宽度。默认单位px，也可自定义单位。若容器是块级(block)，宽度默认占满一行。',
-    required: false,
-    propName: 'width',
-  },
-  {
-    name: '高度',
-    description:
-      '容器高度。默认单位px，也可自定义单位。若不设置，容器高度将由内部内容撑开。',
-    required: false,
-    propName: 'height',
-  },
-  {
-    name: '外边距',
-    description: '容器边缘与外部内容的边距。默认单位px，也可自定义单位。',
-    required: false,
-    propName: 'margin',
-  },
-  {
-    name: '内边距',
-    description: '容器边缘与内部内容的边距。默认单位px，也可自定义单位。',
-    required: false,
-    propName: 'padding',
-  },
-  {
-    name: '圆角',
-    description:
-      '容器四周的圆角。默认单位px，也可自定义单位。举例：8-四周圆角都是8px、"8px 16px 32px 64px"-左上8px，右上16px，右下32px，左下64px。',
-    required: false,
-    propName: 'borderRadius',
-  },
-  {
-    name: '背景颜色',
-    description: '容器背景颜色',
-    required: false,
-    propName: 'backgroundColor',
-  },
-  {
-    name: '背景图片',
-    description: '容器背景图片。',
-    required: false,
-    propName: 'backgroundImage',
-  },
-  {
-    name: '背景图片位置',
-    description:
-      '容器背景图片位置。图片的左上角与容器左上的x、y距离。举例："center"-居中、"20px 40px"-图片上边距容器上边20px，左边距容器左边40px、"top center"-图片上边紧靠容器上边，左右居中。',
-    required: false,
-    propName: 'backgroundPosition',
-  },
-  {
-    name: '背景图片大小',
-    description:
-      '容器背景图片大小。举例："cover"-图片最小能填满容器背景的大小（图片一定能填满背景，但可能显示不完整）、"contain"-图片最大能完整显示的大小（图片一定能显示完整，但可能填不满容器背景）、"200px"-宽200px，高以图片原始比例自适应、"200px 100px"-宽200px，高100px。',
-    required: false,
-    propName: 'backgroundSize',
-  },
-  {
-    name: '背景图片是否重复铺满',
-    description:
-      '容器背景图片大小小于容器大小的情况下，是否重复图片直到填满背景',
-    required: false,
-    propName: 'backgroundRepeat',
-  },
-  {
-    name: '高级样式',
-    description:
-      '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置，style类型是React.CSSProperties',
-    required: false,
-    propName: 'style',
-  },
-];
-
-const layoutConfig = {
-  name: '布局类型',
-  description:
-    '默认block。block: 该容器会占满一行（哪怕实际宽度不足一行，后面的内容依然会另起一行）；inline-该容器宽度默认由内容决定，多个inline(单个不满一行时)可以放在一行。',
-  required: false,
-  propName: 'layout',
-};
 
 export const toCComponents: ToCComponent[] = [
   {
@@ -198,12 +128,7 @@ export const toCComponents: ToCComponent[] = [
       children: [],
     },
     configs: [
-      {
-        name: '数据',
-        description: '选择一个变量，类型必须的数组。',
-        required: false,
-        propName: 'data',
-      },
+      listDataConfig,
       layoutConfig,
       {
         name: '列数',
@@ -224,20 +149,7 @@ export const toCComponents: ToCComponent[] = [
         required: false,
         propName: 'justifyContent',
       },
-      {
-        name: '内容渲染',
-        description: '内容可以由各种UI模块组成',
-        required: false,
-        propName: 'renderItem.render',
-      },
-      {
-        name: '内容渲染函数变量名',
-        description:
-          // eslint-disable-next-line no-template-curly-in-string
-          '变量名称name会被加在"iterate_scope_variable_"后面，内容渲染的节点里可以使用 iterate_scope_variable_${name} 变量',
-        required: false,
-        propName: 'renderItem.iterate_scope_variable',
-      },
+      ...renderItemConfig,
       ...commonContainerConfigs,
     ],
   },
@@ -250,6 +162,30 @@ export const toCComponents: ToCComponent[] = [
       props: {},
       children: [],
     },
+    configs: [
+      listDataConfig,
+      {
+        name: '外层样式wrapperStyle',
+        description:
+          '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置，style类型是React.CSSProperties',
+        required: false,
+        propName: 'wrapperStyle',
+      },
+      {
+        name: '列表样式listStyle',
+        description:
+          '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置，style类型是React.CSSProperties',
+        required: false,
+        propName: 'listStyle',
+      },
+      ...renderItemConfig,
+      {
+        name: '行key字段',
+        description: 'react key所取的字段名，没有默认取循环里的index',
+        required: false,
+        propName: 'rowKey',
+      },
+    ],
   },
   {
     name: '图片',
@@ -265,6 +201,47 @@ export const toCComponents: ToCComponent[] = [
         objectPosition: 'center',
       },
     },
+    configs: [
+      {
+        name: '图片',
+        description: '上传图片或设置变量名',
+        required: true,
+        propName: 'src',
+      },
+      layoutConfig,
+      widthConfig,
+      heightConfig,
+      {
+        name: '图片宽/高比例',
+        description: '在设置了宽度且不设置高度时，可以通过宽高比例固定图片大小',
+        required: false,
+        propName: 'ratio',
+      },
+      borderRadiusConfig,
+      {
+        name: '是否可保存',
+        description: '是否可以长按保存',
+        required: false,
+        propName: 'saveable',
+      },
+      marginConfig,
+      {
+        name: '实际图片自适应大小',
+        description:
+          '若不设置组件宽高或只设置宽度，实际图片会和组件宽度一致，高度按原始比例撑开组件。若组件宽高都设置，但实际图片宽高比例与组件不一致，图片就会变形。可以通过这个配置来选择图片展示方式。举例："cover"-图片尽可能小的以原始比例填满组件（图片一定能填满组件，但可能显示不完整）、"contain"-图片尽可能大的（但不超出组件）以原始比例完整显示（图片一定能显示完整，但可能填不满组件）。',
+        required: false,
+        propName: 'objectFit',
+      },
+      {
+        name: '实际图片位置',
+        description:
+          '若实际图片比例与组件宽高比例不一致，且设置了实际图片自适应大小，图片可能为了保持原始比例而小于组件的大小展示。这时可以设置图片在组件中的位置（默认靠左上）。举例："center"-上下左右居中、"center left"-上下方向居中，左右方向靠左、"top right"-上下方向靠上，左右方向靠右。',
+        required: false,
+        propName: 'objectPosition',
+      },
+      actionConfig,
+      styleConfig,
+    ],
   },
   {
     name: '文字',
@@ -280,6 +257,40 @@ export const toCComponents: ToCComponent[] = [
         fontFamily: 'PingFangSC-Regular, PingFang SC',
       },
     },
+    configs: [
+      {
+        name: '内容',
+        description: '文字内容。可以是字符串，也可以是变量',
+        required: true,
+        propName: 'text',
+      },
+      marginConfig,
+      paddingConfig,
+      widthConfig,
+      heightConfig,
+      ...commonTextConfig,
+      {
+        name: '是否斜体',
+        description: '文字是否是斜体字',
+        required: false,
+        propName: 'italic',
+      },
+      {
+        name: '背景颜色',
+        description: '文字背景颜色',
+        required: false,
+        propName: 'backgroundColor',
+      },
+      {
+        name: '过长是否省略',
+        description:
+          '文字组件的宽度默认由文字数量决定。但如果你设置了组件宽度，文字过长会换行。你可以设置该配置，让文字始终单行并且过长省略（结尾省略号）。',
+        required: false,
+        propName: 'ellipsis',
+      },
+      actionConfig,
+      styleConfig,
+    ],
   },
   {
     name: '段落',
@@ -295,5 +306,33 @@ export const toCComponents: ToCComponent[] = [
         fontFamily: 'PingFangSC-Regular, PingFang SC',
       },
     },
+    configs: [
+      {
+        name: '内容',
+        description:
+          '内容可以由多个文字组件组成，文字组件里的文字样式是文字组件的样式，通过这种方式可以给一段中的某几个字单独设置颜色、背景等。内容也可以直接是字符串，字符串的文字样式就是段落的样式',
+        required: true,
+        propName: 'texts',
+      },
+      marginConfig,
+      paddingConfig,
+      widthConfig,
+      heightConfig,
+      {
+        name: '首行缩进',
+        description:
+          '设置首行缩进的文字数。默认不缩进，如果设置2代表首行缩进2个字符长度。',
+        required: false,
+        propName: 'textIndent',
+      },
+      ...commonTextConfig,
+      {
+        name: '过长是否省略',
+        description:
+          '段落宽度默认占满整行。如果你设置了组件宽度，你可以设置该配置，如果文字超过n行后省略（结尾省略号）。',
+        required: false,
+        propName: 'ellipsis',
+      },
+    ],
   },
 ];

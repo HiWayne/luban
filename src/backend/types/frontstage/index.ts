@@ -114,7 +114,7 @@ interface Ellipsis {
 }
 
 export interface ParagraphProps {
-  texts?: (NodeAST | string | VariableName)[];
+  texts: (NodeAST | string | VariableName)[];
   margin?: number | string;
   padding?: number | string;
   width?: number | string;
@@ -126,8 +126,7 @@ export interface ParagraphProps {
   fontFamily?: string;
   textDecoration?: 'line-through' | 'underline';
   textAlign?: TextAlign;
-  textIndent?: string;
-  wrap?: boolean;
+  textIndent?: number;
   ellipsis?: Ellipsis;
 }
 
