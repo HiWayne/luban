@@ -97,6 +97,7 @@ const Editor = () => {
         />
         <h4>场景组件</h4>
         <ConfigArea>
+          {/* toC */}
           {toCComponents.map(({ name }) => <ComponentWrapper name={name} />)}
         </ConfigArea>
         <div style={{ marginTop: '20px' }}>
