@@ -7,6 +7,8 @@ import { pageModel as pageModelOfFrontstage } from '@/backend/mock2';
 import { getRandomString } from '@/backend/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
 import { HighLightCodeEditor } from '@/frontend/components';
+import { toCComponents } from './config';
+import { ComponentsSelectArea, ComponentItem } from './components'
 
 const Editor = () => {
   const { type = 'tob' } = (getParams() || {}) as { type: 'toc' | 'tob' };
@@ -93,6 +95,11 @@ const Editor = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
+        <h4>场景组件</h4>
+        <ComponentsSelectArea>
+          {/* toC */}
+          {toCComponents.map(({ name }) => <ComponentItem name={name} />)}
+        </ComponentsSelectArea>
         <div style={{ marginTop: '20px' }}>
           <Button onClick={() => previewPage(content)}>
             预览页面（不能交互，防止和配置交互冲突）
