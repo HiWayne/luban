@@ -3,12 +3,12 @@ import { immer } from 'zustand/middleware/immer';
 import createEditorStore, { EditorStore } from './editor';
 
 interface Store {
-  page: EditorStore;
+  editor: EditorStore;
 }
 
 const useStore = create(
   immer<Store>((set) => ({
-    page: createEditorStore(set),
+    editor: createEditorStore(set),
   })),
 );
 
