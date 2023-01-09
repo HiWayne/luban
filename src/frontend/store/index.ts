@@ -1,14 +1,14 @@
 import create from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import createPageStore, { PageStore } from './page';
+import createEditorStore, { EditorStore } from './editor';
 
 interface Store {
-  page: PageStore;
+  page: EditorStore;
 }
 
 const useStore = create(
   immer<Store>((set) => ({
-    page: createPageStore(set),
+    page: createEditorStore(set),
   })),
 );
 

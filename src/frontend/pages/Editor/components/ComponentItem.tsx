@@ -1,5 +1,6 @@
 import { FC } from "react";
 import styled from "styled-components"
+import componentIcon from '../assets/componentIcon.svg'
 
 const Wrapper = styled.div`
     display: flex;
@@ -26,11 +27,11 @@ const Image = styled.img`
     margin-right: 8px;
 `
 
-interface ComponentWrapperProp {
+interface ComponentItemProp {
     name: string;
     icon?: string;
 }
-export const ComponentWrapper: FC<ComponentWrapperProp> = ({ name, icon = 'https://comp-public-1303824488.cos.ap-shanghai.myqcloud.com/lca/comGroup/cg-y9vkmgyuyplh/build/meta/Container/icon.svg' }) => {
+export const ComponentItem: FC<ComponentItemProp> = ({ name, icon = componentIcon }) => {
     return <Wrapper draggable>
         <Image src={icon} alt="小图标" />
         <Name>{name}</Name>

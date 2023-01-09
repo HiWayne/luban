@@ -1,2 +1,2 @@
-export * from './ConfigArea'
-export * from './ComponentWrapper'
+export * from './ComponentsSelectArea'
+export * from './ComponentItem'

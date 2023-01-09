@@ -6,9 +6,9 @@ const Wrapper = styled.div`
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 `
-interface ConfigAreaProp {
+interface ComponentsSelectAreaProp {
     children: ReactNode | ReactNode[];
 }
-export const ConfigArea: FC<ConfigAreaProp> = ({ children }) => {
+export const ComponentsSelectArea: FC<ComponentsSelectAreaProp> = ({ children }) => {
     return <Wrapper>{children}</Wrapper>
 }
