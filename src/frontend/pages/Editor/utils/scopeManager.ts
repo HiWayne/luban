@@ -1,6 +1,6 @@
 import { isExist } from '@duitang/dt-base';
 
-interface Variable {
+export interface Variable {
   variableName: string;
   variableValue: any;
   variableRaw: string;
@@ -17,18 +17,22 @@ interface Variable {
 
 type ScopeStatus = 'public' | 'private';
 
-interface Scope {
+export interface Scope {
   scopeName: string;
   scopeStatus: ScopeStatus;
   variables: Variable[];
 }
 
-interface Scopes {
+export interface ScopeCollection {
   scopes: Scope[];
 }
 
+export interface Context {
+  scopeCollections: ScopeCollection[];
+}
+
 export const createScopeManager = () => {
-  let scopesContext: Scopes[] = [];
+  const context: Context = { scopeCollections: [] };
   return {
     // 获取变量或变量环境。获取variables时，也会获取底层栈的变量（沿着作用域链）
     get(scopeIndex?: number, scopeName?: string, variableName?: string) {
@@ -38,19 +42,29 @@ export const createScopeManager = () => {
           !isExist(scopeName) &&
           !isExist(variableName)
         ) {
-          return scopesContext;
+          return context;
         } else if (
           isExist(scopeIndex) &&
           !isExist(scopeName) &&
           !isExist(variableName)
         ) {
-          return scopesContext[scopeIndex as number];
+          return context.scopeCollections
+            .slice(0, (scopeIndex as number) + 1)
+            .reverse()
+            .reduce((allScopes, scopeContext) => {
+              allScopes.push(
+                ...scopeContext.scopes.filter(
+                  (scope) => scope.scopeStatus === 'public',
+                ),
+              );
+              return allScopes;
+            }, [] as Scope[]);
         } else if (
           isExist(scopeIndex) &&
           isExist(scopeName) &&
           !isExist(variableName)
         ) {
-          return scopesContext
+          return context.scopeCollections
             .slice(0, (scopeIndex as number) + 1)
             .reverse()
             .reduce((allScopes, scopeContext, index) => {
@@ -77,7 +91,7 @@ export const createScopeManager = () => {
           isExist(variableName)
         ) {
           return (
-            scopesContext[scopeIndex as number].scopes
+            context.scopeCollections[scopeIndex as number].scopes
               .find((scope) => scope.scopeName === scopeName)
               ?.variables.find(
                 (variable) => variable.variableName === variableName,
@@ -98,19 +112,19 @@ export const createScopeManager = () => {
           !isExist(scopeName) &&
           !isExist(variableName)
         ) {
-          return scopesContext;
+          return context;
         } else if (
           isExist(scopeIndex) &&
           !isExist(scopeName) &&
           !isExist(variableName)
         ) {
-          return scopesContext[scopeIndex as number];
+          return context.scopeCollections[scopeIndex as number].scopes;
         } else if (
           isExist(scopeIndex) &&
           isExist(scopeName) &&
           !isExist(variableName)
         ) {
-          return scopesContext[scopeIndex as number].scopes.find(
+          return context.scopeCollections[scopeIndex as number].scopes.find(
             (scope) => scope.scopeName === scopeName,
           );
         } else if (
@@ -119,7 +133,7 @@ export const createScopeManager = () => {
           isExist(variableName)
         ) {
           return (
-            scopesContext[scopeIndex as number].scopes
+            context.scopeCollections[scopeIndex as number].scopes
               .find((scope) => scope.scopeName === scopeName)
               ?.variables.find(
                 (variable) => variable.variableName === variableName,
@@ -134,7 +148,7 @@ export const createScopeManager = () => {
     },
     // 在作用域栈顶新增环境并声明变量
     add(data: Variable, scopeName: string, _public?: boolean) {
-      scopesContext.push({
+      context.scopeCollections.push({
         scopes: [
           {
             scopeName,
@@ -143,7 +157,7 @@ export const createScopeManager = () => {
           },
         ],
       });
-      return scopesContext.length - 1;
+      return context.scopeCollections.length - 1;
     },
     // 在作用域栈环境中追加变量
     append(
@@ -153,9 +167,9 @@ export const createScopeManager = () => {
       _public?: boolean,
     ) {
       if (scopeIndex === undefined) {
-        scopeIndex = scopesContext.length - 1;
+        scopeIndex = context.scopeCollections.length - 1;
       }
-      const target = scopesContext[scopeIndex];
+      const target = context.scopeCollections[scopeIndex];
       if (target && Array.isArray(target.scopes)) {
         const targetScope = target.scopes.find(
           (scope) => scope.scopeName === scopeName,
@@ -166,7 +180,7 @@ export const createScopeManager = () => {
           return false;
         }
       } else {
-        scopesContext[scopesContext.length - 1] = {
+        context.scopeCollections[context.scopeCollections.length - 1] = {
           scopes: [
             {
               scopeName,
@@ -176,11 +190,11 @@ export const createScopeManager = () => {
           ],
         };
       }
-      return scopesContext.length - 1;
+      return context.scopeCollections.length - 1;
     },
     // 删除变量
     remove(variableName: string, scopeIndex: number, scopeName: string) {
-      const target = scopesContext[scopeIndex];
+      const target = context.scopeCollections[scopeIndex];
       if (target && Array.isArray(target.scopes)) {
         const namedScopeIndex = target.scopes.findIndex(
           (scope) => scope.scopeName === scopeName,
@@ -200,7 +214,7 @@ export const createScopeManager = () => {
       return false;
     },
     clear() {
-      scopesContext = [];
+      context.scopeCollections = [];
     },
   };
 };

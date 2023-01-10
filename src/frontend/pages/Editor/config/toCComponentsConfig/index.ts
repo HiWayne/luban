@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { NodeAST } from '@/backend/types/frontstage/index';
-import toCImageDemo from '../assets/toCImageDemo.svg';
+import toCImageDemo from '../../assets/toCImageDemo.svg';
 import {
   actionConfig,
   borderRadiusConfig,
@@ -16,10 +16,28 @@ import {
   widthConfig,
 } from './commonConfig';
 
+export type FormSchemaType =
+  | 'input'
+  | 'textarea'
+  | 'radio'
+  | 'checkbox'
+  | 'select'
+  | 'switch'
+  | 'image-upload'
+  | 'color-picker'
+  | 'css-length'
+  | 'variable-select'
+  | 'css-margin'
+  | 'css-padding'
+  | 'css-border-radius'
+  | 'custom-style';
+
 export interface FormSchema {
-  type: 'input' | 'textarea' | 'radio' | 'checkbox' | 'select' | 'image-upload';
-  options: { label: string; value: any }[];
-  defaultValue: any;
+  type: FormSchemaType;
+  options?: { label: string; value: any }[];
+  defaultValue?: any;
+  placeholder?: string;
+  props?: Record<string, any>;
 }
 
 export interface Config {
@@ -98,14 +116,14 @@ export const toCComponents: ToCComponent[] = [
       {
         name: '排列方向的对齐方式',
         description:
-          '比如容器内部水平排列，这个配置影响的就是内容在水平方向上的对齐方式。"flex-start"-局左、"flex-end"-局右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
+          '比如容器内部水平排列，这个配置影响的就是内容在水平方向上的对齐方式。"flex-start"-居左、"flex-end"-居右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
         required: false,
         propName: 'justifyContent',
       },
       {
         name: '与排列垂直方向的对齐方式',
         description:
-          '比如容器内部水平排列，这个配置影响的就是内容在垂直方向上的对齐方式。"flex-start"-局左、"flex-end"-局右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
+          '比如容器内部水平排列，这个配置影响的就是内容在垂直方向上的对齐方式。"flex-start"-居左、"flex-end"-居右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
         required: false,
         propName: 'alignItems',
       },

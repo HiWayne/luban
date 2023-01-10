@@ -245,9 +245,7 @@ export const treeDemo: NodeAST = {
           id: 18,
           type: 'BlockContainer',
           props: {
-            style: {
-              padding: '0 0 0 20px',
-            },
+            padding: '0 0 0 20px',
           },
           children: [
             {
@@ -349,7 +347,7 @@ export const treeDemo: NodeAST = {
                       id: 27,
                       type: 'Image',
                       props: {
-                        src: 'https://c-ssl.dtstatic.com/uploads/blog/202209/09/20220909231809_981c6.thumb.300_300_c.jpeg_webp',
+                        src: 'https://c-ssl.dtstatic.com/uploads/blog/202301/06/20230106182421_eb8cd.thumb.300_300_c.jpeg_webp',
                         width: 100,
                         height: 100,
                         borderRadius: 9,

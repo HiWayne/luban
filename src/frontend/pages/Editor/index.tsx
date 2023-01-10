@@ -7,6 +7,8 @@ import { pageModel as pageModelOfFrontstage } from '@/backend/mock2';
 import { getRandomString } from '@/backend/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
 import { HighLightCodeEditor } from '@/frontend/components';
+import { toCComponents } from './config';
+import { ConfigPanel } from './components';
 
 const Editor = () => {
   const { type = 'tob' } = (getParams() || {}) as { type: 'toc' | 'tob' };
@@ -129,6 +131,9 @@ const Editor = () => {
         style={{ width: '375px', border: '1px solid #eee' }}
         key="container"
       />
+      <div>
+        <ConfigPanel data={toCComponents[1]} />
+      </div>
     </div>
   );
 };
