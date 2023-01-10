@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { NodeAST } from '@/backend/types/frontstage/index';
-import toCImageDemo from '../assets/toCImageDemo.svg';
+import toCImageDemo from '../../assets/toCImageDemo.svg';
 import {
   actionConfig,
   borderRadiusConfig,
