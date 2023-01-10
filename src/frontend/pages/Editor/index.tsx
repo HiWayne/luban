@@ -2,25 +2,32 @@ import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { loadMicroApp, MicroApp } from 'qiankun';
 import { Button, Input } from 'antd';
 import { getParams } from '@duitang/dt-base';
+import shallow from 'zustand/shallow';
 import { pageModel as pageModelOfBackstage } from '@/backend/mock';
-import { pageModel as pageModelOfFrontstage } from '@/backend/mock2';
+// import { pageModel as pageModelOfFrontstage } from '@/backend/mock2';
 import { getRandomString } from '@/backend/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
 import { HighLightCodeEditor } from '@/frontend/components';
 import { toCComponents } from './config';
 import { ComponentsSelectArea, ComponentItem } from './components'
+import useStore from '@/frontend/store';
 
 const Editor = () => {
-  const { type = 'tob' } = (getParams() || {}) as { type: 'toc' | 'tob' };
+  const { type_ = 'tob' } = (getParams() || {}) as { type_: 'toc' | 'tob' };
+  const pageModel = useStore((state) => state.editor.pageModel, shallow)
   const pageModelMap = {
-    toc: pageModelOfFrontstage,
+    toc: pageModel,
     tob: pageModelOfBackstage,
   };
-  const pageModel = pageModelMap[type];
+  const pageModel_ = pageModelMap[type_];
   const [key, setKey] = useState('test1');
-  const [content, setContent] = useState(JSON.stringify(pageModel));
+  const [content, setContent] = useState(JSON.stringify(pageModel_));
   const [sourceCode, setSourceCode] = useState('');
   const microAppRef: MutableRefObject<MicroApp | null> = useRef(null);
+
+  useEffect(() => {
+    setContent(JSON.stringify(pageModel))
+  }, [pageModel])
 
   useEffect(() => {
     pageModel.meta.key = key;
@@ -98,7 +105,7 @@ const Editor = () => {
         <h4>场景组件</h4>
         <ComponentsSelectArea>
           {/* toC */}
-          {toCComponents.map(({ name }) => <ComponentItem name={name} />)}
+          {toCComponents.map(({ name, type, defaultAST }) => <ComponentItem name={name} type={type} defaultAST={defaultAST} key={name} />)}
         </ComponentsSelectArea>
         <div style={{ marginTop: '20px' }}>
           <Button onClick={() => previewPage(content)}>

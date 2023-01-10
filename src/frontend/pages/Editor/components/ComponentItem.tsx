@@ -1,6 +1,8 @@
 import { FC } from "react";
 import styled from "styled-components"
-import componentIcon from '../assets/componentIcon.svg'
+// import componentIcon from '../assets/componentIcon.svg'
+import useStore from '@/frontend/store';
+import { NodeAST } from '@/backend/types/frontstage/index';
 
 const Wrapper = styled.div`
     display: flex;
@@ -21,19 +23,38 @@ const Name = styled.div`
     cursor: grab;
 `
 
-const Image = styled.img`
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-`
+// const Image = styled.img`
+//     width: 16px;
+//     height: 16px;
+//     margin-right: 8px;
+// `
 
 interface ComponentItemProp {
     name: string;
-    icon?: string;
+    type:
+    | 'BlockContainer'
+    | 'InlineContainer'
+    | 'FlexContainer'
+    | 'GridContainer'
+    | 'ScrollList'
+    | 'Image'
+    | 'Text'
+    | 'Paragraph';
+    defaultAST: NodeAST;
 }
-export const ComponentItem: FC<ComponentItemProp> = ({ name, icon = componentIcon }) => {
-    return <Wrapper draggable>
-        <Image src={icon} alt="小图标" />
+
+export const ComponentItem: FC<ComponentItemProp> = ({ name, type, defaultAST }) => {
+
+    const addAST = useStore((state) => state.editor.addAst)
+    const addAAST = () => {
+        addAST({
+            id: 13,
+            type,
+            props: defaultAST.props
+        })
+    }
+    return <Wrapper draggable onClick={addAAST}>
+        {/* <Image src={icon} alt="小图标" /> */}
         <Name>{name}</Name>
     </Wrapper>
 }
