@@ -116,7 +116,7 @@ export const MarginCssConfig: FC<MarginCssConfigProps> = ({
           const css = `${number}${numberUnit}`;
           const marginStyleConfig: MarginStyleConfig = {
             tab,
-            singleValue: number || 0,
+            singleValue: number,
             singleUnit: numberUnit,
           };
           _onChange({ style: css, styleConfig: marginStyleConfig });

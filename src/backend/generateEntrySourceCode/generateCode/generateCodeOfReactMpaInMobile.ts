@@ -1,44 +1,25 @@
-import fs from 'fs';
-import { TEMP_FILE_PATH } from '@/backend/config';
 import { getRandomString } from '@/backend/generateReactSourceCode/utils';
 import { normalizePageMeta } from '../utils';
 import { generateReactSourceCodeOfFrontstage } from '@/backend/generateReactSourceCode';
-import { wrapReactMicroAppHooks } from '@/backend/templates/wrapReactMicroAppHooks';
-import { bundleSourceCode } from '@/backend/bundleSourceCode';
-import { wrapMicroAppUmdFormation } from '@/backend/templates/wrapMicroAppUmdFormation';
-import { Meta, Mode, PageModel } from '@/backend/types';
+import { Mode, PageModel } from '@/backend/types';
+
+const isSuccess = (value: any) => value === 1;
 
 export const generateCodeOfReactMpaInMobile = async (
   mode: Mode,
   pageModel: PageModel | undefined,
-  html: boolean,
-  fileName?: string,
-  _pageMeta?: Meta,
 ) => {
   const isDeploy = mode === 'deploy';
   const isDevelopment = mode === 'development';
-  const tempDirPath = TEMP_FILE_PATH;
-  if (!html && fileName) {
-    const htmlContent = '';
-
-    const bundledCode = await bundleSourceCode(fileName);
-    const microAppJsText = wrapMicroAppUmdFormation(
-      bundledCode.outputFiles[0].text,
-      (_pageMeta as Meta).key,
-    );
-
-    return { htmlContent, jsContent: microAppJsText };
-  } else if (pageModel) {
+  if (pageModel) {
     const pageMeta = pageModel.meta;
     const meta = normalizePageMeta(pageMeta);
-    const reactSourceCode = wrapReactMicroAppHooks(
-      generateReactSourceCodeOfFrontstage(pageModel, isDevelopment),
+    const reactSourceCode = generateReactSourceCodeOfFrontstage(
+      pageModel,
+      isDevelopment,
     );
     if (!isDeploy) {
       const name = `temp_${getRandomString()}`;
-      const htmlPath = `${tempDirPath}/${name}.html`;
-      const filePath = `${tempDirPath}/${name}.js`;
-      const pageMetaPath = `${tempDirPath}/${name}.json`;
 
       const htmlContent = `
       <!DOCTYPE html>
@@ -56,79 +37,24 @@ export const generateCodeOfReactMpaInMobile = async (
       </html>
     `;
 
-      await new Promise((resolve, reject) => {
-        const appendFile = () => {
-          resolve(
-            Promise.all([
-              new Promise((resolve1, reject1) => {
-                fs.appendFile(
-                  htmlPath,
-                  htmlContent,
-                  {
-                    encoding: 'utf-8',
-                  },
-                  (appendFileError) => {
-                    if (appendFileError) {
-                      reject1(appendFileError);
-                    } else {
-                      resolve1(true);
-                    }
-                  },
-                );
-              }),
-              new Promise((resolve1, reject1) => {
-                fs.appendFile(
-                  filePath,
-                  reactSourceCode,
-                  {
-                    encoding: 'utf-8',
-                  },
-                  (appendFileError) => {
-                    if (appendFileError) {
-                      reject1(appendFileError);
-                    } else {
-                      resolve1(true);
-                    }
-                  },
-                );
-              }),
-              new Promise((resolve2, reject2) => {
-                fs.appendFile(
-                  pageMetaPath,
-                  JSON.stringify(pageMeta),
-                  {
-                    encoding: 'utf-8',
-                  },
-                  (appendFileError) => {
-                    if (appendFileError) {
-                      reject2(appendFileError);
-                    } else {
-                      resolve2(true);
-                    }
-                  },
-                );
-              }),
-            ]),
-          );
-        };
+      const [setHtmlReply, setJsReply, setJsonReply] =
+        await process.context.redis
+          .multi()
+          .HSET(name, 'html', htmlContent)
+          .HSET(name, 'js', reactSourceCode)
+          .HSET(name, 'json', JSON.stringify(pageMeta))
+          .exec();
 
-        const tempDirExists = fs.existsSync(tempDirPath);
-        if (!tempDirExists) {
-          fs.mkdir(tempDirPath, (mkdirError) => {
-            if (!mkdirError) {
-              appendFile();
-            } else {
-              reject(mkdirError);
-            }
-          });
-        } else {
-          appendFile();
-        }
-      });
-
-      const jsContent = '';
-
-      return { htmlContent: `/virtual/${name}.html`, jsContent };
+      if (
+        isSuccess(setHtmlReply) &&
+        isSuccess(setJsReply) &&
+        isSuccess(setJsonReply)
+      ) {
+        const jsContent = '';
+        return { htmlContent: `/virtual/${name}.html`, jsContent };
+      } else {
+        throw new Error('服务器存储错误');
+      }
     } else {
       const htmlContent = `
         <!DOCTYPE html>
@@ -156,6 +82,6 @@ export const generateCodeOfReactMpaInMobile = async (
       return { htmlContent, jsContent };
     }
   } else {
-    return { htmlContent: '', jsContent: '' };
+    return Promise.reject('页面数据不能为空');
   }
 };

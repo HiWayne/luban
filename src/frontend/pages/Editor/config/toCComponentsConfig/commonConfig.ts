@@ -136,6 +136,7 @@ export const colorConfig: Config = {
   formSchema: {
     type: 'color-picker',
   },
+  defaultConfig: '#444444',
 };
 
 export const fontSizeConfig: Config = {
@@ -146,15 +147,23 @@ export const fontSizeConfig: Config = {
   formSchema: {
     type: 'css-length',
   },
+  defaultConfig: {
+    value: 14,
+    unit: 'px',
+  },
 };
 
 export const lineHeightConfig: Config = {
   name: '行高',
-  description: '文字所在行的高度',
+  description: '文字所在行的高度。默认1.1倍的文字高度。',
   required: false,
   propName: 'lineHeight',
   formSchema: {
     type: 'css-length',
+  },
+  defaultConfig: {
+    value: 1.1,
+    unit: '',
   },
 };
 
@@ -175,6 +184,7 @@ export const fontFamilyConfig: Config = {
   formSchema: {
     type: 'input',
   },
+  defaultConfig: 'PingFangSC-Regular, PingFang SC',
 };
 
 export const textDecorationConfig: Config = {
@@ -186,6 +196,10 @@ export const textDecorationConfig: Config = {
     type: 'select',
     options: [
       {
+        label: '无',
+        value: '',
+      },
+      {
         label: '下划线',
         value: 'underline',
       },
@@ -195,6 +209,7 @@ export const textDecorationConfig: Config = {
       },
     ],
   },
+  defaultConfig: '',
 };
 
 export const textAlignConfig: Config = {
@@ -220,6 +235,7 @@ export const textAlignConfig: Config = {
       },
     ],
   },
+  defaultConfig: 'left',
 };
 
 export const commonTextConfig = [
@@ -251,6 +267,7 @@ export const layoutConfig: Config = {
       },
     ],
   },
+  defaultConfig: 'block',
 };
 
 export const listDataConfig: Config = {

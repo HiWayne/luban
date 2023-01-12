@@ -1,25 +1,40 @@
 import { Drawer, Form } from 'antd';
-import { FC } from 'react';
-import { ToCComponent } from '../../config';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { CurrentComponent } from '@/frontend/store/editor';
 import { RenderConfig } from './components/RenderConfig';
+import useStore from '@/frontend/store';
 
-export const ConfigPanel: FC<{ id: number; data: ToCComponent }> = ({
-  id,
+export const ConfigPanel: FC<{ data: CurrentComponent | null }> = ({
   data,
 }) => {
-  const { name, configs } = data;
-  return (
+  const [show, setShow] = useState(false);
+
+  const onClose = useCallback(() => {
+    useStore.getState().editor.setCurrentChooseComponent(null);
+    setShow(false);
+  }, []);
+
+  useEffect(() => {
+    if (!data) {
+      setShow(false);
+    } else {
+      setShow(true);
+    }
+  }, [data]);
+
+  return data ? (
     <Drawer
-      title={name}
+      title={data.name}
       width={500}
-      open
+      open={show}
+      onClose={onClose}
       bodyStyle={{ paddingBottom: 80 }}
       mask={false}>
       <Form labelCol={{ span: 6 }} labelAlign="left">
-        {configs.map((config) => (
-          <RenderConfig key={config.name} id={id} config={config} />
+        {data.configs.map((config, index) => (
+          <RenderConfig key={config.name} data={data} index={index} />
         ))}
       </Form>
     </Drawer>
-  );
+  ) : null;
 };

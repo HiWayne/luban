@@ -35,7 +35,6 @@ export type FormSchemaType =
 export interface FormSchema {
   type: FormSchemaType;
   options?: { label: string; value: any }[];
-  defaultValue?: any;
   placeholder?: string;
   props?: Record<string, any>;
 }
@@ -47,6 +46,7 @@ export interface Config {
   FormComponent?: FC;
   required: boolean;
   propName: string;
+  defaultConfig?: any;
 }
 
 export interface ToCComponent {
@@ -61,7 +61,7 @@ export interface ToCComponent {
     | 'Text'
     | 'Paragraph';
   description: string;
-  defaultAST: NodeAST;
+  defaultAST: Omit<NodeAST, 'id'>;
   configs: Config[];
 }
 

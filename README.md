@@ -18,7 +18,9 @@ toC 指移动端用户使用的页面、toB 指企业内部后台，后面直接
 
 6. 可复用的页面模板。类似的布局可以保存成模板快速创建页面，提高工作效率。
 
-## 包管理工具
+## 技术栈
+
+### 依赖管理工具
 
 `pnpm`
 
@@ -26,11 +28,21 @@ toC 指移动端用户使用的页面、toB 指企业内部后台，后面直接
 npm i -g pnpm
 ```
 
-## Node Version
+### 前端
+
+react18、styled-component、zustand
+
+### 后端
+
+fastify、redis
+
+## 项目运行
+
+### Node Version
 
 `>= 17.0.0`, 推荐 `17.6.0`
 
-## 依赖安装
+### 依赖安装
 
 ```shell
 nvm use 17.6.0
@@ -38,7 +50,43 @@ nvm use 17.6.0
 pnpm i
 ```
 
-## 运行(需要同时启动两个服务)
+#### 增删依赖
+
+```shell
+# 安装生产环境依赖
+pnpm i dependence_name
+
+# 安装开发环境依赖
+pnpm i -D dependence_name
+
+# 删除依赖
+pnpm uninstall dependence_name
+```
+
+### 规范工具安装
+
+用于 commit 前代码检查、规范 git commit 格式
+
+```shell
+npm i -g pnpm commitizen && commitizen init cz-conventional-changelog --force --save --save-exact && npm run husky-prepare
+```
+
+#### Git Commit 规范
+
+遵循 angular specification
+
+```shell
+git add .
+
+# 交互式编写commit
+git cz
+
+git push
+```
+
+### 运行
+
+需要同时启动两个服务
 
 ```shell
 # 前端服务，3000端口，用来启动配置后台
@@ -46,6 +94,14 @@ npm run dev-frontend
 
 # 后端服务，8000端口，用来支持后台配置的编译
 npm run dev-backend
+```
+
+### Test
+
+一般不需要手动执行，会在 commit 前自动测试
+
+```shell
+npm run test
 ```
 
 ## 开发指南
@@ -397,42 +453,16 @@ const editorRoutes: RouteType[] = [
 ];
 ```
 
-## Git 操作规范
-
-遵循 angular specification
-
-```shell
-git add .
-
-# 交互式编写commit
-git cz
-
-git push
-```
-
-## 增删依赖
-
-```shell
-pnpm i dependence_name
-
-# 开发环境依赖
-pnpm i -D dependence_name
-
-pnpm uninstall dependence_name
-```
-
-## Test
-
-```shell
-npm run test
-```
-
 ## FQ
 
-1. `npm run dev` 后出现 `Vite Error, /node_modules/...... optimized info should be defined` 的错误怎么办？
+1. 低代码平台前后端的原理是什么，开发遇到的问题有哪些？
+
+生成的页面是由配置产生的。配置的核心部分是 view 字段，它是由 nodeAST（一个最小粒度的、能表示 UI 与逻辑的抽象语法节点）嵌套组成的树，每个 nodeAST 会在后端经过与其 type 对应的编译函数产出 react 组件代码及其调用代码。整个树从 root 节点开始，被递归编译成完整的 react 应用代码，编译过程中还有一些优化细节（如组件复用等）。由于生成的只是 react 源码（这部分美化后可以用于代码预览、人工二次编辑），所以还需要编译、构建、压缩成浏览器可执行的代码。由于后端的最终产物是个完整的应用(SPA: html+js)，所以低代码平台页面通过前端微服务的方式整合到主应用里用于可视化编辑的实时预览。低代码平台可视化编辑时，需要有拖拽调换位置、点击 UI 展示对应配置等交互，然而最终产物(html)已经与原始的 nodeAST 失去了关联。为了解决这一点，在编辑模式时，低代码平台页面每次添加 UI 时都会生成一个唯一 id（也就是 nodeAST 里的 id），后端编译函数会给 nodeAST 对应组件代码的最外层的 html 加上这个 id。低代码平台配置页本地也通过 id 存储了相关数据，于是低代码平台配置页面可以通过这个 html id 知道当前选中的是什么组件、什么 nodeAST，以及它的当前配置，从而可以进行可视化编辑。
+
+2. `npm run dev` 后出现 `Vite Error, /node_modules/...... optimized info should be defined` 的错误怎么办？
 
 可能是因为新安装了依赖，`node_modules/.vite` 里没有缓存，试试 `sh node_modules/.bin/vite --force`。具体原因详见 vite 的 [dep-pre-bundling](https://vitejs.dev/guide/dep-pre-bundling.html)。
 
-2. 为什么 `.gitignore` 要忽略 `__snapshots__`？
+3. 为什么 `.gitignore` 要忽略 `__snapshots__`？
 
 因为不同机器 `styled-components` 生成的 className 哈希不同，导致单测的`toMatchSnapshot`误报

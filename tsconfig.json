@@ -25,6 +25,6 @@
       "components/*": ["src/frontend/components/*"]
     }
   },
-  "include": ["src", "src/frontend"],
+  "include": ["src", "src/frontend", "src/backend/types", "src/frontend/types"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

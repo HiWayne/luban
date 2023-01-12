@@ -35,12 +35,10 @@ interface PositionCssConfigProps {
   defaultBottom?: number;
   defaultBottomUnit?: LengthUnit;
   onChange: (
-    data:
-      | {
-          styleConfig: PositionStyleConfig;
-          style: CSSProperties;
-        }
-      | string[],
+    data: {
+      styleConfig: PositionStyleConfig;
+      style: CSSProperties;
+    } | null,
   ) => void;
 }
 
@@ -71,7 +69,7 @@ export const PositionCssConfig: FC<PositionCssConfigProps> = ({
   useEffect(() => {
     if (typeof onChange === 'function') {
       if (position === 'static') {
-        onChange(['position', 'left', 'right', 'top', 'bottom']);
+        onChange(null);
       } else {
         const positionStyle: CSSProperties = {
           position,

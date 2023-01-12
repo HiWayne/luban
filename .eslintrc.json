@@ -23,7 +23,8 @@
     "no-nested-ternary": "off",
     "no-case-declarations": "off",
     "import/no-named-default": "off",
-    "no-use-before-define": "error"
+    "no-use-before-define": "error",
+    "prefer-promise-reject-errors": "off"
   },
   "extends": [
     "airbnb",

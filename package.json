@@ -6,7 +6,6 @@
     "dev-frontend": "vite",
     "build-frontend": "tsc && vite build",
     "preview": "vite preview",
-    "postinstall": "npm i -g pnpm commitizen && commitizen init cz-conventional-changelog --force --save --save-exact && npm run husky-prepare",
     "husky-prepare": "husky install",
     "test": "lint-staged --allow-empty && jest",
     "build-backend": "npx swc src/backend --only **/*.ts -d dist-backend --config-file .swcrc",
@@ -15,7 +14,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
     "@babel/core": ">=7.0.0 <8.0.0",
-    "@duitang/dt-base": "^2.1.11",
+    "@duitang/dt-base": "^2.1.15",
     "@duitang/dt-react-mobile": "^3.1.18",
     "@fastify/cors": "^8.2.0",
     "antd": "^5.0.2",
@@ -34,6 +33,7 @@
     "react-is": "^18.2.0",
     "react-router-dom": "^6.4.3",
     "react-simple-code-editor": "^0.13.1",
+    "redis": "^4.5.1",
     "styled-components": "^5.3.6",
     "ws": "^8.11.0",
     "zustand": "^4.2.0"

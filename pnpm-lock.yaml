@@ -5,7 +5,7 @@ specifiers:
   '@babel/core': '>=7.0.0 <8.0.0'
   '@commitlint/cli': ^17.3.0
   '@commitlint/config-angular': ^17.3.0
-  '@duitang/dt-base': ^2.1.11
+  '@duitang/dt-base': ^2.1.15
   '@duitang/dt-react-mobile': ^3.1.18
   '@fastify/cors': ^8.2.0
   '@swc/cli': ^0.1.57
@@ -55,6 +55,7 @@ specifiers:
   react-is: ^18.2.0
   react-router-dom: ^6.4.3
   react-simple-code-editor: ^0.13.1
+  redis: ^4.5.1
   styled-components: ^5.3.6
   typescript: ^4.6.4
   vite: ^3.2.3
@@ -65,7 +66,7 @@ specifiers:
 dependencies:
   '@ant-design/icons': 4.8.0_biqbaboplfbrettd7655fr4n2y
   '@babel/core': 7.20.5
-  '@duitang/dt-base': 2.1.11
+  '@duitang/dt-base': 2.1.15
   '@duitang/dt-react-mobile': 3.1.18_34ch25xmpqfrx6wylcxtcsskau
   '@fastify/cors': 8.2.0
   antd: 5.0.2_biqbaboplfbrettd7655fr4n2y
@@ -84,6 +85,7 @@ dependencies:
   react-is: 18.2.0
   react-router-dom: 6.4.3_biqbaboplfbrettd7655fr4n2y
   react-simple-code-editor: 0.13.1_biqbaboplfbrettd7655fr4n2y
+  redis: 4.5.1
   styled-components: 5.3.6_7i5myeigehqah43i5u7wbekgba
   ws: 8.11.0
   zustand: 4.2.0_immer@9.0.16+react@18.2.0
@@ -780,14 +782,8 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  /@duitang/dt-base/2.1.11:
-    resolution: {integrity: sha512-/lcaOX3HNBkOLc1Z0FIdGS3rlDMc92UStYoq61V2B0p8C06CxC0OsFNI0iSLyvBbj0uwrYEr+NXDnb/gkHDSHQ==}
-    dependencies:
-      md5: 2.3.0
-    dev: false
-
-  /@duitang/dt-base/2.1.13:
-    resolution: {integrity: sha512-fyGdkLwyANT4auYE+ETrTFCxoS/0KrfhXt1pBqSoejdWijHSTYJy0hLTiR9I4H4pewdmStmlWF4UI/qq8/cazg==}
+  /@duitang/dt-base/2.1.15:
+    resolution: {integrity: sha512-eX6FClmF63+qK6DJBrxx4qdxg8VV8bSA5D+hldCC+J9MdlcyjhTt9cVT1wdsMQoXDWEtsUI2Eg3/QIedVWMrsw==}
     dependencies:
       md5: 2.3.0
     dev: false
@@ -799,7 +795,7 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@better-scroll/core': 2.5.0
-      '@duitang/dt-base': 2.1.13
+      '@duitang/dt-base': 2.1.15
       '@emotion/react': 11.10.5_hebjedjhazelsvuzebr6t7ng24
       antd-mobile: 2.3.4_biqbaboplfbrettd7655fr4n2y
       better-scroll: 1.15.2
@@ -1537,6 +1533,55 @@ packages:
       rc-util: 5.24.8_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+    dev: false
+
+  /@redis/bloom/1.1.0_@redis+client@1.4.2:
+    resolution: {integrity: sha512-9QovlxmpRtvxVbN0UBcv8WfdSMudNZZTFqCsnBszcQXqaZb/TVe30ScgGEO7u1EAIacTPAo7/oCYjYAxiHLanQ==}
+    peerDependencies:
+      '@redis/client': ^1.0.0
+    dependencies:
+      '@redis/client': 1.4.2
+    dev: false
+
+  /@redis/client/1.4.2:
+    resolution: {integrity: sha512-oUdEjE0I7JS5AyaAjkD3aOXn9NhO7XKyPyXEyrgFDu++VrVBHUPnV6dgEya9TcMuj5nIJRuCzCm8ZP+c9zCHPw==}
+    engines: {node: '>=14'}
+    dependencies:
+      cluster-key-slot: 1.1.1
+      generic-pool: 3.9.0
+      yallist: 4.0.0
+    dev: false
+
+  /@redis/graph/1.1.0_@redis+client@1.4.2:
+    resolution: {integrity: sha512-16yZWngxyXPd+MJxeSr0dqh2AIOi8j9yXKcKCwVaKDbH3HTuETpDVPcLujhFYVPtYrngSco31BUcSa9TH31Gqg==}
+    peerDependencies:
+      '@redis/client': ^1.0.0
+    dependencies:
+      '@redis/client': 1.4.2
+    dev: false
+
+  /@redis/json/1.0.4_@redis+client@1.4.2:
+    resolution: {integrity: sha512-LUZE2Gdrhg0Rx7AN+cZkb1e6HjoSKaeeW8rYnt89Tly13GBI5eP4CwDVr+MY8BAYfCg4/N15OUrtLoona9uSgw==}
+    peerDependencies:
+      '@redis/client': ^1.0.0
+    dependencies:
+      '@redis/client': 1.4.2
+    dev: false
+
+  /@redis/search/1.1.0_@redis+client@1.4.2:
+    resolution: {integrity: sha512-NyFZEVnxIJEybpy+YskjgOJRNsfTYqaPbK/Buv6W2kmFNaRk85JiqjJZA5QkRmWvGbyQYwoO5QfDi2wHskKrQQ==}
+    peerDependencies:
+      '@redis/client': ^1.0.0
+    dependencies:
+      '@redis/client': 1.4.2
+    dev: false
+
+  /@redis/time-series/1.0.4_@redis+client@1.4.2:
+    resolution: {integrity: sha512-ThUIgo2U/g7cCuZavucQTQzA9g9JbDDY2f64u3AbAoz/8vE2lt2U37LamDUVChhaDA3IRT9R6VvJwqnUfTJzng==}
+    peerDependencies:
+      '@redis/client': ^1.0.0
+    dependencies:
+      '@redis/client': 1.4.2
     dev: false
 
   /@remix-run/router/1.0.3:
@@ -2965,6 +3010,11 @@ packages:
   /clsx/1.2.1:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
     engines: {node: '>=6'}
+    dev: false
+
+  /cluster-key-slot/1.1.1:
+    resolution: {integrity: sha512-rwHwUfXL40Chm1r08yrhU3qpUvdVlgkKNeyeGPOxnW8/SyVDvgRaed/Uz54AqWNaTCAThlj6QAs3TZcKI0xDEw==}
+    engines: {node: '>=0.10.0'}
     dev: false
 
   /co/4.6.0:
@@ -4557,6 +4607,11 @@ packages:
   /functions-have-names/1.2.3:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
     dev: true
+
+  /generic-pool/3.9.0:
+    resolution: {integrity: sha512-hymDOu5B53XvN4QT9dBmZxPX4CWhBPPLguTZ9MMFeFa/Kg0xWVfylOVNlJji/E7yTZWFd/q9GO5TxDLq156D7g==}
+    engines: {node: '>= 4'}
+    dev: false
 
   /gensync/1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -7653,6 +7708,17 @@ packages:
       indent-string: 4.0.0
       strip-indent: 3.0.0
     dev: true
+
+  /redis/4.5.1:
+    resolution: {integrity: sha512-oxXSoIqMJCQVBTfxP6BNTCtDMyh9G6Vi5wjdPdV/sRKkufyZslDqCScSGcOr6XGR/reAWZefz7E4leM31RgdBA==}
+    dependencies:
+      '@redis/bloom': 1.1.0_@redis+client@1.4.2
+      '@redis/client': 1.4.2
+      '@redis/graph': 1.1.0_@redis+client@1.4.2
+      '@redis/json': 1.0.4_@redis+client@1.4.2
+      '@redis/search': 1.1.0_@redis+client@1.4.2
+      '@redis/time-series': 1.0.4_@redis+client@1.4.2
+    dev: false
 
   /regenerator-runtime/0.11.1:
     resolution: {integrity: sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==}

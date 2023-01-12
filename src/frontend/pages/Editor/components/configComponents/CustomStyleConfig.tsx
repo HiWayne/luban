@@ -47,14 +47,14 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
   defaultStyleConfig,
   onChange,
 }) => {
-  const [styleConfig, setStyleConfig] = useState<CustomStyleConfigData>(
-    defaultStyleConfig || {},
+  const [styleConfig, setStyleConfig] = useState<CustomStyleConfigData | null>(
+    defaultStyleConfig || null,
   );
-  const [style, setStyle] = useState<CSSProperties>({});
+  const [style, setStyle] = useState<CSSProperties | null>(null);
   const [list, setList] = useState<{ type: string; render: JSX.Element }[]>([]);
 
   useEffect(() => {
-    if (typeof onChange === 'function') {
+    if (typeof onChange === 'function' && style && styleConfig) {
       onChange({ style, styleConfig });
     }
   }, [style, styleConfig]);
@@ -70,7 +70,7 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
           defaultBorderStyle={styleConfig?.borderStyleConfig?.borderStyle}
           defaultBorderColor={styleConfig?.borderStyleConfig?.borderColor}
           onChange={(data) => {
-            if (!Array.isArray(data)) {
+            if (data) {
               const { styleConfig: borderStyleConfig, style: borderStyle } =
                 data;
               setStyleConfig((oldStyleConfig) => ({
@@ -80,18 +80,26 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
               setStyle((oldStyle) => ({ ...oldStyle, ...borderStyle }));
             } else {
               setStyleConfig((oldStyleConfig) => {
-                const newStyleConfig = { ...oldStyleConfig };
-                if (newStyleConfig.borderStyleConfig) {
-                  delete newStyleConfig.borderStyleConfig;
+                if (oldStyleConfig) {
+                  const newStyleConfig = { ...oldStyleConfig };
+                  if (newStyleConfig.borderStyleConfig) {
+                    delete newStyleConfig.borderStyleConfig;
+                  }
+                  return newStyleConfig;
+                } else {
+                  return oldStyleConfig;
                 }
-                return newStyleConfig;
               });
               setStyle((oldStyle) => {
-                const newStyleObj = { ...oldStyle };
-                if (newStyleObj.border) {
-                  delete newStyleObj.border;
+                if (oldStyle) {
+                  const newStyleObj = { ...oldStyle };
+                  if (newStyleObj.border) {
+                    delete newStyleObj.border;
+                  }
+                  return newStyleObj;
+                } else {
+                  return oldStyle;
                 }
-                return newStyleObj;
               });
             }
           }}
@@ -105,7 +113,7 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
       <Form.Item label="定位">
         <PositionCssConfig
           onChange={(data) => {
-            if (!Array.isArray(data)) {
+            if (data) {
               const { style: positionStyle, styleConfig: positionStyleConfig } =
                 data;
               setStyleConfig((oldStyleConfig) => ({
@@ -118,30 +126,38 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
               }));
             } else {
               setStyleConfig((oldStyleConfig) => {
-                const newStyleCOnfig = { ...oldStyleConfig };
-                if (newStyleCOnfig.positionStyleConfig) {
-                  delete newStyleCOnfig.positionStyleConfig;
+                if (oldStyleConfig) {
+                  const newStyleCOnfig = { ...oldStyleConfig };
+                  if (newStyleCOnfig.positionStyleConfig) {
+                    delete newStyleCOnfig.positionStyleConfig;
+                  }
+                  return newStyleCOnfig;
+                } else {
+                  return oldStyleConfig;
                 }
-                return newStyleCOnfig;
               });
               setStyle((oldStyleObj) => {
-                const newStyleObj = { ...oldStyleObj };
-                if (newStyleObj.position) {
-                  delete newStyleObj.position;
+                if (oldStyleObj) {
+                  const newStyleObj = { ...oldStyleObj };
+                  if (newStyleObj.position) {
+                    delete newStyleObj.position;
+                  }
+                  if (newStyleObj.left !== undefined) {
+                    delete newStyleObj.left;
+                  }
+                  if (newStyleObj.top !== undefined) {
+                    delete newStyleObj.top;
+                  }
+                  if (newStyleObj.right !== undefined) {
+                    delete newStyleObj.right;
+                  }
+                  if (newStyleObj.bottom !== undefined) {
+                    delete newStyleObj.bottom;
+                  }
+                  return newStyleObj;
+                } else {
+                  return oldStyleObj;
                 }
-                if (newStyleObj.left !== undefined) {
-                  delete newStyleObj.left;
-                }
-                if (newStyleObj.top !== undefined) {
-                  delete newStyleObj.top;
-                }
-                if (newStyleObj.right !== undefined) {
-                  delete newStyleObj.right;
-                }
-                if (newStyleObj.bottom !== undefined) {
-                  delete newStyleObj.bottom;
-                }
-                return newStyleObj;
               });
             }
           }}

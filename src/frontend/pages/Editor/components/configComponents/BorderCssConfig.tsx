@@ -31,12 +31,10 @@ interface BorderCssConfigProps {
   defaultBorderStyle?: BorderStyle;
   defaultBorderColor?: string;
   onChange: (
-    data:
-      | {
-          styleConfig: BorderStyleConfig;
-          style: CSSProperties;
-        }
-      | string[],
+    data: {
+      styleConfig: BorderStyleConfig;
+      style: CSSProperties;
+    } | null,
   ) => void;
 }
 
@@ -48,7 +46,7 @@ export const BorderCssConfig: FC<BorderCssConfigProps> = ({
   onChange,
 }) => {
   const [borderWidth, setBorderWidth] = useState<number | null>(
-    defaultBorderWidth || 0,
+    defaultBorderWidth || null,
   );
   const [borderWidthUnit, setBorderWidthUnit] = useState(
     defaultBorderWidthUnit || 'px',
@@ -72,7 +70,7 @@ export const BorderCssConfig: FC<BorderCssConfigProps> = ({
         };
         onChange({ styleConfig: borderStyleConfig, style: borderStyleObj });
       } else {
-        onChange(['border']);
+        onChange(null);
       }
     }
   }, [borderWidth, borderWidthUnit, borderStyle, borderColor]);

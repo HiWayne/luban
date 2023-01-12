@@ -29,7 +29,7 @@ const ColorShow = styled<FC<ColorFCProps>>(({ className }) => (
   align-items: center;
   width: 100%;
   height: 100%;
-  ${(props) => `background-color: ${props.color};`}
+  ${(props) => (props.color ? `background-color: ${props.color};` : '')}
 `;
 
 const ColorButton = styled<FC<ColorFCProps>>(
@@ -51,7 +51,7 @@ const ColorButton = styled<FC<ColorFCProps>>(
 
 interface ColorPickerProps {
   defaultColor?: string;
-  onChange: (color: string) => void;
+  onChange: (color: string | null) => void;
 }
 
 const createRgba = (rgba: {
@@ -69,10 +69,8 @@ export const ColorPicker: FC<ColorPickerProps> = ({
   onChange,
 }) => {
   const [show, setShow] = useState(false);
-  const [prevColor, setPrevColor] = useState(
-    defaultColor || 'rgba(0, 0, 0, 1)',
-  );
-  const [color, setColor] = useState(defaultColor || 'rgba(0, 0, 0, 1)');
+  const [prevColor, setPrevColor] = useState(defaultColor || '');
+  const [color, setColor] = useState(defaultColor || '');
   const [popInLeft, setPopInLeft] = useState(true);
   const [popInBottom, setPopInBottom] = useState(true);
 
@@ -160,6 +158,18 @@ export const ColorPicker: FC<ColorPickerProps> = ({
               boxShadow:
                 'rgb(0 0 0 / 15%) 0px 0px 0px 1px, rgb(0 0 0 / 15%) 0px 8px 16px',
             }}>
+            <Button
+              style={{ marginRight: '8px' }}
+              onClick={() => {
+                if (typeof onChange === 'function') {
+                  onChange(null);
+                }
+                setColor('');
+                setPrevColor('');
+                close();
+              }}>
+              清除
+            </Button>
             <Button
               style={{ marginRight: '8px' }}
               onClick={() => {
