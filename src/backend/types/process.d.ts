@@ -3,8 +3,9 @@ export {};
 declare global {
   namespace NodeJS {
     interface Process {
-      context: {
+      dbContext: {
         redis: RedisClientType<{} & RedisModules, RedisFunctions, RedisScripts>;
+        mongo: MongoClient;
       };
     }
   }

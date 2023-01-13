@@ -1,5 +1,5 @@
 import { NodeAST } from '@/backend/types/frontstage/index';
-import { PageModel } from '@/backend/types';
+import { Meta, PageModel } from '@/backend/types';
 import { createUniqueId } from '../pages/Editor/utils';
 import { ToCComponent } from '../pages/Editor/config';
 import {
@@ -17,7 +17,8 @@ export interface EditorStore {
   currentChooseComponent: CurrentComponent | null;
   setCurrentChooseComponent: (component: CurrentComponent | null) => void;
   pageModel: PageModel;
-  addNodeAST: (ast: NodeAST, targetId?: number) => void;
+  setPageMeta: (meta: Meta) => void;
+  addNodeAST: (nodeAST: NodeAST, targetId?: number) => void;
   updateNodeAST: (id: number, props: any) => void;
   removeNodeAST: (id: number) => void;
 }
@@ -47,6 +48,11 @@ const createEditorStore: (
   setCurrentChooseComponent(component: CurrentComponent | null) {
     set((state) => {
       state.editor.currentChooseComponent = component;
+    });
+  },
+  setPageMeta(meta: Meta) {
+    set((state) => {
+      state.editor.pageModel.meta = meta;
     });
   },
   addNodeAST(nodeAST: NodeAST, targetId?: number) {

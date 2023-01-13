@@ -7,9 +7,11 @@ import { TEMP_FILE_PATH } from '../config';
 export const bundleSourceCode = async (
   name: string,
   sourceCode: string,
+  production?: boolean,
 ): Promise<{
   outputFiles: OutputFile[];
 }> => {
+  const buildConfig = !production ? { minify: false } : { minify: true };
   try {
     return await new Promise((resolve, reject) => {
       const tempDirPath = TEMP_FILE_PATH;
@@ -17,7 +19,7 @@ export const bundleSourceCode = async (
 
       fs.appendFile(filePath, sourceCode, { encoding: 'utf-8' }, (err) => {
         if (err) {
-          reject();
+          reject(err);
         } else {
           resolve(
             build({
@@ -34,19 +36,19 @@ export const bundleSourceCode = async (
               outdir: 'out',
               sourcemap: false,
               write: false,
-              minify: true,
               plugins: [
                 lessLoader({
                   javascriptEnabled: true,
                 }),
               ],
+              ...buildConfig,
             }).finally(() => {
               fs.rm(filePath, (rmError) => {
                 if (rmError) {
                   reject(rmError);
                 }
               });
-              process.context.redis.sendCommand([
+              process.dbContext.redis.sendCommand([
                 'HDEL',
                 name,
                 'html',

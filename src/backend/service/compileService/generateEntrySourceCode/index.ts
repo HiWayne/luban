@@ -1,4 +1,4 @@
-import { Mode, PageModel } from '../types';
+import { Mode, PageModel } from '@/backend/types';
 import {
   generateCodeOfReactMpaInMobile,
   generateCodeOfReactMpaInPc,

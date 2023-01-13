@@ -8,7 +8,7 @@ import {
 import { loadMicroApp, MicroApp } from 'qiankun';
 import { Button, Input } from 'antd';
 import shallow from 'zustand/shallow';
-import { getRandomString } from '@/backend/generateReactSourceCode/utils';
+import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
 import { HighLightCodeEditor } from '@/frontend/components';
 import { toCComponents } from './config';
@@ -45,7 +45,7 @@ const ToCEditor = () => {
       meta: { ...pageModel.meta },
     };
     tempPageModel.meta.key = randomKey;
-    const data: any = await fetch('//localhost:8000/lubanApp/', {
+    const data: any = await fetch('//localhost:8000/generatePage/', {
       method: 'post',
       body: JSON.stringify(tempPageModel),
     }).then((response) => response.json());
@@ -77,7 +77,7 @@ const ToCEditor = () => {
     };
     tempPageModel.meta.key = randomKey;
     tempPageModel.meta.mode = 'production';
-    const data: any = await fetch('//localhost:8000/lubanApp/', {
+    const data: any = await fetch('//localhost:8000/generatePage/', {
       method: 'post',
       body: JSON.stringify(tempPageModel),
     }).then((response) => response.json());
@@ -94,6 +94,19 @@ const ToCEditor = () => {
         });
       }
     }
+  }, [pageModel]);
+
+  const deploy = useCallback(async () => {
+    const tempPageModel: PageModel = {
+      ...pageModel,
+      meta: { ...pageModel.meta },
+    };
+    tempPageModel.meta.mode = 'deploy';
+    const data: any = await fetch('//localhost:8000/generatePage/', {
+      method: 'post',
+      body: JSON.stringify(tempPageModel),
+    });
+    console.log(data);
   }, [pageModel]);
 
   const getReactCode = async () => {
@@ -126,6 +139,9 @@ const ToCEditor = () => {
           <Button style={{ marginLeft: '20px' }}>保存为模板</Button>
           <Button style={{ marginLeft: '20px' }} onClick={runPage}>
             运行真实页面
+          </Button>
+          <Button style={{ marginLeft: '20px' }} onClick={deploy}>
+            发布
           </Button>
         </div>
         <div style={{ marginTop: '20px' }}>

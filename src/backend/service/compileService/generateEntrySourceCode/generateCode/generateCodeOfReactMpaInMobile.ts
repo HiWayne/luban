@@ -1,7 +1,11 @@
-import { getRandomString } from '@/backend/generateReactSourceCode/utils';
+import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { normalizePageMeta } from '../utils';
-import { generateReactSourceCodeOfFrontstage } from '@/backend/generateReactSourceCode';
+import { generateReactSourceCodeOfFrontstage } from '@/backend/service/compileService/generateReactSourceCode';
 import { Mode, PageModel } from '@/backend/types';
+import { bundleSourceCode } from '../../bundleSourceCode';
+import { deployStaticService } from '@/backend/service/deployService';
+
+const removeSlashOfEnd = (string: string) => string.replace(/\/$/, '');
 
 const isSuccess = (value: any) => value === 1;
 
@@ -18,9 +22,8 @@ export const generateCodeOfReactMpaInMobile = async (
       pageModel,
       isDevelopment,
     );
+    const name = `temp_${getRandomString()}`;
     if (!isDeploy) {
-      const name = `temp_${getRandomString()}`;
-
       const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">
@@ -38,7 +41,7 @@ export const generateCodeOfReactMpaInMobile = async (
     `;
 
       const [setHtmlReply, setJsReply, setJsonReply] =
-        await process.context.redis
+        await process.dbContext.redis
           .multi()
           .HSET(name, 'html', htmlContent)
           .HSET(name, 'js', reactSourceCode)
@@ -50,36 +53,50 @@ export const generateCodeOfReactMpaInMobile = async (
         isSuccess(setJsReply) &&
         isSuccess(setJsonReply)
       ) {
-        const jsContent = '';
-        return { htmlContent: `/virtual/${name}.html`, jsContent };
+        return { htmlPath: `/virtual/${name}.html` };
       } else {
         throw new Error('服务器存储错误');
       }
     } else {
+      const pathOfPageMeta = removeSlashOfEnd(pageMeta.path);
+
       const htmlContent = `
         <!DOCTYPE html>
         <html lang="en">
           <head>
             <meta charset="UTF-8" />
             <link rel="icon" type="image/svg+xml" href="${meta.icon}" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
             <title>${meta.title}</title>
-            <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-            <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
           </head>
           <body>
             <div id="root"></div>
-            <script src="${pageMeta.path}/${meta.key}.js"></script>
+            <script src="/static/luban${pathOfPageMeta}/${meta.key}.js"></script>
           </body>
         </html>
         `;
 
-      const jsContent = `
-        ${reactSourceCode}
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-      `;
+      const { outputFiles } = await bundleSourceCode(
+        name,
+        `
+      ${reactSourceCode}
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    `,
+        true,
+      );
 
-      return { htmlContent, jsContent };
+      const jsContent = outputFiles[0].text;
+
+      const result = await deployStaticService(
+        pageModel,
+        htmlContent,
+        jsContent,
+      );
+      if (result) {
+        return { htmlPath: pathOfPageMeta };
+      } else {
+        return Promise.reject('发布失败');
+      }
     }
   } else {
     return Promise.reject('页面数据不能为空');
