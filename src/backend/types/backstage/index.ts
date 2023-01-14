@@ -323,7 +323,7 @@ export interface ListProps {
 }
 
 export interface NodeAST {
-  id?: number;
+  id: number;
   key?: string | number | VariableName;
   type: NodeType;
   // 左变量 === 右值 ? 渲染 : null

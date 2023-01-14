@@ -1,6 +1,6 @@
 import { MutableRefObject } from 'react';
-import { NodeAST as NodeASTOfBackstage } from '../types/backstage';
-import { NodeAST as NodeASTOfFrontstage } from '../types/frontstage';
+import { NodeAST as NodeASTOfBackstage } from '../../../types/backstage';
+import { NodeAST as NodeASTOfFrontstage } from '../../../types/frontstage';
 import {
   generateCodeByNodeAST as generateCodeByNodeASTOfBackstage,
   generateCodeOfReactLogics,
@@ -11,7 +11,7 @@ import {
   generateCommonCodeOfFrontstage,
 } from './generateBackstageCode/generateCommonCode';
 import { createComponentName } from './utils';
-import { LogicAST, PageModel } from '../types';
+import { LogicAST, PageModel } from '../../../types';
 
 export interface Declarations {
   has: (name: string) => boolean;
