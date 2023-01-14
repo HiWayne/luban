@@ -1,22 +1,31 @@
 /// <reference types="mongodb" />
 
 import { mongoConfig } from '@/backend/config';
-import { TemplateRequestDTO } from '@/backend/types/dto';
+import {
+  SaveTemplateRequestDTO,
+  TemplateEntity,
+} from '@/backend/service/templateService/types';
 
 export const saveTemplateService = async (
-  templateModel: TemplateRequestDTO,
+  templateModel: SaveTemplateRequestDTO,
+  userName: string,
 ) => {
   if (templateModel) {
     try {
-      const templateEntity = {
+      const templateEntity: Omit<
+        TemplateEntity,
+        'create_time' | 'update_time' | '_id'
+      > = {
         type: templateModel.type,
         private: templateModel.private,
         name: templateModel.name,
-        desc: templateModel.desc,
+        desc: templateModel.desc || '',
         view: templateModel.view,
-        author_name: templateModel.author_name,
-        author_id: templateModel.author_id,
+        author_name: userName || '匿名',
+        author_id: templateModel.author_id || null,
         status: templateModel.status,
+        tags: templateModel.tags || [],
+        collaborators: templateModel.collaborators || [],
         collect_count: 0,
         like_count: 0,
         use_count: 0,

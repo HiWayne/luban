@@ -7,4 +7,6 @@ export const mongoConfig = {
   dbName: 'luban',
   templateCollectionName: 'templates',
   deployCollectionName: 'deploy',
+  userCollectionName: 'user',
+  userIdCollectionName: 'userId',
 };

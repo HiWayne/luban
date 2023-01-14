@@ -14,14 +14,37 @@ import {
   generateVirtualStaticHtml,
   generateVirtualStaticJs,
 } from './service/compileService/generateVirtualStaticFile';
-import { TemplateRequestDTO } from './types/dto';
+import {
+  GetOwnRequestDTO,
+  GetTemplatesRequestDTO,
+  SaveTemplateRequestDTO,
+  UpdateTemplateRequestDTO,
+  UserResponseDTO,
+} from './service/templateService/types';
 import { mongoConfig, redisConfig } from './config';
 import {
   deleteTemplateService,
-  getTemplateService,
+  getOwnTemplatesService,
+  getTemplatesService,
   saveTemplateService,
   updateTemplateService,
 } from './service/templateService';
+import {
+  verifyGetOwnTemplates,
+  verifyGetTemplates,
+  verifySaveTemplate,
+  verifyUpdateTemplate,
+} from './service/templateService/utils';
+import {
+  checkUsernameService,
+  getUserService,
+  loginService,
+  registerService,
+} from './service/userService';
+import {
+  ACCESS_TOKEN_HEADER,
+  REFRESH_TOKEN_HEADER,
+} from './service/userService/config';
 
 const mongoClient = new MongoClient(mongoConfig.url);
 
@@ -156,95 +179,220 @@ try {
       });
     });
 
-    app.post('/save/template/', async (req, reply) => {
-      if (req.body) {
-        let templateModel: TemplateRequestDTO = null as any;
-        try {
-          templateModel = JSON.parse(req.body as string);
-        } catch {
+    app.get('/check/username/', async (req, reply) => {
+      try {
+        const { userName } = req.query || ({} as any);
+        if (userName) {
+          const result = await checkUsernameService(userName);
+          reply.send({ status: 1, data: result, message: '' });
+        } else {
           reply
             .status(400)
-            .send({ status: 0, data: null, message: '模板json解析失败' });
+            .send({ status: 0, data: null, message: '缺少参数' });
         }
-        if (templateModel) {
-          try {
-            const result = await saveTemplateService(templateModel);
-            if (result) {
-              reply.send({ status: 1, data: result, message: '' });
-            } else {
-              reply
-                .status(500)
-                .send({ status: 0, data: null, message: '保存模板失败' });
-            }
-          } catch (e) {
-            reply.status(500).send({ status: 0, data: null, message: e });
-          }
-        }
+      } catch (e) {
+        reply.status(500).send({ status: 0, data: null, message: e });
       }
     });
 
-    app.put('/update/template/', async (req, reply) => {
-      if (req.body) {
-        let templateModel: TemplateRequestDTO = null as any;
-        try {
-          templateModel = JSON.parse(req.body as string);
-        } catch {
+    app.post('/register/user/', async (req, reply) => {
+      try {
+        const body = JSON.parse(req.body as string);
+        if (body) {
+          const response = await registerService(body);
+          reply
+            .headers({
+              [ACCESS_TOKEN_HEADER]: response.accessToken,
+              [REFRESH_TOKEN_HEADER]: response.refreshToken,
+            })
+            .send({ status: 1, data: response.user, message: '' });
+        }
+      } catch (e) {
+        reply.status(500).send({ status: 0, data: null, message: e });
+      }
+    });
+
+    app.post('/login/user/', async (req, reply) => {
+      try {
+        const { userName, password } = req.body || ({} as any);
+        if (
+          userName &&
+          password &&
+          typeof userName === 'string' &&
+          typeof password === 'string'
+        ) {
+          const response = await loginService({ userName, password });
+          reply
+            .headers({
+              [ACCESS_TOKEN_HEADER]: response.accessToken,
+              [REFRESH_TOKEN_HEADER]: response.refreshToken,
+            })
+            .send({ status: 1, data: response.user, message: '' });
+        } else {
           reply
             .status(400)
-            .send({ status: 0, data: null, message: '模板json解析失败' });
+            .send({ status: 0, data: null, message: '参数错误' });
         }
-        if (templateModel) {
-          if (!templateModel.id) {
+      } catch (e) {
+        reply.status(500).send({ status: 0, data: null, message: e });
+      }
+    });
+
+    app.get('/get/user/', async (req, reply) => {
+      try {
+        const { id } = req.query || ({} as any);
+        let user: UserResponseDTO | null = null;
+        if (isExist(id)) {
+          user = await getUserService(req, Number(id));
+        } else {
+          user = await getUserService(req);
+        }
+        reply.send({
+          status: 1,
+          data: user,
+          message: user === null ? 'accessToken已过期' : '',
+        });
+      } catch (e) {
+        reply.status(500).send({ status: 0, data: null, message: e });
+      }
+    });
+
+    app.post('/save/template/', async (req, reply) => {
+      try {
+        // TODO:查询请求身份，得到userId作为authorName
+        const userName = '';
+        if (req.body) {
+          let templateModel: SaveTemplateRequestDTO = null as any;
+          try {
+            templateModel = JSON.parse(req.body as string);
+          } catch {
             reply
               .status(400)
-              .send({ status: 0, data: null, message: '数据不正确' });
-          } else {
+              .send({ status: 0, data: null, message: '模板json解析失败' });
+          }
+          if (templateModel) {
             try {
-              const result = await updateTemplateService(templateModel);
-              if (result) {
-                reply.send({ status: 1, data: result, message: '' });
+              const legal = verifySaveTemplate(templateModel);
+              if (legal) {
+                const result = await saveTemplateService(
+                  templateModel,
+                  userName,
+                );
+                if (result) {
+                  reply.send({ status: 1, data: result, message: '' });
+                } else {
+                  reply
+                    .status(500)
+                    .send({ status: 0, data: null, message: '保存模板失败' });
+                }
               } else {
                 reply
-                  .status(500)
-                  .send({ status: 0, data: null, message: '保存模板失败' });
+                  .status(400)
+                  .send({ status: 0, data: null, message: '参数不正确' });
               }
             } catch (e) {
               reply.status(500).send({ status: 0, data: null, message: e });
             }
           }
         }
+      } catch (e) {
+        reply.status(500).send({ status: 0, data: null, message: e });
       }
     });
 
-    app.get('/get/template/', async (req, reply) => {
-      if (req.query) {
-        const { id, user_id, user_name } = req.query as {
-          id: string;
-          user_id?: string;
-          user_name?: string;
-        };
-        if (isExist(id)) {
+    app.put('/update/template/', async (req, reply) => {
+      try {
+        // TODO:查询请求身份，得到userId作为authorId
+        const userId = 0;
+
+        if (req.body) {
+          let templateModel: UpdateTemplateRequestDTO = null as any;
           try {
-            const result = await getTemplateService(
-              id,
-              isExist(user_id) ? Number(user_id) : undefined,
-              user_name,
-            );
-            if (result) {
-              reply.send({ status: 1, data: result, message: '' });
+            templateModel = JSON.parse(req.body as string);
+          } catch {
+            reply
+              .status(400)
+              .send({ status: 0, data: null, message: '模板json解析失败' });
+          }
+          if (templateModel) {
+            const legal = verifyUpdateTemplate(templateModel);
+            if (!legal) {
+              reply
+                .status(400)
+                .send({ status: 0, data: null, message: '参数不正确' });
             } else {
-              reply.send({ status: 1, data: null, message: '没有该模板' });
+              try {
+                const result = await updateTemplateService(
+                  templateModel,
+                  userId,
+                );
+                if (result) {
+                  reply.send({ status: 1, data: result, message: '' });
+                } else {
+                  reply
+                    .status(500)
+                    .send({ status: 0, data: null, message: '保存模板失败' });
+                }
+              } catch (e) {
+                reply.status(500).send({ status: 0, data: null, message: e });
+              }
             }
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '数据不能为空' });
+        }
+      } catch (e) {
+        reply.status(500).send({ status: 0, data: null, message: e });
+      }
+    });
+
+    app.get('/get/templates/', async (req, reply) => {
+      const params: GetTemplatesRequestDTO = req.query as any;
+      if (params) {
+        if (isExist(params.author_id)) {
+          params.author_id = Number(params.author_id);
+        }
+        if (isExist(params.start)) {
+          params.start = Number(params.start);
+        }
+        if (isExist(params.limit)) {
+          params.limit = Number(params.limit);
+        }
+        const legal = verifyGetTemplates(params);
+        if (legal) {
+          try {
+            const result = await getTemplatesService(params);
+            reply.send({ status: 1, data: result, message: '' });
           } catch (e) {
             reply.status(500).send({ status: 0, data: null, message: e });
           }
         } else {
           reply
             .status(400)
-            .send({ status: 0, data: null, message: '缺少参数' });
+            .send({ status: 0, data: null, message: '参数不正确' });
         }
       } else {
         reply.status(400).send({ status: 0, data: null, message: '缺少参数' });
+      }
+    });
+
+    app.get('/get/own/templates/', async (req, reply) => {
+      try {
+        // TODO:查询请求身份，得到userId作为authorId
+        const userId = 0;
+        const params: GetOwnRequestDTO = (req.query as any) || {};
+        if (!verifyGetOwnTemplates(params)) {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '参数不正确' });
+        } else {
+          const result = await getOwnTemplatesService(params, userId);
+          reply.send({ status: 1, data: result, message: '' });
+        }
+      } catch (e) {
+        reply.status(500).send({ status: 0, data: null, message: e });
       }
     });
 
