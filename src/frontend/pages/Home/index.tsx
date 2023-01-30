@@ -29,11 +29,11 @@ const Home = () => {
     <div>
       <HeaderBar />
       <Entries>
-        <Link to="editor?type=tob">
-          <Entry>创建后台页面</Entry>
-        </Link>
         <Link to="editor?type=toc">
           <Entry>创建前台页面</Entry>
+        </Link>
+        <Link to="editor?type=tob">
+          <Entry>创建后台页面</Entry>
         </Link>
       </Entries>
     </div>
