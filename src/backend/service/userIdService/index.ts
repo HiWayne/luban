@@ -1,1 +1,2 @@
-export * from './createUserIdService';
+export * from './createIdService';
+export * from './getVersionService';

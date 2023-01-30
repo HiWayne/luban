@@ -3,10 +3,10 @@ export const redisConfig = {
 };
 
 export const mongoConfig = {
-  url: 'mongodb://0.0.0.0:27017?retryWrites=true&w=majority',
-  dbName: 'luban',
+  url: 'mongodb://0.0.0.0:27017',
+  dbName: 'lowcode',
   templateCollectionName: 'templates',
   deployCollectionName: 'deploy',
   userCollectionName: 'user',
-  userIdCollectionName: 'userId',
+  idCollectionName: 'id',
 };

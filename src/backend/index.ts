@@ -15,15 +15,18 @@ import {
   generateVirtualStaticJs,
 } from './service/compileService/generateVirtualStaticFile';
 import {
-  GetOwnRequestDTO,
-  GetTemplatesRequestDTO,
   SaveTemplateRequestDTO,
   UpdateTemplateRequestDTO,
-  UserResponseDTO,
 } from './service/templateService/types';
+import {
+  SearchUsersRequestDTO,
+  UserRegisterDTO,
+  UserResponseDTO,
+} from './service/userService/types';
 import { mongoConfig, redisConfig } from './config';
 import {
   deleteTemplateService,
+  getCollaborativeTemplatesService,
   getOwnTemplatesService,
   getTemplatesService,
   saveTemplateService,
@@ -39,12 +42,23 @@ import {
   checkUsernameService,
   getUserService,
   loginService,
+  refreshTokenService,
   registerService,
+  getUserIdFromHeaderService,
+  deleteUserService,
+  updateUserService,
 } from './service/userService';
 import {
   ACCESS_TOKEN_HEADER,
   REFRESH_TOKEN_HEADER,
 } from './service/userService/config';
+import { catchErrorReply } from './utils';
+import {
+  verifySearchUsers,
+  verifyUpdateUserInfo,
+  verifyUserInfo,
+} from './service/userService/utils';
+import { searchUsersService } from './service/userService/searchUsersService';
 
 const mongoClient = new MongoClient(mongoConfig.url);
 
@@ -67,7 +81,7 @@ try {
       origin: (receivedOrigin, cb) => cb(null, true),
     });
 
-    app.post('/generatePage/', async (req, reply) => {
+    app.post('/api/generatePage/', async (req, reply) => {
       try {
         const pageModel: PageModel = JSON.parse(req.body as string);
         if (pageModel) {
@@ -90,7 +104,7 @@ try {
       }
     });
 
-    app.get('/virtual/*', async (req, reply) => {
+    app.get('/api/virtual/*', async (req, reply) => {
       const fileNameParam = (req.params as any)['*'];
       const match = /([^.]+)\.([^.]+)$/.exec(fileNameParam);
       if (match) {
@@ -114,7 +128,7 @@ try {
       }
     });
 
-    app.post('/compileToSourceCode/', async (req, reply) => {
+    app.post('/api/compileToSourceCode/', async (req, reply) => {
       try {
         const pageModel: PageModel = JSON.parse(req.body as string);
         if (pageModel) {
@@ -134,7 +148,6 @@ try {
             .send({ status: 0, data: null, message: '内容不能为空' });
         }
       } catch (e) {
-        console.log(e);
         reply
           .code(500)
           .send({ status: 0, data: null, message: '参数错误或服务器错误' });
@@ -179,7 +192,7 @@ try {
       });
     });
 
-    app.get('/check/username/', async (req, reply) => {
+    app.get('/api/check/username/', async (req, reply) => {
       try {
         const { userName } = req.query || ({} as any);
         if (userName) {
@@ -191,30 +204,39 @@ try {
             .send({ status: 0, data: null, message: '缺少参数' });
         }
       } catch (e) {
-        reply.status(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, reply);
       }
     });
 
-    app.post('/register/user/', async (req, reply) => {
+    app.post('/api/register/user/', async (req, reply) => {
       try {
         const body = JSON.parse(req.body as string);
         if (body) {
-          const response = await registerService(body);
-          reply
-            .headers({
-              [ACCESS_TOKEN_HEADER]: response.accessToken,
-              [REFRESH_TOKEN_HEADER]: response.refreshToken,
-            })
-            .send({ status: 1, data: response.user, message: '' });
+          const verifiedBody = await verifyUserInfo(body);
+          const result = await checkUsernameService(verifiedBody.name);
+          if (result) {
+            const response = await registerService(verifiedBody);
+            reply
+              .headers({
+                [ACCESS_TOKEN_HEADER]: response.accessToken,
+                [REFRESH_TOKEN_HEADER]: response.refreshToken,
+              })
+              .send({ status: 1, data: response.user, message: '' });
+          } else {
+            reply
+              .status(400)
+              .send({ status: 0, data: null, message: '用户名重复' });
+          }
         }
       } catch (e) {
-        reply.status(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, reply);
       }
     });
 
-    app.post('/login/user/', async (req, reply) => {
+    app.post('/api/login/user/', async (req, reply) => {
       try {
-        const { userName, password } = req.body || ({} as any);
+        const { userName, password } =
+          JSON.parse(req.body as string) || ({} as any);
         if (
           userName &&
           password &&
@@ -234,33 +256,99 @@ try {
             .send({ status: 0, data: null, message: '参数错误' });
         }
       } catch (e) {
-        reply.status(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, reply);
       }
     });
 
-    app.get('/get/user/', async (req, reply) => {
+    app.get('/api/get/user/', async (req, reply) => {
       try {
-        const { id } = req.query || ({} as any);
-        let user: UserResponseDTO | null = null;
+        const { id } = (req.query || {}) as any;
+        let userId: number;
         if (isExist(id)) {
-          user = await getUserService(req, Number(id));
+          userId = Number(id);
         } else {
-          user = await getUserService(req);
+          const { id: numberId } = await getUserIdFromHeaderService(req);
+          userId = numberId;
         }
+        const user: UserResponseDTO = await getUserService(userId);
         reply.send({
           status: 1,
           data: user,
           message: user === null ? 'accessToken已过期' : '',
         });
       } catch (e) {
-        reply.status(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, reply);
       }
     });
 
-    app.post('/save/template/', async (req, reply) => {
+    app.put('/api/update/user/', async (req, reply) => {
       try {
-        // TODO:查询请求身份，得到userId作为authorName
-        const userName = '';
+        const { id } = await getUserIdFromHeaderService(req);
+        if (!id) {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '登录异常' });
+        } else {
+          const body: Partial<UserRegisterDTO> & { id: number } = JSON.parse(
+            req.body as string,
+          );
+          if (body) {
+            const verifiedBody = await verifyUpdateUserInfo(body);
+            const user = await updateUserService(verifiedBody);
+            reply.send({ status: 1, data: user, message: '' });
+          } else {
+            reply
+              .status(400)
+              .send({ status: 0, data: null, message: '缺少参数' });
+          }
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.delete('/api/delete/user/', async (req, reply) => {
+      try {
+        const { id: userId } = await getUserIdFromHeaderService(req);
+        if (userId !== null) {
+          const result = await deleteUserService(userId);
+          reply.send({ status: 1, data: result, message: '' });
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '缺少参数' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.get('/api/search/users/', async (req, reply) => {
+      try {
+        const query = (req.query || {}) as SearchUsersRequestDTO;
+        const verifiedParams = verifySearchUsers(query);
+        const result = await searchUsersService(verifiedParams);
+        reply.send({ status: 1, data: result, message: '' });
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.get('/api/refresh/accessToken/', async (req, reply) => {
+      try {
+        const accessToken = await refreshTokenService(req);
+        reply
+          .headers({ [ACCESS_TOKEN_HEADER]: accessToken })
+          .send({ status: 1, data: true, message: '' });
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.post('/api/create/template/', async (req, reply) => {
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const userData = await getUserService(id);
         if (req.body) {
           let templateModel: SaveTemplateRequestDTO = null as any;
           try {
@@ -272,23 +360,17 @@ try {
           }
           if (templateModel) {
             try {
-              const legal = verifySaveTemplate(templateModel);
-              if (legal) {
-                const result = await saveTemplateService(
-                  templateModel,
-                  userName,
-                );
-                if (result) {
-                  reply.send({ status: 1, data: result, message: '' });
-                } else {
-                  reply
-                    .status(500)
-                    .send({ status: 0, data: null, message: '保存模板失败' });
-                }
+              const verifiedTemplateParams = verifySaveTemplate(templateModel);
+              const result = await saveTemplateService(
+                verifiedTemplateParams,
+                userData,
+              );
+              if (result) {
+                reply.send({ status: 1, data: result, message: '' });
               } else {
                 reply
-                  .status(400)
-                  .send({ status: 0, data: null, message: '参数不正确' });
+                  .status(500)
+                  .send({ status: 0, data: null, message: '保存模板失败' });
               }
             } catch (e) {
               reply.status(500).send({ status: 0, data: null, message: e });
@@ -296,14 +378,13 @@ try {
           }
         }
       } catch (e) {
-        reply.status(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, reply);
       }
     });
 
-    app.put('/update/template/', async (req, reply) => {
+    app.put('/api/update/template/', async (req, reply) => {
       try {
-        // TODO:查询请求身份，得到userId作为authorId
-        const userId = 0;
+        const { id: userId } = await getUserIdFromHeaderService(req);
 
         if (req.body) {
           let templateModel: UpdateTemplateRequestDTO = null as any;
@@ -315,27 +396,22 @@ try {
               .send({ status: 0, data: null, message: '模板json解析失败' });
           }
           if (templateModel) {
-            const legal = verifyUpdateTemplate(templateModel);
-            if (!legal) {
-              reply
-                .status(400)
-                .send({ status: 0, data: null, message: '参数不正确' });
-            } else {
-              try {
-                const result = await updateTemplateService(
-                  templateModel,
-                  userId,
-                );
-                if (result) {
-                  reply.send({ status: 1, data: result, message: '' });
-                } else {
-                  reply
-                    .status(500)
-                    .send({ status: 0, data: null, message: '保存模板失败' });
-                }
-              } catch (e) {
-                reply.status(500).send({ status: 0, data: null, message: e });
+            try {
+              const verifiedTemplateParams =
+                verifyUpdateTemplate(templateModel);
+              const result = await updateTemplateService(
+                verifiedTemplateParams,
+                userId,
+              );
+              if (result) {
+                reply.send({ status: 1, data: result, message: '' });
+              } else {
+                reply
+                  .status(500)
+                  .send({ status: 0, data: null, message: '保存模板失败' });
               }
+            } catch (e) {
+              reply.status(500).send({ status: 0, data: null, message: e });
             }
           }
         } else {
@@ -344,12 +420,12 @@ try {
             .send({ status: 0, data: null, message: '数据不能为空' });
         }
       } catch (e) {
-        reply.status(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, reply);
       }
     });
 
-    app.get('/get/templates/', async (req, reply) => {
-      const params: GetTemplatesRequestDTO = req.query as any;
+    app.get('/api/get/templates/', async (req, reply) => {
+      const params = req.query as any;
       if (params) {
         if (isExist(params.author_id)) {
           params.author_id = Number(params.author_id);
@@ -378,46 +454,56 @@ try {
       }
     });
 
-    app.get('/get/own/templates/', async (req, reply) => {
+    app.get('/api/get/own/templates/', async (req, reply) => {
       try {
-        // TODO:查询请求身份，得到userId作为authorId
-        const userId = 0;
-        const params: GetOwnRequestDTO = (req.query as any) || {};
+        const { id } = await getUserIdFromHeaderService(req);
+        const params = (req.query as any) || {};
+        if (isExist(params.start)) {
+          params.start = Number(params.start);
+        }
+        if (isExist(params.limit)) {
+          params.limit = Number(params.limit);
+        }
         if (!verifyGetOwnTemplates(params)) {
           reply
             .status(400)
             .send({ status: 0, data: null, message: '参数不正确' });
         } else {
-          const result = await getOwnTemplatesService(params, userId);
+          const result = await getOwnTemplatesService(params, id);
           reply.send({ status: 1, data: result, message: '' });
         }
       } catch (e) {
-        reply.status(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, reply);
       }
     });
 
-    app.delete('/delete/template/', async (req, reply) => {
-      if (req.query) {
-        const { id } = req.query as {
-          id: string;
-        };
-        if (id) {
-          const result = await deleteTemplateService(id);
-          if (result) {
-            reply.send({ status: 1, data: true, message: '' });
-          } else {
-            reply
-              .status(500)
-              .send({ status: 0, data: null, message: '删除失败' });
-          }
-        } else {
+    app.get('/api/get/collaborative/templates/', async (req, reply) => {
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const params = (req.query as any) || {};
+        if (isExist(params.start)) {
+          params.start = Number(params.start);
+        }
+        if (isExist(params.limit)) {
+          params.limit = Number(params.limit);
+        }
+        if (!verifyGetOwnTemplates(params)) {
           reply
             .status(400)
-            .send({ status: 0, data: null, message: '缺少参数' });
+            .send({ status: 0, data: null, message: '参数不正确' });
+        } else {
+          const result = await getCollaborativeTemplatesService(params, id);
+          reply.send({ status: 1, data: result, message: '' });
         }
-      } else {
-        reply.status(400).send({ status: 0, data: null, message: '缺少参数' });
+      } catch (e) {
+        catchErrorReply(e, reply);
       }
+    });
+
+    app.delete('/api/delete/template/', async (req, reply) => {
+      const { id } = await getUserIdFromHeaderService(req);
+      const result = await deleteTemplateService(id);
+      reply.send({ status: 1, data: result, message: '' });
     });
 
     app.listen({ port: 8000, host: '0.0.0.0' }, (error, address) => {

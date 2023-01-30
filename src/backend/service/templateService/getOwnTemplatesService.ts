@@ -2,7 +2,8 @@
 
 import { isExist } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
-import { GetOwnRequestDTO, TemplateEntity } from './types';
+import { FormatGetOwnRequestDTO, TemplateEntity } from './types';
+import { escapeRegex } from '@/backend/utils';
 
 export const formatData = (data: any) => {
   if (data) {
@@ -16,7 +17,7 @@ export const formatData = (data: any) => {
 };
 
 export const getOwnTemplatesService = async (
-  params: GetOwnRequestDTO,
+  params: FormatGetOwnRequestDTO,
   userId: number,
 ) => {
   const {
@@ -31,14 +32,16 @@ export const getOwnTemplatesService = async (
   } = params;
   try {
     const conditions: any = {
-      author_id: userId,
+      author: {
+        author_id: userId,
+      },
     };
 
     if (isExist(name)) {
-      conditions.name = new RegExp(name!, 'i');
+      conditions.name = new RegExp(escapeRegex(name), 'i');
     }
     if (isExist(desc)) {
-      conditions.desc = new RegExp(desc!, 'i');
+      conditions.desc = new RegExp(escapeRegex(desc), 'i');
     }
     if (isExist(tags)) {
       conditions.tags = { $all: tags?.split(',') };
@@ -58,7 +61,7 @@ export const getOwnTemplatesService = async (
     const mongodb = process.dbContext.mongo;
     const db = mongodb.db(mongoConfig.dbName);
     const collection = db.collection(mongoConfig.templateCollectionName);
-    const [list, count] = await Promise.all([
+    const [list, total] = await Promise.all([
       collection
         .find({
           ...conditions,
@@ -71,10 +74,10 @@ export const getOwnTemplatesService = async (
     ]);
     return {
       list: list.map((item: TemplateEntity) => formatData(item)),
-      more: count > start + limit,
-      count,
+      more: total > start + limit,
+      total,
     };
   } catch (e) {
-    return Promise.reject(`${e}`);
+    return Promise.reject(e);
   }
 };

@@ -147,7 +147,7 @@ const treeDemo: NodeAST = {
             action: {
               type: 'Fetch',
               data: {
-                url: 'http://localhost:8000/api/mock/pagination/',
+                url: '/api/mock/pagination/',
                 method: 'GET',
                 params: 'component_scope_variable_params',
                 computeParams: `(params) => ({...params, startTime: params.startTime.format('YYYY-MM-DD HH:mm:ss'), endTime: params.endTime.format('YYYY-MM-DD HH:mm:ss')})`,
@@ -321,7 +321,7 @@ const treeDemo: NodeAST = {
             next: {
               type: 'Fetch',
               data: {
-                url: 'http://localhost:8000/api/mock/pagination/',
+                url: '/api/mock/pagination/',
                 method: 'GET',
                 params: 'component_scope_variable_params',
                 computeParams: '(params, start) => ({...params, start})',

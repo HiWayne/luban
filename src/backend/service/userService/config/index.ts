@@ -1,3 +1,3 @@
-export const ACCESS_TOKEN_HEADER = 'accessToken';
+export const ACCESS_TOKEN_HEADER = 'accesstoken';
 
-export const REFRESH_TOKEN_HEADER = 'refreshToken';
+export const REFRESH_TOKEN_HEADER = 'refreshtoken';

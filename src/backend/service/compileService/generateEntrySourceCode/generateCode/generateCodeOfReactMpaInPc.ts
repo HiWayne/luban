@@ -35,7 +35,7 @@ export const generateCodeOfReactMpaInPc = async (
         </head>
         <body>
           <div id="root"></div>
-          <script src="/virtual/${name}.js></script>
+          <script src="/api/virtual/${name}.js></script>
         </body>
       </html>
     `;
@@ -49,7 +49,7 @@ export const generateCodeOfReactMpaInPc = async (
           .HSET('virtual', name, 'json', JSON.stringify(pageMeta));
 
       if (isOK(setHtmlReply) && isOK(setJsReply) && isOK(setJsonReply)) {
-        return { htmlPath: `/virtual/${name}.html` };
+        return { htmlPath: `/api/virtual/${name}.html` };
       } else {
         throw new Error('服务器存储错误');
       }

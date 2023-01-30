@@ -1,4 +1,5 @@
-import { defineConfig, Plugin_2 } from 'vite';
+import { defineConfig } from 'vite';
+import type { Plugin_2 } from 'vite';
 import react from '@vitejs/plugin-react';
 import path, { posix } from 'path';
 import fs from 'fs';
@@ -22,6 +23,12 @@ export default defineConfig({
   server: {
     port: 3000,
     host: '0.0.0.0',
+    proxy: {
+      '/api/': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
   },
 });
 

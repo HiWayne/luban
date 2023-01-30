@@ -1,6 +1,6 @@
-import styled from 'styled-components';
-import loadingIcon from 'assets/images/loading.svg';
 import { forwardRef } from 'react';
+import styled from 'styled-components';
+import loadingIcon from '@/frontend/assets/loading.svg';
 
 const globalStyle = `
 position: fixed;

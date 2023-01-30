@@ -1,6 +1,8 @@
 export interface VerifyTypeStructure {
   key: string;
   type: string[];
+  empty?: boolean;
+  required?: boolean;
 }
 
 export const STRING = 'STRING';
@@ -11,28 +13,39 @@ export const BOOLEAN = 'BOOLEAN';
 
 const originalTypes = [STRING, NUMBER, ARRAY, OBJECT, BOOLEAN];
 
-const verifyType = (data: any, key: string, types: string[]) => {
+const verifyType = (
+  value: any,
+  types: string[],
+  config: { empty: boolean; required: boolean },
+) => {
+  const { empty, required } = config;
+  if (!required && value === undefined) {
+    return true;
+  }
   if (Array.isArray(types)) {
     return types.some((type) => {
       if (originalTypes.includes(type)) {
         switch (type) {
           case STRING:
-            return typeof data[key] === 'string';
+            return typeof value === 'string' && (!empty ? !!value : true);
           case NUMBER:
-            return typeof data[key] === 'number';
+            return typeof value === 'number';
           case BOOLEAN:
-            return typeof data[key] === 'boolean';
+            return typeof value === 'boolean';
           case ARRAY:
-            return Array.isArray(data[key]);
+            return Array.isArray(value) && (!empty ? value.length > 0 : true);
           case OBJECT:
             return (
-              data && typeof data[key] === 'object' && !Array.isArray(data[key])
+              value &&
+              typeof value === 'object' &&
+              !Array.isArray(value) &&
+              (!empty ? Object.keys(value).length > 0 : true)
             );
           default:
             throw new Error('type不属于verifyType已有的类型');
         }
       } else {
-        return data[key] === type;
+        return value === type;
       }
     });
   } else {
@@ -40,26 +53,16 @@ const verifyType = (data: any, key: string, types: string[]) => {
   }
 };
 
-export const verifyValues = (
-  data: any,
-  requiredValues: VerifyTypeStructure[],
-  optionalValues: VerifyTypeStructure[],
-) => {
+export const verifyValues = (data: any, values: VerifyTypeStructure[]) => {
   if (!data) {
     throw new Error('verifyValues 的 data 不能为空');
   }
-  if (Array.isArray(requiredValues) && Array.isArray(optionalValues)) {
-    const requiredValuesLegal = requiredValues.every(({ key, type }) =>
-      verifyType(data, key, type),
+  if (Array.isArray(values)) {
+    const valuesLegal = values.every(
+      ({ key, type, empty = true, required = true }) =>
+        verifyType(data[key], type, { empty, required }),
     );
-    const optionalValuesLegal = optionalValues.every(({ key, type }) => {
-      if (data[key] === undefined) {
-        return true;
-      } else {
-        return verifyType(data, key, type);
-      }
-    });
-    return requiredValuesLegal && optionalValuesLegal;
+    return valuesLegal;
   } else {
     throw new Error(
       'verifyValues 的 requiredValues 和 optionalValues 参数必须是数组',

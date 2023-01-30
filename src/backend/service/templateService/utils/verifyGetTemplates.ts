@@ -7,20 +7,18 @@ import {
 } from './verifyValues';
 
 export const verifyGetTemplates = (params: GetTemplatesRequestDTO) => {
-  const requiredValues: VerifyTypeStructure[] = [];
-
-  const optionalValues: VerifyTypeStructure[] = [
-    { key: 'type', type: ['tob', 'toc'] },
-    { key: 'id', type: [STRING] },
-    { key: 'name', type: [STRING] },
-    { key: 'desc', type: [STRING] },
-    { key: 'author_name', type: [STRING] },
-    { key: 'author_id', type: [NUMBER] },
-    { key: 'tags', type: [STRING] },
-    { key: 'collaborators', type: [STRING] },
-    { key: 'start', type: [NUMBER] },
-    { key: 'limit', type: [NUMBER] },
+  const values: VerifyTypeStructure[] = [
+    { key: 'type', type: ['tob', 'toc'], required: false },
+    { key: 'id', type: [STRING], required: false },
+    { key: 'name', type: [STRING], required: false },
+    { key: 'desc', type: [STRING], required: false },
+    { key: 'author_name', type: [STRING], required: false },
+    { key: 'author_id', type: [NUMBER], required: false },
+    { key: 'tags', type: [STRING], required: false },
+    { key: 'collaborators', type: [STRING], required: false },
+    { key: 'start', type: [NUMBER], required: false },
+    { key: 'limit', type: [NUMBER], required: false },
   ];
 
-  return verifyValues(params, requiredValues, optionalValues);
+  return verifyValues(params, values);
 };
