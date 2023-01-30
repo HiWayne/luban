@@ -25,13 +25,13 @@ export const updateTemplateService = async (
       });
       if (template) {
         if (
-          template.author_id !== userId &&
+          template.author.author_id !== userId ||
           !template.collaborators.includes(userId)
         ) {
           throw new Error('没有权限更新模板');
         }
       } else {
-        throw new Error('不存在该模板');
+        throw new Error('模板不存在');
       }
 
       const templateEntity: Partial<TemplateEntity> = {};
@@ -56,6 +56,9 @@ export const updateTemplateService = async (
       if (isExist(templateModel.tags)) {
         templateEntity.tags = templateModel.tags;
       }
+      if (isExist(templateModel.preview)) {
+        templateEntity.preview = templateModel.preview;
+      }
       const currentTimestamp = new Date().getTime();
       templateEntity.update_time = currentTimestamp;
       delete (templateEntity as any).id;
@@ -65,13 +68,9 @@ export const updateTemplateService = async (
         { $set: { ...templateEntity } },
       );
       // result { acknowledged: true, modifiedCount: 1, upsertedId: null, upsertedCount: 0, matchedCount: 1 }
-      if (result.acknowledged) {
-        return true;
-      } else {
-        return false;
-      }
+      return result.acknowledged;
     } catch (e) {
-      return Promise.reject(`${e}`);
+      return Promise.reject(e);
     }
   } else {
     return Promise.reject('模板更新数据不能为空');

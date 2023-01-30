@@ -1,7 +1,12 @@
-import { getTimeWithMillisecond } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
-import { LoginInDTO } from '../templateService/types';
-import { createJWTToken, decode, formatUserResponse, hash } from './utils';
+import { LoginInDTO, UserEntity } from './types';
+import {
+  createAccessToken,
+  createRefreshToken,
+  decode,
+  formatUserResponse,
+  hash,
+} from './utils';
 
 export const loginService = async (body: LoginInDTO) => {
   try {
@@ -9,34 +14,40 @@ export const loginService = async (body: LoginInDTO) => {
     const mongodb = process.dbContext.mongo;
     const db = mongodb.db(mongoConfig.dbName);
     const collection = db.collection(mongoConfig.userCollectionName);
-    const user = collection.findOne({ name: userName });
+    const user = await collection.findOne({ name: userName });
     if (user) {
-      const passwordHash = hash(decode(password), user._salt);
+      const decodedPassword = await decode(password);
+      const passwordHash = hash(decodedPassword, user._salt);
       if (passwordHash === user._password) {
-        const userData = {
-          id: user.id,
-          name: user.name,
-          _password: user._password,
-          _salt: user._salt,
-          desc: user.desc,
-          sex: user.sex,
-          avatar: user.avatar,
-          roles: user.roles,
-          create_time: user.create_time,
-        };
-
-        const responseUser = formatUserResponse(user);
-
-        const accessToken = createJWTToken(
-          userData,
-          getTimeWithMillisecond(15, 'minute'),
+        const lastLoginTimes = [...user.last_login_times, new Date().getTime()];
+        const result = await collection.updateOne(
+          { id: user.id },
+          { $set: { last_login_times: lastLoginTimes } },
         );
-        const refreshToken = createJWTToken(
-          userData,
-          getTimeWithMillisecond(1, 'month'),
-        );
+        if (result.acknowledged) {
+          const userData: UserEntity = {
+            _id: user._id,
+            id: user.id,
+            name: user.name,
+            _password: user._password,
+            _salt: user._salt,
+            desc: user.desc,
+            sex: user.sex,
+            avatar: user.avatar,
+            roles: user.roles,
+            create_time: user.create_time,
+            last_login_times: lastLoginTimes,
+          };
 
-        return { user: responseUser, accessToken, refreshToken };
+          const responseUser = formatUserResponse(user);
+
+          const accessToken = createAccessToken(userData);
+          const refreshToken = createRefreshToken(userData);
+
+          return { user: responseUser, accessToken, refreshToken };
+        } else {
+          throw new Error('服务器发生错误');
+        }
       } else {
         throw new Error('账号或密码错误');
       }
@@ -44,6 +55,6 @@ export const loginService = async (body: LoginInDTO) => {
       throw new Error('账号或密码错误');
     }
   } catch (e) {
-    return Promise.reject(`${e}`);
+    return Promise.reject(e);
   }
 };

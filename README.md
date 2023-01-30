@@ -6,9 +6,9 @@ toC 指移动端用户使用的页面、toB 指企业内部后台，后面直接
 
 ## 项目特点
 
-1. 灵活的 UI。比如我希望表格最后有一列『操作』栏，里面有叫『修改配置』的按钮。按钮会弹出修改配置的弹框，弹框里有一堆自定义的表单，用以修改表格该行配置。
+1. 灵活的 UI。比如我想自定义表格每列单元格的内容、弹窗里的内容。
 
-2. 支持自定义组件之间的状态逻辑。比如我希望点击按钮后 -> 发出请求 -> 表格 compute 请求数据 -> 表格展示 computed 的请求数据。比如希望表单修改后其他地方的内容跟着变化。
+2. 支持组件之间的自定义状态逻辑。比如我希望点击按钮后 -> 发出请求 -> compute 请求数据 -> 表格展示 computed 后的数据。或者希望表单修改后其他地方的内容也跟着变化。
 
 3. 较好的运行时性能。低代码平台产出的内容是仅业务页面相关的、编译后的、浏览器可直接运行的代码，没有额外的运行时逻辑。
 
@@ -16,7 +16,7 @@ toC 指移动端用户使用的页面、toB 指企业内部后台，后面直接
 
 5. 页面代码支持人工修改。面对超出平台能力的需求，可以在平台生成的代码(react)基础上人工修改（平台生成的代码拥有不错的可读性）。
 
-6. 可复用的页面模板。类似的布局可以保存成模板快速创建页面，提高工作效率。
+6. 可复用的页面模板。类似的布局可以保存成模板，在需要时快速创建页面，提高工作效率。
 
 ## 技术栈
 
@@ -50,19 +50,6 @@ nvm use 17.6.0
 pnpm i
 ```
 
-#### 增删依赖
-
-```shell
-# 安装生产环境依赖
-pnpm i dependence_name
-
-# 安装开发环境依赖
-pnpm i -D dependence_name
-
-# 删除依赖
-pnpm uninstall dependence_name
-```
-
 ### 规范工具安装
 
 用于 commit 前代码检查、规范 git commit 格式
@@ -71,22 +58,15 @@ pnpm uninstall dependence_name
 npm i -g pnpm commitizen && commitizen init cz-conventional-changelog --force --save --save-exact && npm run husky-prepare
 ```
 
-#### Git Commit 规范
-
-遵循 angular specification
-
-```shell
-git add .
-
-# 交互式编写commit
-git cz
-
-git push
-```
-
 ### 运行
 
-需要同时启动两个服务
+1. 需要 mongo 服务
+
+2. 需要 redis 服务
+
+mongo、redis 配置在/src/backend/config/dbConfig.ts 里
+
+3. 需要同时启动前后端两个 web 服务
 
 ```shell
 # 前端服务，3000端口，用来启动配置后台
@@ -95,6 +75,8 @@ npm run dev-frontend
 # 后端服务，8000端口，用来支持后台配置的编译
 npm run dev-backend
 ```
+
+4. 浏览器打开 http://localhost:3000
 
 ### Test
 
@@ -432,6 +414,32 @@ const generateCodeOfList = (nodeAST, id, declarations, context) => {
 ### 总结
 
 其实只要明确了`componentName`、`componentDeclaration`、`componentCall`、`componentElement`的含义，写几个例子实验一下结果，同时理清楚`编译`和`运行时`代码的区别，那么面对新模块开发起来就基本没什么问题了。
+
+### 增删依赖
+
+```shell
+# 安装生产环境依赖
+pnpm i dependence_name
+
+# 安装开发环境依赖
+pnpm i -D dependence_name
+
+# 删除依赖
+pnpm uninstall dependence_name
+```
+
+### Git Commit 规范
+
+遵循 angular specification
+
+```shell
+git add .
+
+# 交互式编写commit
+git cz
+
+git push
+```
 
 ## 配置后台页面权限
 

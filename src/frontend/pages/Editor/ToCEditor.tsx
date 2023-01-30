@@ -6,14 +6,22 @@ import {
   useState,
 } from 'react';
 import { loadMicroApp, MicroApp } from 'qiankun';
-import { Button, Input } from 'antd';
+import { Button, Input, notification } from 'antd';
 import shallow from 'zustand/shallow';
 import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
 import { HighLightCodeEditor } from '@/frontend/components';
 import { toCComponents } from './config';
-import { ConfigPanel, ComponentsSelectArea, ComponentItem } from './components';
+import {
+  ConfigPanel,
+  ComponentsSelectArea,
+  ComponentItem,
+  TemplateConfig,
+  TemplateList,
+} from './components';
 import useStore from '@/frontend/store';
+import { useCreateTemplateApi } from './api';
+import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
 
 const ToCEditor = () => {
   const { pageModel, currentComponent } = useStore(
@@ -26,15 +34,19 @@ const ToCEditor = () => {
   const [key, setKey] = useState('test1');
   const [content, setContent] = useState(JSON.stringify(pageModel));
   const [sourceCode, setSourceCode] = useState('');
+  const [templateConfigShow, setTemplateConfigShow] = useState(false);
   const microAppRef: MutableRefObject<MicroApp | null> = useRef(null);
+
+  const { createTemplate } = useCreateTemplateApi();
 
   useEffect(() => {
     setContent(JSON.stringify(pageModel));
   }, [pageModel]);
 
   useEffect(() => {
-    pageModel.meta.key = key;
-    setContent(JSON.stringify(pageModel));
+    setContent(
+      JSON.stringify({ ...pageModel, meta: { ...pageModel.meta, key } }),
+    );
   }, [key]);
 
   const previewPage = useCallback(async () => {
@@ -45,7 +57,7 @@ const ToCEditor = () => {
       meta: { ...pageModel.meta },
     };
     tempPageModel.meta.key = randomKey;
-    const data: any = await fetch('//localhost:8000/generatePage/', {
+    const data: any = await fetch('/api/generatePage/', {
       method: 'post',
       body: JSON.stringify(tempPageModel),
     }).then((response) => response.json());
@@ -57,7 +69,7 @@ const ToCEditor = () => {
         }
         microAppRef.current = loadMicroApp({
           name: `luban-app-${randomKey}`,
-          entry: `//localhost:8000${htmlPath}`,
+          entry: `${htmlPath}`,
           container: '#lubanAppContainer',
         });
       }
@@ -77,7 +89,7 @@ const ToCEditor = () => {
     };
     tempPageModel.meta.key = randomKey;
     tempPageModel.meta.mode = 'production';
-    const data: any = await fetch('//localhost:8000/generatePage/', {
+    const data: any = await fetch('/api/generatePage/', {
       method: 'post',
       body: JSON.stringify(tempPageModel),
     }).then((response) => response.json());
@@ -89,7 +101,7 @@ const ToCEditor = () => {
         }
         microAppRef.current = loadMicroApp({
           name: `luban-app-${randomKey}`,
-          entry: `//localhost:8000${htmlPath}`,
+          entry: `${htmlPath}`,
           container: '#lubanAppContainer',
         });
       }
@@ -102,7 +114,7 @@ const ToCEditor = () => {
       meta: { ...pageModel.meta },
     };
     tempPageModel.meta.mode = 'deploy';
-    const data: any = await fetch('//localhost:8000/generatePage/', {
+    const data: any = await fetch('/api/generatePage/', {
       method: 'post',
       body: JSON.stringify(tempPageModel),
     });
@@ -110,7 +122,7 @@ const ToCEditor = () => {
   }, [pageModel]);
 
   const getReactCode = async () => {
-    const code = await fetch('//localhost:8000/compileToSourceCode/', {
+    const code = await fetch('/api/compileToSourceCode/', {
       method: 'post',
       body: content,
     })
@@ -118,6 +130,28 @@ const ToCEditor = () => {
       .then((json) => json.data);
     setSourceCode(code);
   };
+
+  const openTemplateConfigModal = useCallback(() => {
+    setTemplateConfigShow(true);
+  }, []);
+
+  const closeTemplateConfigModal = useCallback(() => {
+    setTemplateConfigShow(false);
+  }, []);
+
+  const createTemplateAndCloseModal = useCallback(
+    async (templateData: SaveTemplateRequestDTO) => {
+      const result = await createTemplate(templateData);
+      if (result) {
+        closeTemplateConfigModal();
+      } else {
+        notification.error({
+          message: '创建模板失败',
+        });
+      }
+    },
+    [],
+  );
 
   return (
     <div style={{ display: 'flex', width: '100vw' }}>
@@ -128,7 +162,7 @@ const ToCEditor = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
-        <h4>场景组件</h4>
+        <h3>场景组件</h3>
         <ComponentsSelectArea>
           {/* toC */}
           {toCComponents.map((component) => (
@@ -136,7 +170,11 @@ const ToCEditor = () => {
           ))}
         </ComponentsSelectArea>
         <div style={{ marginTop: '20px' }}>
-          <Button style={{ marginLeft: '20px' }}>保存为模板</Button>
+          <Button
+            style={{ marginLeft: '20px' }}
+            onClick={openTemplateConfigModal}>
+            保存为模板
+          </Button>
           <Button style={{ marginLeft: '20px' }} onClick={runPage}>
             运行真实页面
           </Button>
@@ -144,6 +182,8 @@ const ToCEditor = () => {
             发布
           </Button>
         </div>
+        <h3>模板</h3>
+        <TemplateList />
         <div style={{ marginTop: '20px' }}>
           <Button onClick={getReactCode}>预览代码</Button>
         </div>
@@ -177,6 +217,12 @@ const ToCEditor = () => {
       <div>
         <ConfigPanel data={currentComponent} />
       </div>
+      <TemplateConfig
+        open={templateConfigShow}
+        onOk={createTemplateAndCloseModal}
+        onCancel={closeTemplateConfigModal}
+        type="create"
+      />
     </div>
   );
 };

@@ -7,7 +7,7 @@ import {
 import RouterGuard from "./RouterGuard";
 import { Loading } from "@/frontend/components";
 // 路由定义
-import { editorRoutes, homeRoutes, loginRoutes } from "./routes";
+import { editorRoutes, homeRoutes, userRoutes } from "./routes";
 
 export interface RouteType {
   path: string;
@@ -20,7 +20,7 @@ export interface RouteType {
 export const routes: RouteType[] = [
   ...homeRoutes,
   ...editorRoutes,
-  ...loginRoutes,
+  ...userRoutes,
 ];
 
 const renderNestRoute = (_routes: RouteType[]) => {

@@ -1,4 +1,4 @@
-import { GetTemplatesRequestDTO } from '../types';
+import { FormatGetTemplatesRequestDTO } from '../types';
 import {
   NUMBER,
   STRING,
@@ -6,19 +6,17 @@ import {
   verifyValues,
 } from './verifyValues';
 
-export const verifyGetOwnTemplates = (params: GetTemplatesRequestDTO) => {
-  const requiredValues: VerifyTypeStructure[] = [];
-
-  const optionalValues: VerifyTypeStructure[] = [
-    { key: 'type', type: ['tob', 'toc'] },
-    { key: 'name', type: [STRING] },
-    { key: 'desc', type: [STRING] },
-    { key: 'tags', type: [STRING] },
-    { key: 'collaborators', type: [STRING] },
-    { key: 'status', type: ['active', 'inactive'] },
-    { key: 'start', type: [NUMBER] },
-    { key: 'limit', type: [NUMBER] },
+export const verifyGetOwnTemplates = (params: FormatGetTemplatesRequestDTO) => {
+  const values: VerifyTypeStructure[] = [
+    { key: 'type', type: ['tob', 'toc'], required: false },
+    { key: 'name', type: [STRING], required: false },
+    { key: 'desc', type: [STRING], required: false },
+    { key: 'tags', type: [STRING], required: false },
+    { key: 'collaborators', type: [STRING], required: false },
+    { key: 'status', type: ['active', 'inactive'], required: false },
+    { key: 'start', type: [NUMBER], required: false },
+    { key: 'limit', type: [NUMBER], required: false },
   ];
 
-  return verifyValues(params, requiredValues, optionalValues);
+  return verifyValues(params, values);
 };

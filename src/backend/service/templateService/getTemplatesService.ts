@@ -1,10 +1,13 @@
 import { ObjectId } from 'mongodb';
 import { isExist } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
-import { GetTemplatesRequestDTO, TemplateEntity } from './types';
+import { FormatGetTemplatesRequestDTO, TemplateEntity } from './types';
 import { formatData } from './getOwnTemplatesService';
+import { escapeRegex } from '@/backend/utils';
 
-export const getTemplatesService = async (params: GetTemplatesRequestDTO) => {
+export const getTemplatesService = async (
+  params: FormatGetTemplatesRequestDTO,
+) => {
   try {
     const {
       id,
@@ -30,16 +33,19 @@ export const getTemplatesService = async (params: GetTemplatesRequestDTO) => {
       conditions.type = type;
     }
     if (isExist(name)) {
-      conditions.name = new RegExp(name!, 'i');
+      conditions.name = new RegExp(escapeRegex(name), 'i');
     }
     if (isExist(desc)) {
-      conditions.desc = new RegExp(desc!, 'i');
+      conditions.desc = new RegExp(escapeRegex(desc), 'i');
     }
     if (isExist(author_id)) {
-      conditions.author_id = author_id;
+      if (!conditions.author) {
+        conditions.author = {};
+      }
+      conditions.author.author_id = author_id;
     }
     if (isExist(author_name)) {
-      conditions.author_name = new RegExp(author_name!, 'i');
+      conditions.author.author_name = new RegExp(escapeRegex(author_name), 'i');
     }
     if (isExist(tags)) {
       conditions.tags = { $all: tags!.split(',') };
@@ -53,16 +59,16 @@ export const getTemplatesService = async (params: GetTemplatesRequestDTO) => {
     const mongodb = process.dbContext.mongo;
     const db = mongodb.db(mongoConfig.dbName);
     const collection = db.collection(mongoConfig.templateCollectionName);
-    const [list, count] = await Promise.all([
+    const [list, total] = await Promise.all([
       collection.find(conditions).skip(start).limit(limit).toArray(),
       collection.countDocuments(conditions),
     ]);
     return {
       list: list.map((item: TemplateEntity) => formatData(item)),
-      more: count > start + limit,
-      count,
+      more: total > start + limit,
+      total,
     };
   } catch (e) {
-    return Promise.reject(`${e}`);
+    return Promise.reject(e);
   }
 };

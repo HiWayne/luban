@@ -18,7 +18,7 @@ export interface EditorStore {
   setCurrentChooseComponent: (component: CurrentComponent | null) => void;
   pageModel: PageModel;
   setPageMeta: (meta: Meta) => void;
-  addNodeAST: (nodeAST: NodeAST, targetId?: number) => void;
+  addNodeAST: (nodeAST: NodeAST | NodeAST[], targetId?: number) => void;
   updateNodeAST: (id: number, props: any) => void;
   removeNodeAST: (id: number) => void;
 }
@@ -55,10 +55,14 @@ const createEditorStore: (
       state.editor.pageModel.meta = meta;
     });
   },
-  addNodeAST(nodeAST: NodeAST, targetId?: number) {
+  addNodeAST(nodeAST: NodeAST | NodeAST[], targetId?: number) {
     set((state) => {
       if (targetId === undefined) {
-        state.editor.pageModel.view.children.push(nodeAST);
+        if (Array.isArray(nodeAST)) {
+          state.editor.pageModel.view.children.push(...nodeAST);
+        } else {
+          state.editor.pageModel.view.children.push(nodeAST);
+        }
       } else {
         const { complete, nodes, parentProperty } = findPathById(
           state.editor.pageModel.view,

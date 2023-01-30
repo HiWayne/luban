@@ -1,4 +1,4 @@
-import { UserEntity } from '../../templateService/types';
+import { UserEntity } from '../types';
 
 export const formatUserResponse = (user: UserEntity) => {
   if (user) {

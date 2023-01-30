@@ -4,7 +4,11 @@ import { NodeAST as NodeASTOfBackstage } from '@/backend/types/backstage';
 
 export const add = (
   target: NodeASTOfFrontstage | NodeASTOfBackstage,
-  nodeAST: NodeASTOfFrontstage | NodeASTOfBackstage,
+  nodeAST:
+    | NodeASTOfFrontstage
+    | NodeASTOfBackstage
+    | NodeASTOfFrontstage[]
+    | NodeASTOfBackstage[],
   parentProperty?: string,
 ) => {
   if (!parentProperty) {
@@ -13,13 +17,17 @@ export const add = (
   switch (parentProperty) {
     case 'children':
       if (Array.isArray(target.children)) {
-        target.children?.push(nodeAST as any);
-      } else if ((target.props as any).renderItem) {
+        if (Array.isArray(nodeAST)) {
+          target.children?.push(...(nodeAST as any[]));
+        } else {
+          target.children?.push(nodeAST as any);
+        }
+      } else if ((target.props as any).renderItem && !Array.isArray(nodeAST)) {
         (target.props as any).renderItem.render = nodeAST;
       }
       break;
     case 'renderItem':
-      if ((target.props as any).renderItem) {
+      if ((target.props as any).renderItem && !Array.isArray(nodeAST)) {
         (target.props as any).renderItem.render = nodeAST;
       }
       break;

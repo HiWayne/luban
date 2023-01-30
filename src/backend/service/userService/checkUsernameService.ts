@@ -18,6 +18,6 @@ export const checkUsernameService = async (userName: string) => {
       return true;
     }
   } catch (e) {
-    return Promise.reject(`${e}`);
+    return Promise.reject(e);
   }
 };

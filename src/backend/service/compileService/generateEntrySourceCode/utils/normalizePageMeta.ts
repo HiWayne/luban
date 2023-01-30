@@ -1,4 +1,4 @@
-import { getRandomString } from '@/backend/generateReactSourceCode/utils';
+import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { Meta } from '@/backend/types';
 
 export const normalizePageMeta = (pageMeta: Meta) => {

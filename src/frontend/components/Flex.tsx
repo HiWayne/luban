@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CSSProperties, FC } from 'react';
+import { CSSProperties, FC, MouseEventHandler } from 'react';
 import styled from 'styled-components';
 
 interface FlexProps {
@@ -11,27 +11,20 @@ interface FlexProps {
   className?: string;
   children?: JSX.Element | string | null | (JSX.Element | string | null)[];
   style?: CSSProperties;
+  onClick?: MouseEventHandler;
 }
 
 export const Flex = styled<FC<FlexProps>>(
-  ({
-    className,
-    children,
-    layout = 'block',
-    wrap = false,
-    direction = 'row',
-    style,
-  }) => (
-    <div className={className} style={style}>
+  ({ className, children, style, onClick }) => (
+    <div className={className} style={style} onClick={onClick}>
       {children}
     </div>
   ),
 )`
-  display: ${(props) => (props.layout === 'block' ? 'flex' : 'inline-flex')};
-  flex-direction: ${(props) => props.direction};
+  display: ${(props) => (props.layout === 'inline' ? 'inline-flex' : 'flex')};
+  flex-direction: ${(props) => props.direction || 'row'};
   flex-wrap: ${(props) => (props.wrap ? 'wrap' : 'no-wrap')};
   ${(props) =>
     props.justifyContent ? `justify-content: ${props.justifyContent};` : ''}
-  ${(props) =>
-    props.alignItems ? `justify-content: ${props.alignItems};` : ''}
+  ${(props) => (props.alignItems ? `align-items: ${props.alignItems};` : '')}
 `;

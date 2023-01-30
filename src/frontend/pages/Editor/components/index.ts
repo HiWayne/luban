@@ -6,3 +6,5 @@ export * from './configComponents/CustomStyleConfig';
 export * from './ConfigPanel';
 export * from './ComponentsSelectArea';
 export * from './ComponentItem';
+export * from './TemplateConfig';
+export * from './TemplateList';

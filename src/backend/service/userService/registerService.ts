@@ -1,14 +1,21 @@
-import { getTimeWithMillisecond } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
-import { UserRegisterDTO } from '../templateService/types';
-import { createUserIdService } from '../userIdService';
-import { createSalt, createJWTToken, decode, hash } from './utils';
+import { UserEntity, UserRegisterDTO } from './types';
+import { createIdService, getVersionService } from '../userIdService';
+import { USER_ID } from '../userIdService/config';
+import {
+  createSalt,
+  decode,
+  hash,
+  createAccessToken,
+  createRefreshToken,
+  formatUserResponse,
+} from './utils';
 
 export const registerService = async (body: UserRegisterDTO) => {
   try {
     const { name, password, desc, sex, avatar } = body;
 
-    const decodePassword = decode(password);
+    const decodePassword = await decode(password);
 
     // 生成盐
     const salt = createSalt();
@@ -16,36 +23,31 @@ export const registerService = async (body: UserRegisterDTO) => {
     const passwordHash = hash(decodePassword, salt);
 
     const mongodb = process.dbContext.mongo;
-    const session = mongodb.startSession();
     const db = mongodb.db(mongoConfig.dbName);
     const collection = db.collection(mongoConfig.userCollectionName);
 
-    let userId: number | null = null;
+    const version = await getVersionService(USER_ID);
+
+    const userId: number = await createIdService({ id: USER_ID, version });
 
     const currentTimestamp = new Date().getTime();
 
-    try {
-      await session.withTransaction(async () => {
-        const uniqueId = await createUserIdService(session);
-        await collection.insertOne({
-          id: uniqueId,
-          name,
-          _password: passwordHash,
-          _salt: salt,
-          desc,
-          sex,
-          avatar,
-          roles: [],
-          create_time: currentTimestamp,
-        });
-        userId = uniqueId;
-      });
-    } finally {
-      await session.endSession();
-    }
-    if (userId !== null) {
-      const userData = {
-        id: userId as number,
+    const result = await collection.insertOne({
+      id: userId,
+      name,
+      _password: passwordHash,
+      _salt: salt,
+      desc,
+      sex,
+      avatar,
+      roles: [],
+      create_time: currentTimestamp,
+      last_login_times: [currentTimestamp],
+    });
+    if (result.acknowledged) {
+      const userData: UserEntity = {
+        _id: result.insertedId,
+        id: userId,
         name,
         _password: passwordHash,
         _salt: salt,
@@ -54,31 +56,19 @@ export const registerService = async (body: UserRegisterDTO) => {
         avatar,
         roles: [],
         create_time: currentTimestamp,
+        last_login_times: [currentTimestamp],
       };
 
-      const responseUser = {
-        id: userId as number,
-        name,
-        desc,
-        sex,
-        avatar,
-        roles: [],
-        create_time: currentTimestamp,
-      };
+      const responseUser = formatUserResponse(userData);
 
-      const accessToken = createJWTToken(
-        userData,
-        getTimeWithMillisecond(15, 'minute'),
-      );
-      const refreshToken = createJWTToken(
-        userData,
-        getTimeWithMillisecond(1, 'month'),
-      );
+      const accessToken = createAccessToken(userData);
+      const refreshToken = createRefreshToken(userData);
+
       return { user: responseUser, accessToken, refreshToken };
     } else {
-      throw new Error('注册用户失败');
+      throw new Error('用户注册失败');
     }
   } catch (e) {
-    return Promise.reject(`${e}`);
+    return Promise.reject(e);
   }
 };
