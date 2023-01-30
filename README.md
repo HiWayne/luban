@@ -88,9 +88,9 @@ npm run test
 
 ## 开发指南
 
-前端代码在`/frontend/*`，主要负责后台页面
+前端代码在`/src/frontend/*`，主要负责后台页面
 
-后端代码在`/backend/*`，主要负责将后台发送过来的页面配置编译成前端代码（浏览器可直接运行）
+后端代码在`/src/backend/*`，主要负责将后台发送过来的页面配置编译成前端代码（浏览器可直接运行的 html、js）
 
 低代码搭建的页面中的最小粒度是 UI 模块（在配置中可以看作一个节点(node)），UI 模块都有 type 属性，不同 type 代表不同的 UI 模块，用以呈现各种特定外观、功能、交互的 UI 。后端编译服务也是以 UI 模块为粒度实现的，每个 UI 模块都有一个与之对应的编译函数，负责将 nodeAST（**一个表示 UI 和逻辑的 DSL(领域特定语言/配置)亦可把它看作 AST(抽象语法树)**）编译成 react 组件代码。toC 页面的编译函数在`/backend/generateReactSourceCode/generateFrontstageCode/*`，toB 页面的编译函数在`/backend/generateReactSourceCode/generateBackstageCode/*`。
 
@@ -125,17 +125,17 @@ createRoot(document.getElementById('root')).render(<App />);
  * nodeAST-该UI节点的ast、id-唯一id、context-上下文信息，里面有用的是development-是否是开发(编辑)环境
  */
 const generateCodeOfXxx = (nodeAST, id, context) => {
-  // 一：
+  // 必须一：
   /**
-   * context的作用除了给 astToReactNodeCodeOfFrontstage 提供参数（后面的写法里会讲到它），还有必须的作用是：
+   * context的作用除了给 astToReactNodeCodeOfFrontstage 提供参数（这个后面会讲到），另一个必须的作用是：
    * 开发环境或者叫编辑环境，是低代码后台编辑页面时所在的环境
    * 这种环境下，UI本身应该不能交互，否则会和低代码后台的交互（比如拖拽、点击）冲突
    * 所以需要根据context.development决定是否不编译交互相关的代码
    * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBlockContainer.ts 里的onClickCode
    */
-  // 二：
+  // 必须二：
   /**
-   * id的作用除了封装组件时生成唯一name（后面的写法里会讲到它），还有必须的作用是：
+   * id的作用除了封装组件时生成唯一name（这个后面会讲到），另一个必须的作用是：
    * 低代码后台在配置页面时，可以通过点击某个页面UI，唤起它的配置面板，或者可以拖拽某个UI和其他调换位置等操作
    * 但是低代码后台是不知道预览页面里的UI和组件模块的对应关系的
    * 所以需要编译时，在development环境下，给组件的最外层元素加上特殊的id，用来标记这是一个组件模块。如果id=1，那就是<div id="luban_1"></div>
@@ -144,11 +144,11 @@ const generateCodeOfXxx = (nodeAST, id, context) => {
 };
 ```
 
-> 总结一下必须写法：1. 如果 UI 模块有交互事件，必须根据 context.development 确定是否不能交互。2. 如果在 development 环境下，最外层元素需要有特殊的 id 属性
+> 总结一下必须的写法：1. 如果 UI 模块有交互事件，必须根据 context.development 确定是否不能交互。2. 如果在 development 环境下，最外层元素需要有特殊的 id 属性
 
 > 下面会讲各种不同的编译写法以及用处，它们可能为了讲述重点，所以省略了一些上述的必须写法，真正开发的时候不要忘记。
 
-### 1. 编译写法一。希望创建组件声明函数。
+### 1. 编译写法一。当你希望创建组件声明函数。
 
 ```js
 // generateCodeOfProp用来生成React中的 " prop=xxx" 代码(开头有空格)，自动根据不同类型的值生成合适的代码，如果值是undefined则返回空字符串
@@ -465,7 +465,7 @@ const editorRoutes: RouteType[] = [
 
 1. 该低代码平台前后端的原理是什么，开发遇到的问题有哪些？
 
-生成的页面是由配置产生的。配置的核心部分是 view 字段，它是由 nodeAST（一个最小粒度的、能表示 UI 与逻辑的抽象语法节点）嵌套组成的树，每个 nodeAST 会在后端经过与其 type 对应的编译函数产出 react 组件代码及其调用代码。整个树从 root 节点开始，被递归编译成完整的 react 应用代码，编译过程中还有一些优化细节（如组件复用等）。由于生成的只是 react 源码（这部分美化后可以用于代码预览、人工二次编辑），所以还需要编译、构建、压缩成浏览器可执行的代码。由于后端的最终产物是个完整的应用(SPA: html+js)，所以低代码平台页面通过前端微服务的方式整合到主应用里用于可视化编辑的实时预览。低代码平台可视化编辑时，需要有拖拽调换位置、点击 UI 展示对应配置等交互，然而最终产物(html)已经与原始的 nodeAST 失去了关联。为了解决这一点，在编辑模式时，低代码平台页面每次添加 UI 时都会生成一个唯一 id（也就是 nodeAST 里的 id），后端编译函数会给 nodeAST 对应组件代码的最外层的 html 加上这个 id。低代码平台配置页本地也通过 id 存储了相关数据，于是低代码平台配置页面可以通过这个 html id 知道当前选中的是什么组件、什么 nodeAST，以及它的当前配置，从而可以进行可视化编辑。
+生成的页面是由配置产生的。配置的核心部分是 view 字段，它是由 nodeAST（一个最小粒度的、能表示 UI 与逻辑的抽象语法节点）嵌套组成的树，每个 nodeAST 会在后端经过与其 type 对应的编译函数产出 react 组件代码及其调用代码。整个树从 root 节点开始，被递归编译成完整的 react 应用代码，编译过程中还有一些优化细节（如组件复用等）。由于生成的只是 react 源码（这部分美化后可以用于代码预览、人工二次编辑），所以还需要编译、构建、压缩成浏览器可执行的代码。由于后端的最终产物是个完整的应用(SPA: html+js)，所以低代码平台页面通过前端微服务的方式整合到主应用里用于可视化编辑的实时预览。低代码平台可视化编辑时，需要有拖拽调换位置、点击 UI 展示对应配置等交互，然而最终产物(html)已经与原始的 nodeAST 失去了关联。为了解决这一点，在编辑模式时，低代码平台页面每次添加 UI 时都会生成一个唯一 id（也就是 nodeAST 里的 id），后端编译函数会给 nodeAST 对应组件代码的最外层的 html 元素加上这个 id。低代码平台配置页本地也通过 id 存储了相关数据，于是低代码平台配置页面可以通过这个 html id 知道当前选中的是什么组件、什么 nodeAST，以及它的当前配置，从而可以进行可视化编辑交互。
 
 2. `npm run dev` 后出现 `Vite Error, /node_modules/...... optimized info should be defined` 的错误怎么办？
 
