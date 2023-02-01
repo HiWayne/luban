@@ -7,6 +7,16 @@ import {
   createGenerateCodeFnReturn,
   createIdAttrInDev,
 } from '../utils';
+import {
+  actionConfig,
+  commonTextConfig,
+  heightConfig,
+  marginConfig,
+  paddingConfig,
+  styleConfig,
+  ToCComponent,
+  widthConfig,
+} from './toCComponentsPluginsConfig';
 
 export const generateCodeOfText = (
   nodeAST: NodeAST,
@@ -36,7 +46,7 @@ export const generateCodeOfText = (
 
   const componentName = 'Text';
 
-  const componentDeclaration = `const ${componentName} = ({ id, width, height, italic, text, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, textAlign, onClick, ellipsisStyle = {}, style = {} }) => {
+  const componentDeclaration = `const ${componentName} = ({ role, id, width, height, italic, text, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, textAlign, onClick, ellipsisStyle = {}, style = {} }) => {
     const textStyle = useMemo(() => ({
         display: 'inline-block',
         wordBreak: 'break-all',
@@ -58,9 +68,9 @@ export const generateCodeOfText = (
     }), [width, height, color, fontSize, fontWeight, fontFamily, lineHeight, textDecoration, margin, padding, backgroundColor, textAlign, ...Object.values(ellipsisStyle), ...Object.values(style)])
 
     if (italic) {
-        return <i id={id} style={textStyle} onClick={onClick}>{text}</i>
+        return <i role={role} id={id} style={textStyle} onClick={onClick}>{text}</i>
     } else {
-        return <span id={id} style={textStyle} onClick={onClick}>{text}</span>
+        return <span role={role} id={id} style={textStyle} onClick={onClick}>{text}</span>
     }
   };`;
 
@@ -118,3 +128,54 @@ export const generateCodeOfText = (
     componentCall,
   });
 };
+
+generateCodeOfText.plugin = {
+  sort: 6,
+  name: '文字',
+  type: 'Text',
+  description: '文字',
+  defaultAST: {
+    type: 'Text',
+    props: {
+      text: '文字文字文字',
+      fontSize: 14,
+      color: '#444444',
+      fontWeight: 400,
+      fontFamily: 'PingFangSC-Regular, PingFang SC',
+    },
+  },
+  configs: [
+    {
+      name: '内容',
+      description: '文字内容。可以是字符串，也可以是变量',
+      required: true,
+      propName: 'text',
+    },
+    marginConfig,
+    paddingConfig,
+    widthConfig,
+    heightConfig,
+    ...commonTextConfig,
+    {
+      name: '是否斜体',
+      description: '文字是否是斜体字',
+      required: false,
+      propName: 'italic',
+    },
+    {
+      name: '背景颜色',
+      description: '文字背景颜色',
+      required: false,
+      propName: 'backgroundColor',
+    },
+    {
+      name: '过长是否省略',
+      description:
+        '文字组件的宽度默认由文字数量决定。但如果你设置了组件宽度，文字过长会换行。你可以设置该配置，让文字始终单行并且过长省略（结尾省略号）。',
+      required: false,
+      propName: 'ellipsis',
+    },
+    actionConfig,
+    styleConfig,
+  ],
+} as ToCComponent;

@@ -2,7 +2,6 @@ import { FC, useCallback } from 'react';
 import { Checkbox, Form, Input, Radio, Select, Switch } from 'antd';
 import { debounce } from '@duitang/dt-base';
 import { Flex } from '@/frontend/components';
-import { ToCComponent } from '../../../config';
 import { ColorPicker } from '../../configComponents/ColorPicker';
 import { CustomStyleConfig } from '../../configComponents/CustomStyleConfig';
 import {
@@ -15,28 +14,29 @@ import {
 } from '../../configComponents/MarginCssConfig';
 import { VariableSelect } from '../../configComponents/VariableSelect';
 import { UploadImageConfig } from '../../configComponents/UploadImageConfig';
-import { findConfigFromMap } from '../../../utils';
 import { useUpdateNodeAST } from '../../../hooks/useUpdateNodeAST';
+import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 
 export const RenderConfig: FC<{
   data: ToCComponent & { id: number };
+  initialConfig: any;
   index: number;
-}> = ({ data, index }) => {
+}> = ({ data, initialConfig, index }) => {
   const { id, configs } = data;
   const { formSchema, FormComponent, name, description, propName } =
     configs[index];
 
-  const { updateNodeAST } = useUpdateNodeAST(data);
+  const { updateNodeAST } = useUpdateNodeAST();
 
   const updateNodeASTWithDebounce = debounce(updateNodeAST, 1000);
 
-  const initialConfig = findConfigFromMap(id);
-
-  const computeNewData = useCallback((old?: Record<string, any>) => {
+  const deleteProp = useCallback((old?: Record<string, any>) => {
+    let newData = old;
     if (old && old[propName]) {
-      old[propName] = undefined;
+      newData = { ...old };
+      newData[propName] = undefined;
     }
-    return old;
+    return newData;
   }, []);
 
   if (FormComponent) {
@@ -151,7 +151,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData.styleConfig },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />
@@ -170,7 +170,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />
@@ -219,7 +219,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData.styleConfig },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />
@@ -268,7 +268,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData.styleConfig },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />
@@ -317,7 +317,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData.styleConfig },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />
@@ -336,7 +336,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData.styleConfig },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />
@@ -356,7 +356,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />
@@ -375,7 +375,7 @@ export const RenderConfig: FC<{
                   { [propName]: changeData },
                 );
               } else {
-                updateNodeASTWithDebounce(id, computeNewData, computeNewData);
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
               }
             }}
           />

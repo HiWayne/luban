@@ -1,4 +1,4 @@
-import { NodeAST } from '@/backend/types/frontstage';
+import { NodeAST } from '@/frontend/types';
 
 const nodeASTMap = new Map<number, NodeAST>();
 
@@ -8,6 +8,19 @@ export const addNodeASTToMap = (nodeAST: NodeAST) => {
 
 export const findNodeASTById = (id: number) => {
   return nodeASTMap.get(id);
+};
+
+export const updateNodeASTFromMap = (id: number, newProps: any) => {
+  if (newProps) {
+    const oldNodeAST = nodeASTMap.get(id);
+    if (oldNodeAST) {
+      const newNodeAST = { ...oldNodeAST };
+      newNodeAST.props = oldNodeAST.props
+        ? { ...oldNodeAST.props, ...newProps }
+        : newProps;
+      nodeASTMap.set(oldNodeAST.id, newNodeAST);
+    }
+  }
 };
 
 export const removeNodeASTFromMap = (id: number) => {
@@ -23,22 +36,19 @@ export const addConfigToMap = (id: number, configs: Record<string, any>) => {
 export const updateConfigFromMap = (
   id: number,
   configs:
-    | string
-    | number
     | Record<string, any>
     | ((oldConfig: Record<string, any> | undefined) => Record<string, any>),
-  propName?: string,
 ) => {
   const oldConfigs = nodeConfigMap.get(id);
-  if (!propName) {
+  if (typeof configs !== 'function') {
     let newConfigs = configs;
     if (oldConfigs && typeof oldConfigs === 'object') {
-      newConfigs = { ...oldConfigs, configs };
+      newConfigs = { ...oldConfigs, ...configs };
     }
     nodeConfigMap.set(id, newConfigs as Record<string, any>);
   } else if (typeof configs === 'function') {
     if (oldConfigs) {
-      const newSingleConfig = configs({ ...oldConfigs[propName] });
+      const newSingleConfig = configs({ ...oldConfigs });
       const newConfigs = { ...oldConfigs, ...newSingleConfig };
       nodeConfigMap.set(id, newConfigs);
     } else {

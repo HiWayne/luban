@@ -115,7 +115,9 @@ export const LengthCssConfig: FC<LengthCssConfigProps> = ({
   const [number, setNumber] = useState<number | null>(
     isExist(defaultValue) ? (defaultValue as number) : null,
   );
-  const [unit, setUnit] = useState<LengthUnit>(defaultUnit || 'px');
+  const [unit, setUnit] = useState<LengthUnit>(
+    isExist(defaultUnit) ? (defaultUnit as any) : 'px',
+  );
 
   const onChange = useCallback(
     (value: number | null) => {
@@ -125,14 +127,14 @@ export const LengthCssConfig: FC<LengthCssConfigProps> = ({
           if (unit) {
             const css = `${value}${unit}`;
             const styleConfig = {
-              value: number,
+              value,
               unit,
             };
             _onChange({ style: css, styleConfig });
           } else {
             const css = value;
             const styleConfig = {
-              value: number,
+              value,
               unit,
             };
             _onChange({ style: css, styleConfig });
@@ -142,7 +144,7 @@ export const LengthCssConfig: FC<LengthCssConfigProps> = ({
         }
       }
     },
-    [unit],
+    [number, unit],
   );
 
   return (

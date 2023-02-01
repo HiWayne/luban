@@ -1,5 +1,5 @@
+import { NodeAST } from '@/backend/types/backstage';
 import { Context, Declarations } from '..';
-import { NodeAST } from '../../types/backstage';
 import { generateCodeOfAvatar } from './generateCodeOfAvatar';
 import { generateCodeOfBlockContainer } from './generateCodeOfBlockContainer';
 import { generateCodeOfButton } from './generateCodeOfButton';
@@ -23,13 +23,12 @@ import { generateCodeOfText } from './generateCodeOfText';
 import { generateCodeOfTitle } from './generateCodeOfTitle';
 
 export const generateCodeByNodeAST = (
-  id: number,
   context: Context,
   nodeAST: NodeAST,
   declarations: Declarations,
   children?: string,
 ): { declaration: string; call: string; name: string } => {
-  const { type, condition } = nodeAST;
+  const { id, type, condition } = nodeAST;
 
   let output = {
     canHoist: true,

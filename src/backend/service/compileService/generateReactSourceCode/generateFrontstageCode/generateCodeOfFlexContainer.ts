@@ -7,6 +7,11 @@ import {
   createGenerateCodeFnReturn,
   createIdAttrInDev,
 } from '../utils';
+import {
+  commonContainerConfigs,
+  layoutConfig,
+  ToCComponent,
+} from './toCComponentsPluginsConfig';
 
 export const generateCodeOfFlexContainer = (
   nodeAST: NodeAST,
@@ -36,7 +41,7 @@ export const generateCodeOfFlexContainer = (
 
   const componentName = 'FlexContainer';
 
-  const componentDeclaration = `const ${componentName} = ({ id, layout, direction = 'row', justifyContent = 'center', alignItems = 'center', style = {}, onClick, children }) => {
+  const componentDeclaration = `const ${componentName} = ({ role, id, layout, direction = 'row', justifyContent = 'center', alignItems = 'center', style = {}, onClick, children }) => {
     const flexStyle = useMemo(() => ({
         display: layout === 'inline' ? 'inline-flex' : 'flex',
         flexDirection: direction,
@@ -45,7 +50,7 @@ export const generateCodeOfFlexContainer = (
         ...style,
     }), [layout, direction, justifyContent, alignItems, ...Object.values(style)])
 
-    return <div id={id} style={flexStyle} onClick={onClick}>{children}</div>
+    return <div role={role} id={id} style={flexStyle} onClick={onClick}>{children}</div>
   };`;
 
   const styleObject = {
@@ -92,3 +97,45 @@ export const generateCodeOfFlexContainer = (
     componentCall,
   });
 };
+
+generateCodeOfFlexContainer.plugin = {
+  sort: 2,
+  name: 'Flex布局容器',
+  type: 'FlexContainer',
+  description:
+    '可以控制内容按水平或垂直方向排列，以及它们的对齐位置。本身没有内容，里面需要添加内容。',
+  defaultAST: {
+    type: 'FlexContainer',
+    props: {
+      layout: 'block',
+      direction: 'row',
+      justifyContent: 'flex-start',
+      alignItems: 'flex-start',
+    },
+    children: [],
+  },
+  configs: [
+    layoutConfig,
+    {
+      name: '排列方向',
+      description: '内部内容的排列方向。"row"-水平排列、"column"-垂直排列。',
+      required: false,
+      propName: 'direction',
+    },
+    {
+      name: '排列方向的对齐方式',
+      description:
+        '比如容器内部水平排列，这个配置影响的就是内容在水平方向上的对齐方式。"flex-start"-居左、"flex-end"-居右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
+      required: false,
+      propName: 'justifyContent',
+    },
+    {
+      name: '与排列垂直方向的对齐方式',
+      description:
+        '比如容器内部水平排列，这个配置影响的就是内容在垂直方向上的对齐方式。"flex-start"-居左、"flex-end"-居右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
+      required: false,
+      propName: 'alignItems',
+    },
+    ...commonContainerConfigs,
+  ],
+} as ToCComponent;

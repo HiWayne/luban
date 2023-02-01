@@ -16,8 +16,9 @@ export const wrapReactMicroAppHooks = (code: string) => {
          */
         let root
         async function mount(props) {
+            const setUpdateCount = props.setUpdateCount;
             root = createRoot(props.container ? props.container.querySelector('#root') : document.getElementById('root'));
-            root.render(<App />);
+            root.render(<App setUpdateCount={setUpdateCount} />);
         }
         __exports.mount = mount;
         

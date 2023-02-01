@@ -7,6 +7,16 @@ import {
 import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
 import { Context } from '..';
 import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
+import {
+  actionConfig,
+  borderRadiusConfig,
+  heightConfig,
+  layoutConfig,
+  marginConfig,
+  styleConfig,
+  ToCComponent,
+  widthConfig,
+} from './toCComponentsPluginsConfig';
 
 export const generateCodeOfImage = (
   nodeAST: NodeAST,
@@ -115,15 +125,15 @@ export const generateCodeOfImage = (
       ${BlockImageWrapperComponent}
       ${BlockImageComponent}
 
-      const ${componentName} = ({ id, src, style, onClick }) => {
-        return (<BlockImageWrapper_inner_${id} id={id} style={style} onClick={onClick}><BlockImage_inner_${id} src={src} /></BlockImageWrapper_inner_${id}>)
+      const ${componentName} = ({ role, id, src, style, onClick }) => {
+        return (<BlockImageWrapper_inner_${id} role={role} id={id} style={style} onClick={onClick}><BlockImage_inner_${id} src={src} /></BlockImageWrapper_inner_${id}>)
       };
     `
       : `
       ${InlineImageComponent}
 
-      const ${componentName} = ({ id, src, style, onClick }) => {
-        return (<InlineImage_inner_${id} id={id} style={style} src={src} onClick={onClick} />)
+      const ${componentName} = ({ role, id, src, style, onClick }) => {
+        return (<InlineImage_inner_${id} role={role} id={id} style={style} src={src} onClick={onClick} />)
       };
     `;
 
@@ -152,3 +162,61 @@ export const generateCodeOfImage = (
     componentCall,
   });
 };
+
+generateCodeOfImage.plugin = {
+  sort: 5,
+  name: '图片',
+  type: 'Image',
+  description: '图片',
+  defaultAST: {
+    type: 'Image',
+    props: {
+      layout: 'inline',
+      src: 'https://c-ssl.dtstatic.com/uploads/ops/202301/31/20230131144921_34fb2.png',
+      saveable: false,
+      objectFit: 'cover',
+      objectPosition: 'center',
+    },
+  },
+  configs: [
+    {
+      name: '图片',
+      description: '上传图片或设置变量名',
+      required: true,
+      propName: 'src',
+    },
+    { ...layoutConfig, defaultConfig: 'inline' },
+    widthConfig,
+    heightConfig,
+    {
+      name: '图片宽/高比例',
+      description: '在设置了宽度且不设置高度时，可以通过宽高比例固定图片大小',
+      required: false,
+      propName: 'ratio',
+    },
+    borderRadiusConfig,
+    {
+      name: '是否可保存',
+      description: '是否可以长按保存',
+      required: false,
+      propName: 'saveable',
+    },
+    marginConfig,
+    {
+      name: '实际图片自适应大小',
+      description:
+        '若不设置组件宽高或只设置宽度，实际图片会和组件宽度一致，高度按原始比例撑开组件。若组件宽高都设置，但实际图片宽高比例与组件不一致，图片就会变形。可以通过这个配置来选择图片展示方式。举例："cover"-图片尽可能小的以原始比例填满组件（图片一定能填满组件，但可能显示不完整）、"contain"-图片尽可能大的（但不超出组件）以原始比例完整显示（图片一定能显示完整，但可能填不满组件）。',
+      required: false,
+      propName: 'objectFit',
+    },
+    {
+      name: '实际图片位置',
+      description:
+        '若实际图片比例与组件宽高比例不一致，且设置了实际图片自适应大小，图片可能为了保持原始比例而小于组件的大小展示。这时可以设置图片在组件中的位置（默认靠左上）。举例："center"-上下左右居中、"center left"-上下方向居中，左右方向靠左、"top right"-上下方向靠上，左右方向靠右。',
+      required: false,
+      propName: 'objectPosition',
+    },
+    actionConfig,
+    styleConfig,
+  ],
+} as ToCComponent;
