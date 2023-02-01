@@ -1,4 +1,3 @@
-import { MutableRefObject } from 'react';
 import { NodeAST as NodeASTOfBackstage } from '../../../types/backstage';
 import { NodeAST as NodeASTOfFrontstage } from '../../../types/frontstage';
 import {
@@ -21,7 +20,6 @@ export interface Declarations {
 }
 
 export interface Context {
-  idRef: MutableRefObject<number>;
   development: boolean;
 }
 
@@ -33,7 +31,6 @@ export const astToReactNodeCodeOfBackstage = (
   declarations: Declarations,
   context: Context,
 ): { declarations: Declarations; call: string } => {
-  const id = ++context.idRef.current;
   let childrenCode = '';
   if (
     nodeAST &&
@@ -54,7 +51,6 @@ export const astToReactNodeCodeOfBackstage = (
     call,
     name,
   } = generateCodeByNodeASTOfBackstage(
-    id,
     context,
     nodeAST,
     declarations,
@@ -76,7 +72,6 @@ export const astToReactNodeCodeOfFrontstage = (
   declarations: Declarations,
   context: Context,
 ): { declarations: Declarations; call: string } => {
-  const id = ++context.idRef.current;
   let childrenCode = '';
   if (
     nodeAST &&
@@ -97,7 +92,6 @@ export const astToReactNodeCodeOfFrontstage = (
     call,
     name,
   } = generateCodeByNodeASTOfFrontstage(
-    id,
     context,
     nodeAST,
     declarations,
@@ -162,7 +156,6 @@ export const generateReactSourceCodeOfBackstage = (
     pageModel.view as NodeASTOfBackstage,
     componentsDeclarations,
     {
-      idRef: { current: 0 },
       development,
     },
   );
@@ -192,7 +185,13 @@ export const generateReactSourceCodeOfBackstage = (
     return (${call})
   };
 
-  const App = () => <StrictMode><ConfigProvider locale={zhCN}><${componentName} /></ConfigProvider></StrictMode>`;
+  const App = ({ setUpdateCount }) => {
+    useEffect(() => {
+      setUpdateCount()
+    }, [])
+
+    return (<StrictMode><ConfigProvider locale={zhCN}><${componentName} /></ConfigProvider></StrictMode>)
+  }`;
 
   return reactCode;
 };
@@ -209,7 +208,6 @@ export const generateReactSourceCodeOfFrontstage = (
     pageModel.view as NodeASTOfFrontstage,
     componentsDeclarations,
     {
-      idRef: { current: 0 },
       development,
     },
   );
@@ -242,7 +240,17 @@ export const generateReactSourceCodeOfFrontstage = (
     return (${call})
   };
 
-  const App = () => <StrictMode><Root><${componentName} /></Root></StrictMode>`;
+  ${
+    pageModel.meta.mode === 'development'
+      ? `const App = ({ setUpdateCount }) => {
+    useEffect(() => {
+      setUpdateCount()
+    }, [])`
+      : `const App = () => {`
+  }
+
+    return (<StrictMode><Root><${componentName} /></Root></StrictMode>)
+}`;
 
   return reactCode;
 };

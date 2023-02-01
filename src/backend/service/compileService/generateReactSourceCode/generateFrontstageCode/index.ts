@@ -1,4 +1,3 @@
-import { NodeAST } from '../../types/frontstage';
 import { generateCodeOfCondition } from '../generateBackstageCode/generateCodeOfCondition';
 import { generateCodeOfBlockContainer } from './generateCodeOfBlockContainer';
 import { generateCodeOfScrollList } from './generateCodeOfScrollList';
@@ -9,15 +8,15 @@ import { generateCodeOfText } from './generateCodeOfText';
 import { generateCodeOfParagraph } from './generateCodeOfParagraph';
 import { generateCodeOfFlexContainer } from './generateCodeOfFlexContainer';
 import { generateCodeOfGridContainer } from './generateCodeOfGridContainer';
+import { NodeAST } from '@/backend/types/frontstage';
 
 export const generateCodeByNodeAST = (
-  id: number,
   context: Context,
   nodeAST: NodeAST,
   declarations: Declarations,
   children?: string,
 ): { declaration: string; call: string; name: string } => {
-  const { type, condition } = nodeAST;
+  const { id, type, condition } = nodeAST;
 
   let output = {
     canHoist: true,

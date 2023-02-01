@@ -1,4 +1,4 @@
-import { CSSProperties, FC, useEffect, useState } from 'react';
+import { CSSProperties, FC, useCallback, useEffect, useState } from 'react';
 import { Select } from 'antd';
 import { Flex } from '@/frontend/components';
 import { ColorPicker } from './ColorPicker';
@@ -52,8 +52,8 @@ export const BorderCssConfig: FC<BorderCssConfigProps> = ({
     defaultBorderWidthUnit || 'px',
   );
   const [borderStyle, setBorderStyle] = useState(defaultBorderStyle || 'solid');
-  const [borderColor, setBorderColor] = useState(
-    defaultBorderColor || '#000000',
+  const [borderColor, setBorderColor] = useState<string>(
+    defaultBorderColor || 'transparent',
   );
 
   useEffect(() => {
@@ -75,6 +75,14 @@ export const BorderCssConfig: FC<BorderCssConfigProps> = ({
     }
   }, [borderWidth, borderWidthUnit, borderStyle, borderColor]);
 
+  const handleColorPickerChange = useCallback((color: string | null) => {
+    if (color === null) {
+      setBorderColor('transparent');
+    } else {
+      setBorderColor(color);
+    }
+  }, []);
+
   return (
     <Flex>
       <ValueWithUnit
@@ -88,7 +96,10 @@ export const BorderCssConfig: FC<BorderCssConfigProps> = ({
         options={options}
         onChange={setBorderStyle}
       />
-      <ColorPicker defaultColor={borderColor} onChange={setBorderColor} />
+      <ColorPicker
+        defaultColor={borderColor}
+        onChange={handleColorPickerChange}
+      />
     </Flex>
   );
 };

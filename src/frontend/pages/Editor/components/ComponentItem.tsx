@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import { FC, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { ToCComponent } from '../config';
+import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 import { useUpdateNodeAST } from '../hooks/useUpdateNodeAST';
 
 const Wrapper = styled.div`
@@ -30,15 +30,50 @@ const Name = styled.div`
 
 interface ComponentItemProp {
   data: ToCComponent;
+  onDragStart: any;
+  onDragOver: any;
+  onDragEnd: any;
 }
 
-export const ComponentItem: FC<ComponentItemProp> = ({ data }) => {
+export const ComponentItem: FC<ComponentItemProp> = ({
+  data,
+  onDragStart: _onDragStart,
+  onDragOver,
+  onDragEnd,
+}) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
   const { name } = data;
 
-  const { addNodeAST } = useUpdateNodeAST(data);
+  const { addNodeASTFromInitial } = useUpdateNodeAST();
+
+  const onDragStart = useCallback(function (
+    this: HTMLElement,
+    event: DragEvent,
+  ) {
+    return _onDragStart.call(this, event, data);
+  },
+  []);
+
+  useEffect(() => {
+    if (wrapperRef.current) {
+      wrapperRef.current.addEventListener('dragstart', onDragStart);
+      wrapperRef.current.addEventListener('dragover', onDragOver);
+      wrapperRef.current.addEventListener('dragend', onDragEnd);
+
+      return () => {
+        wrapperRef.current?.removeEventListener('dragstart', onDragStart);
+        wrapperRef.current?.removeEventListener('dragover', onDragOver);
+        wrapperRef.current?.removeEventListener('dragend', onDragEnd);
+      };
+    }
+  }, []);
 
   return (
-    <Wrapper draggable onClick={addNodeAST}>
+    <Wrapper
+      ref={wrapperRef}
+      draggable
+      onClick={() => addNodeASTFromInitial(data)}>
       {/* <Image src={icon} alt="小图标" /> */}
       <Name>{name}</Name>
     </Wrapper>

@@ -1,21 +1,23 @@
-import { NodeAST } from '@/backend/types/frontstage/index';
 import { Meta, PageModel } from '@/backend/types';
 import { createUniqueId } from '../pages/Editor/utils';
-import { ToCComponent } from '../pages/Editor/config';
 import {
   add,
   findPathById,
   remove,
   update,
 } from '../pages/Editor/utils/operateNodeAST';
+import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { NodeAST } from '../types';
 
 export interface CurrentComponent extends ToCComponent {
   id: number;
 }
 
 export interface EditorStore {
-  currentChooseComponent: CurrentComponent | null;
-  setCurrentChooseComponent: (component: CurrentComponent | null) => void;
+  currentChooseComponent: { component: CurrentComponent; config: any } | null;
+  setCurrentChooseComponent: (
+    data: { component: CurrentComponent; config: any } | null,
+  ) => void;
   pageModel: PageModel;
   setPageMeta: (meta: Meta) => void;
   addNodeAST: (nodeAST: NodeAST | NodeAST[], targetId?: number) => void;
@@ -45,9 +47,11 @@ const createEditorStore: (
       children: [],
     },
   },
-  setCurrentChooseComponent(component: CurrentComponent | null) {
+  setCurrentChooseComponent(
+    data: { component: CurrentComponent; config: any } | null,
+  ) {
     set((state) => {
-      state.editor.currentChooseComponent = component;
+      state.editor.currentChooseComponent = data;
     });
   },
   setPageMeta(meta: Meta) {
@@ -59,9 +63,9 @@ const createEditorStore: (
     set((state) => {
       if (targetId === undefined) {
         if (Array.isArray(nodeAST)) {
-          state.editor.pageModel.view.children.push(...nodeAST);
+          nodeAST.forEach((node) => add(state.editor.pageModel.view, node));
         } else {
-          state.editor.pageModel.view.children.push(nodeAST);
+          add(state.editor.pageModel.view, nodeAST);
         }
       } else {
         const { complete, nodes, parentProperty } = findPathById(
@@ -77,7 +81,13 @@ const createEditorStore: (
   },
   updateNodeAST(id: number, props: any) {
     set((state) => {
-      update(state.editor.pageModel.view, id, props);
+      const { complete, nodes } = findPathById(state.editor.pageModel.view, id);
+      if (complete) {
+        const target = nodes[0];
+        if (target) {
+          update(state.editor.pageModel.view, id, props);
+        }
+      }
     });
   },
   removeNodeAST(id: number) {

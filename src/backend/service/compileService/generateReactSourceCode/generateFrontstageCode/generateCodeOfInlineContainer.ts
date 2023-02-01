@@ -7,6 +7,10 @@ import {
   createGenerateCodeFnReturn,
   createIdAttrInDev,
 } from '../utils';
+import {
+  commonContainerConfigs,
+  ToCComponent,
+} from './toCComponentsPluginsConfig';
 
 export const generateCodeOfInlineContainer = (
   nodeAST: NodeAST,
@@ -48,7 +52,7 @@ export const generateCodeOfInlineContainer = (
     ...(style || {}),
   };
 
-  const componentDeclaration = `const ${componentName} = ({ id, children, onClick, style = {} }) => (<div id={id} style={{display: 'inline-block', ...style}} onClick={onClick}>{children}</div>);`;
+  const componentDeclaration = `const ${componentName} = ({ role, id, children, onClick, style = {} }) => (<div role={role} id={id} style={{display: 'inline-block', ...style}} onClick={onClick}>{children}</div>);`;
 
   const onClickCode =
     !context.development && action
@@ -74,3 +78,17 @@ export const generateCodeOfInlineContainer = (
     componentCall,
   });
 };
+
+generateCodeOfInlineContainer.plugin = {
+  sort: 1,
+  name: '行内布局容器',
+  type: 'InlineContainer',
+  description:
+    '默认大小由内容大小决定，多个行内容器（单个宽度不足一行时）可以放在一行。本身没有内容，里面需要添加内容。',
+  defaultAST: {
+    type: 'InlineContainer',
+    props: {},
+    children: [],
+  },
+  configs: [...commonContainerConfigs],
+} as ToCComponent;

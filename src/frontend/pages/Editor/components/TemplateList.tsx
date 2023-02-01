@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { Button, List } from 'antd';
+import { Button, List, message } from 'antd';
 import VirtualList from 'rc-virtual-list';
 import { DtIcon } from '@duitang/dt-react-mobile';
 import { Avatar, Flex } from '@/frontend/components';
@@ -57,6 +57,7 @@ export const TemplateList = styled(({ className }) => {
 
   const applyTemplate = useCallback((view: NodeAST[]) => {
     addNodeAST(formatTemplateView(view));
+    message.success('成功添加模板', 2);
   }, []);
 
   return (

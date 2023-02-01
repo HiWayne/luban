@@ -7,6 +7,7 @@ import {
   createGenerateCodeFnReturn,
   createIdAttrInDev,
 } from '../utils';
+import { commonContainerConfigs, ToCComponent } from './toCComponentsPluginsConfig';
 
 export const generateCodeOfBlockContainer = (
   nodeAST: NodeAST,
@@ -71,3 +72,17 @@ export const generateCodeOfBlockContainer = (
     canHoist: false,
   });
 };
+
+generateCodeOfBlockContainer.plugin = {
+  sort: 0,
+  name: '块级布局容器',
+  type: 'BlockContainer',
+  description:
+    '默认占满一行的容器，哪怕实际宽度不足一行，后面的内容依然会另起一行。本身没有内容，里面需要添加内容。',
+  defaultAST: {
+    type: 'BlockContainer',
+    props: {},
+    children: [],
+  },
+  configs: [...commonContainerConfigs],
+} as ToCComponent;

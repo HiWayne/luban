@@ -6,6 +6,11 @@ import {
   createIdAttrInDev,
   _BUILT_IN_TYPE,
 } from '../utils';
+import {
+  listDataConfig,
+  renderItemConfig,
+  ToCComponent,
+} from './toCComponentsPluginsConfig';
 
 export const generateCodeOfScrollList = (
   nodeAST: NodeAST,
@@ -68,3 +73,39 @@ export const generateCodeOfScrollList = (
     canHoist: false,
   });
 };
+
+generateCodeOfScrollList.plugin = {
+  sort: 4,
+  name: '水平滚动容器',
+  type: 'ScrollList',
+  description: '水平滚动列表',
+  defaultAST: {
+    type: 'ScrollList',
+    props: {},
+    children: [],
+  },
+  configs: [
+    listDataConfig,
+    {
+      name: '外层样式wrapperStyle',
+      description:
+        '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置，style类型是React.CSSProperties',
+      required: false,
+      propName: 'wrapperStyle',
+    },
+    {
+      name: '列表样式listStyle',
+      description:
+        '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置，style类型是React.CSSProperties',
+      required: false,
+      propName: 'listStyle',
+    },
+    ...renderItemConfig,
+    {
+      name: '行key字段',
+      description: 'react key所取的字段名，没有默认取循环里的index',
+      required: false,
+      propName: 'rowKey',
+    },
+  ],
+} as ToCComponent;

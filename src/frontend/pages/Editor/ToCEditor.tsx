@@ -11,7 +11,8 @@ import shallow from 'zustand/shallow';
 import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
 import { HighLightCodeEditor } from '@/frontend/components';
-import { toCComponents } from './config';
+import * as compileFunctions from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/plugins';
+import type { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 import {
   ConfigPanel,
   ComponentsSelectArea,
@@ -22,6 +23,11 @@ import {
 import useStore from '@/frontend/store';
 import { useCreateTemplateApi } from './api';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
+import { useEditorInteractive } from './hooks';
+
+export const toCComponents = Object.values(compileFunctions)
+  .map((compileFunction) => (compileFunction as any).plugin as ToCComponent)
+  .sort((a, b) => a.sort - b.sort);
 
 const ToCEditor = () => {
   const { pageModel, currentComponent } = useStore(
@@ -35,9 +41,14 @@ const ToCEditor = () => {
   const [content, setContent] = useState(JSON.stringify(pageModel));
   const [sourceCode, setSourceCode] = useState('');
   const [templateConfigShow, setTemplateConfigShow] = useState(false);
+  const [updateCount, setUpdateCount] = useState(0);
+
   const microAppRef: MutableRefObject<MicroApp | null> = useRef(null);
 
   const { createTemplate } = useCreateTemplateApi();
+
+  const { onDragStart, onDragEnd, onDragOver } =
+    useEditorInteractive(updateCount);
 
   useEffect(() => {
     setContent(JSON.stringify(pageModel));
@@ -71,6 +82,9 @@ const ToCEditor = () => {
           name: `luban-app-${randomKey}`,
           entry: `${htmlPath}`,
           container: '#lubanAppContainer',
+          props: {
+            setUpdateCount: () => setUpdateCount((count) => count + 1),
+          },
         });
       }
     }
@@ -154,11 +168,16 @@ const ToCEditor = () => {
   );
 
   return (
-    <div style={{ display: 'flex', width: '100vw' }}>
-      <div style={{ flex: '0 0 300px' }}>
+    <div
+      style={{
+        display: 'flex',
+        width: '100vw',
+        gap: '20px',
+      }}>
+      <div style={{ flex: '0 0 400px' }}>
         <Input value={key} onChange={(e) => setKey(e.target.value)} />
         <Input.TextArea
-          style={{ width: '500px', height: '200px' }}
+          style={{ width: '400px', height: '200px' }}
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
@@ -166,7 +185,13 @@ const ToCEditor = () => {
         <ComponentsSelectArea>
           {/* toC */}
           {toCComponents.map((component) => (
-            <ComponentItem data={component} key={component.name} />
+            <ComponentItem
+              data={component}
+              key={component.name}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDragEnd={onDragEnd}
+            />
           ))}
         </ComponentsSelectArea>
         <div style={{ marginTop: '20px' }}>
@@ -192,9 +217,9 @@ const ToCEditor = () => {
             language="jsx"
             code={sourceCode}
             onChange={setSourceCode}
-            style={{ width: '550px' }}
+            style={{ width: '400px' }}
             wrapperStyle={{
-              width: '550px',
+              width: '400px',
               height: '300px',
             }}
           />
@@ -208,9 +233,12 @@ const ToCEditor = () => {
       <div
         id="lubanAppContainer"
         style={{
+          marginTop: '5vh',
           position: 'relative',
           width: '375px',
-          border: '1px solid #eee',
+          height: '90vh',
+          border: '1px solid #ddd',
+          boxSizing: 'border-box',
         }}
         key="container"
       />

@@ -1,5 +1,5 @@
 export const createIdAttrInDev = (dev: boolean, id: number) =>
-  dev ? ` id="luban_${id}"` : '';
+  dev ? ` role="luban_component" id="luban_${id}"` : '';
 
 export const getElementByLuBanId = (id: number) =>
   typeof window !== undefined
@@ -16,6 +16,20 @@ export const getLuBanIdFromElement = (
     const match = lubanIdReg.exec(id || '');
     if (match) {
       return Number(match[1]);
+    } else {
+      return getLuBanIdFromElement(element.parentElement);
+    }
+  } else {
+    return null;
+  }
+};
+
+export const getClosestWrapperElement = (element: HTMLElement) => {
+  if (element) {
+    const id = element.getAttribute('id');
+    const match = lubanIdReg.exec(id || '');
+    if (match) {
+      return element;
     } else {
       return getLuBanIdFromElement(element.parentElement);
     }

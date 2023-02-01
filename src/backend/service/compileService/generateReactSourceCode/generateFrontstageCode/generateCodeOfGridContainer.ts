@@ -7,6 +7,13 @@ import {
   createGenerateCodeFnReturn,
   createIdAttrInDev,
 } from '../utils';
+import {
+  commonContainerConfigs,
+  layoutConfig,
+  listDataConfig,
+  renderItemConfig,
+  ToCComponent,
+} from './toCComponentsPluginsConfig';
 
 export const generateCodeOfGridContainer = (
   nodeAST: NodeAST,
@@ -56,7 +63,7 @@ export const generateCodeOfGridContainer = (
         margin-top: \${props => props.marginTop};
     \`
 
-  const ${componentName} = ({ id, data, layout, columns = 3, verticalSpace, horizontalSpace, children, renderItem: RenderItem, justifyContent, onClick, style = {} }) => {
+  const ${componentName} = ({ role, id, data, layout, columns = 3, verticalSpace, horizontalSpace, children, renderItem: RenderItem, justifyContent, onClick, style = {} }) => {
     const wrapperStyle = useMemo(() => ({
         display: layout === 'inline' ? 'inline-block' : 'block',
         ...style,
@@ -82,7 +89,7 @@ export const generateCodeOfGridContainer = (
         }
     }, [data, children])
 
-    return <div id={id} style={wrapperStyle} onClick={onClick}><div style={{marginLeft: \`-\${horizontalSpace}\`, marginTop: \`-\${verticalSpace}\`}}>{createArray(rowCount).map((_, rowIndex) => (<${LineName} key={rowIndex} justifyContent={justifyContent}>{createArray(columns).map((_, columnIndex) => <${ItemName} key={columnIndex} marginLeft={horizontalSpace} marginTop={verticalSpace}>{render(rowIndex, columnIndex)}</${ItemName}>)}</${LineName}>))}</div></div>
+    return <div role={role} id={id} style={wrapperStyle} onClick={onClick}><div style={{marginLeft: \`-\${horizontalSpace}\`, marginTop: \`-\${verticalSpace}\`}}>{createArray(rowCount).map((_, rowIndex) => (<${LineName} key={rowIndex} justifyContent={justifyContent}>{createArray(columns).map((_, columnIndex) => <${ItemName} key={columnIndex} marginLeft={horizontalSpace} marginTop={verticalSpace}>{render(rowIndex, columnIndex)}</${ItemName}>)}</${LineName}>))}</div></div>
   };`;
 
   const createSpaceObject = (): {
@@ -170,10 +177,13 @@ export const generateCodeOfGridContainer = (
   const componentCall = `<${componentName}${createIdAttrInDev(
     context.development,
     id,
-  )}${generateCodeOfProp('data', data)}${generateCodeOfProp(
-    'layout',
-    layout,
-  )}${generateCodeOfProp('columns', columns)}${generateCodeOfProp(
+  )}${generateCodeOfProp(
+    'data',
+    data,
+  )}${generateCodeOfProp('layout', layout)}${generateCodeOfProp(
+    'columns',
+    columns,
+  )}${generateCodeOfProp(
     'verticalSpace',
     spaceObject.verticalSpace,
   )}${generateCodeOfProp(
@@ -193,3 +203,46 @@ export const generateCodeOfGridContainer = (
     componentCall,
   });
 };
+
+generateCodeOfGridContainer.plugin = {
+  sort: 3,
+  name: '网格布局容器',
+  type: 'GridContainer',
+  description:
+    '可以将内部内容按网格状布局排列，比如四宫格、九宫格。本身没有内容，里面需要添加内容。',
+  defaultAST: {
+    type: 'GridContainer',
+    props: {
+      layout: 'block',
+      columns: 3,
+      space: 8,
+      justifyContent: 'center',
+    },
+    children: [],
+  },
+  configs: [
+    listDataConfig,
+    layoutConfig,
+    {
+      name: '列数',
+      description: '网格有多少列',
+      required: false,
+      propName: 'columns',
+    },
+    {
+      name: '网格内容间隙',
+      description: '网格内容之间的间隙，最边缘的内容与容器之间没有间隙',
+      required: false,
+      propName: 'space',
+    },
+    {
+      name: '行内对齐方式',
+      description:
+        '如果网格容器宽度大于一行所有内容+间隙，那么可以配置行内的对齐方式。和Flex容器的对齐方式规则一样。',
+      required: false,
+      propName: 'justifyContent',
+    },
+    ...renderItemConfig,
+    ...commonContainerConfigs,
+  ],
+} as ToCComponent;

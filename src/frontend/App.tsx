@@ -1,10 +1,14 @@
 import AppRouter, { AppRoutes, routes } from './router';
+import { GlobalStyle } from './style';
 
 function App() {
   return (
-    <AppRouter>
-      <AppRoutes routes={routes} />
-    </AppRouter>
+    <>
+      <GlobalStyle />
+      <AppRouter>
+        <AppRoutes routes={routes} />
+      </AppRouter>
+    </>
   );
 }
 
