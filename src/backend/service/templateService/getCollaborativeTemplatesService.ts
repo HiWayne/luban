@@ -1,6 +1,6 @@
 import { isExist } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
-import { formatData } from './getOwnTemplatesService';
+import { formatBriefData } from './getOwnTemplatesService';
 import { FormatGetOwnRequestDTO, TemplateEntity } from './types';
 import { escapeRegex } from '@/backend/utils';
 
@@ -57,7 +57,7 @@ export const getCollaborativeTemplatesService = async (
       collection.countDocuments({ ...conditions, status: { $ne: 'delete' } }),
     ]);
     return {
-      list: list.map((item: TemplateEntity) => formatData(item)),
+      list: list.map((item: TemplateEntity) => formatBriefData(item)),
       more: total > start + limit,
       total,
     };

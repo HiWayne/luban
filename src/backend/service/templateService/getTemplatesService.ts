@@ -1,8 +1,7 @@
-import { ObjectId } from 'mongodb';
 import { isExist } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
 import { FormatGetTemplatesRequestDTO, TemplateEntity } from './types';
-import { formatData } from './getOwnTemplatesService';
+import { formatBriefData } from './getOwnTemplatesService';
 import { escapeRegex } from '@/backend/utils';
 
 export const getTemplatesService = async (
@@ -10,7 +9,6 @@ export const getTemplatesService = async (
 ) => {
   try {
     const {
-      id,
       type,
       name,
       desc,
@@ -26,9 +24,6 @@ export const getTemplatesService = async (
       status: 'active',
     };
 
-    if (isExist(id)) {
-      conditions._id = new ObjectId(id);
-    }
     if (isExist(type)) {
       conditions.type = type;
     }
@@ -64,7 +59,7 @@ export const getTemplatesService = async (
       collection.countDocuments(conditions),
     ]);
     return {
-      list: list.map((item: TemplateEntity) => formatData(item)),
+      list: list.map((item: TemplateEntity) => formatBriefData(item)),
       more: total > start + limit,
       total,
     };

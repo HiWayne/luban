@@ -28,6 +28,7 @@ import {
   deleteTemplateService,
   getCollaborativeTemplatesService,
   getOwnTemplatesService,
+  getTemplateDetailService,
   getTemplatesService,
   saveTemplateService,
   updateTemplateService,
@@ -494,6 +495,22 @@ try {
         } else {
           const result = await getCollaborativeTemplatesService(params, id);
           reply.send({ status: 1, data: result, message: '' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.get('/api/get/template/detail/', async (req, reply) => {
+      try {
+        const { id } = (req.query || {}) as any;
+        if (id) {
+          const detail = await getTemplateDetailService(id);
+          reply.send({ status: 1, data: detail, message: '' });
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '缺少参数' });
         }
       } catch (e) {
         catchErrorReply(e, reply);

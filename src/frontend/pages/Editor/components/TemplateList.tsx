@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Button, List } from 'antd';
 import VirtualList from 'rc-virtual-list';
@@ -36,10 +36,38 @@ const UserName = styled.span`
   font-size: 12px;
 `;
 
+const ApplyButton = ({ templateId }: { templateId: string }) => {
+  const [loading, setLoading] = useState(false);
+
+  const { getTemplateDetail } = useGetTemplatesApi();
+  const { addComponentFromTemplate } = useModifyPage();
+
+  return (
+    <Button
+      loading={loading}
+      style={{ marginLeft: '20px' }}
+      onClick={() => {
+        setLoading(true);
+        getTemplateDetail(templateId)
+          .then((templateDetail) => {
+            if (templateDetail) {
+              addComponentFromTemplate(
+                templateDetail.view as NodeAST[],
+                templateDetail.config,
+              );
+            }
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }}>
+      应用模板
+    </Button>
+  );
+};
+
 export const TemplateList = styled(({ className }) => {
   const { templates, getTemplates } = useGetTemplatesApi();
-
-  const { addComponentFromTemplate } = useModifyPage();
 
   useEffect(() => {
     getTemplates();
@@ -80,16 +108,7 @@ export const TemplateList = styled(({ className }) => {
                 <UserName>{template.author.author_name}</UserName>
               </Flex>
             </Flex>
-            <Button
-              style={{ marginLeft: '20px' }}
-              onClick={() => {
-                addComponentFromTemplate(
-                  template.view as NodeAST[],
-                  template.config,
-                );
-              }}>
-              应用模板
-            </Button>
+            <ApplyButton templateId={template.id} />
           </Flex>
         )}
       </VirtualList>
