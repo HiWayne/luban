@@ -14,7 +14,7 @@ import {
 } from '../../configComponents/MarginCssConfig';
 import { VariableSelect } from '../../configComponents/VariableSelect';
 import { UploadImageConfig } from '../../configComponents/UploadImageConfig';
-import { useUpdateNodeAST } from '../../../hooks/useUpdateNodeAST';
+import { useModifyPage } from '../../../hooks';
 import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 
 export const RenderConfig: FC<{
@@ -26,9 +26,9 @@ export const RenderConfig: FC<{
   const { formSchema, FormComponent, name, description, propName } =
     configs[index];
 
-  const { updateNodeAST } = useUpdateNodeAST();
+  const { updateComponent } = useModifyPage();
 
-  const updateNodeASTWithDebounce = debounce(updateNodeAST, 1000);
+  const updateNodeASTWithDebounce = debounce(updateComponent, 1000);
 
   const deleteProp = useCallback((old?: Record<string, any>) => {
     let newData = old;

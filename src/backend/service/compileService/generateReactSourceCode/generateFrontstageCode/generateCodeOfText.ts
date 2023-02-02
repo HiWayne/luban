@@ -98,7 +98,7 @@ export const generateCodeOfText = (
     color,
   )}${generateCodeOfProp('fontSize', fontSize)}${generateCodeOfProp(
     'lineHeight',
-    typeof lineHeight === 'number' ? `${lineHeight}px` : lineHeight,
+    lineHeight,
   )}${generateCodeOfProp('fontWeight', fontWeight)}${generateCodeOfProp(
     'italic',
     italic,

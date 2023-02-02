@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { InputNumber, Select } from 'antd';
 import { isExist } from '@duitang/dt-base';
@@ -119,38 +119,34 @@ export const LengthCssConfig: FC<LengthCssConfigProps> = ({
     isExist(defaultUnit) ? (defaultUnit as any) : 'px',
   );
 
-  const onChange = useCallback(
-    (value: number | null) => {
-      setNumber(value);
-      if (typeof _onChange === 'function') {
-        if (value !== null) {
-          if (unit) {
-            const css = `${value}${unit}`;
-            const styleConfig = {
-              value,
-              unit,
-            };
-            _onChange({ style: css, styleConfig });
-          } else {
-            const css = value;
-            const styleConfig = {
-              value,
-              unit,
-            };
-            _onChange({ style: css, styleConfig });
-          }
+  useEffect(() => {
+    if (typeof _onChange === 'function') {
+      if (number !== null) {
+        if (unit) {
+          const css = `${number}${unit}`;
+          const styleConfig = {
+            value: number,
+            unit,
+          };
+          _onChange({ style: css, styleConfig });
         } else {
-          _onChange(null);
+          const css = number;
+          const styleConfig = {
+            value: number,
+            unit,
+          };
+          _onChange({ style: css, styleConfig });
         }
+      } else {
+        _onChange(null);
       }
-    },
-    [number, unit],
-  );
+    }
+  }, [number, unit]);
 
   return (
     <ValueWithUnit
       value={number}
-      setValue={onChange}
+      setValue={setNumber}
       unitValue={unit}
       setUnitValue={setUnit}
       placeholder={placeholder}

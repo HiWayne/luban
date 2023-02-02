@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { CSSProperties, FC, MouseEventHandler } from 'react';
+/* eslint-disable react/no-unused-prop-types */
+import { CSSProperties, FC, MouseEventHandler, forwardRef } from 'react';
 import styled from 'styled-components';
 
 interface FlexProps {
@@ -15,10 +15,12 @@ interface FlexProps {
 }
 
 export const Flex = styled<FC<FlexProps>>(
-  ({ className, children, style, onClick }) => (
-    <div className={className} style={style} onClick={onClick}>
-      {children}
-    </div>
+  forwardRef<HTMLDivElement, FlexProps>(
+    ({ className, children, style, onClick }, ref) => (
+      <div ref={ref} className={className} style={style} onClick={onClick}>
+        {children}
+      </div>
+    ),
   ),
 )`
   display: ${(props) => (props.layout === 'inline' ? 'inline-flex' : 'flex')};

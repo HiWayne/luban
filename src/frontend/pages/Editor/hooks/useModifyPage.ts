@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { cloneDeep } from 'lodash-es';
 import { message } from 'antd';
 import { isExist } from '@duitang/dt-base';
 import useStore from '@/frontend/store';
@@ -7,6 +8,7 @@ import {
   addConfigToMap,
   addNodeASTToMap,
   createUniqueId,
+  prepareTemplateView,
   removeConfigFromMap,
   removeNodeASTFromMap,
   updateConfigFromMap,
@@ -15,10 +17,15 @@ import {
 import { NodeAST } from '@/frontend/types';
 import { findPathById, iterateNodeAST } from '../utils/operateNodeAST';
 
-export const useUpdateNodeAST = () => {
-  const addNodeASTFromExist = useCallback(
+export const useModifyPage = () => {
+  const addComponentFromExist = useCallback(
     (nodeAST: NodeAST, config: any, targetId?: number) => {
-      const { addNodeAST: addNodeInStore } = useStore.getState().editor;
+      const { addNodeAST: addNodeInStore, pageModel } =
+        useStore.getState().editor;
+      nodeAST = {
+        ...nodeAST,
+        parent: targetId !== undefined ? targetId : pageModel.view.id,
+      };
       // 在store中添加
       addNodeInStore(nodeAST, targetId);
       // 在高性能nodeAST数据结构中添加
@@ -29,15 +36,19 @@ export const useUpdateNodeAST = () => {
     [],
   );
 
-  const addNodeASTFromInitial = useCallback(
+  const addComponentFromInitial = useCallback(
     (data: ToCComponent, targetId?: number) => {
       message.success(`成功添加【${data.name}】组件`, 2);
       const id = createUniqueId();
-      const { addNodeAST: addNodeInStore, setCurrentChooseComponent } =
-        useStore.getState().editor;
+      const {
+        addNodeAST: addNodeInStore,
+        setCurrentChooseComponent,
+        pageModel,
+      } = useStore.getState().editor;
       const nodeAST = {
         ...data.defaultAST,
         id,
+        parent: targetId !== undefined ? targetId : pageModel.view.id,
       };
       // 在store中添加
       addNodeInStore(nodeAST, targetId);
@@ -62,7 +73,22 @@ export const useUpdateNodeAST = () => {
     [],
   );
 
-  const updateNodeAST = useCallback(
+  const addComponentFromTemplate = useCallback(
+    (view: NodeAST[], config: Record<number, any>, target?: number) => {
+      const { addNodeAST: addNodeInStore, pageModel } =
+        useStore.getState().editor;
+      const templateNodeASTs = prepareTemplateView(
+        cloneDeep(view),
+        config,
+        target !== undefined ? target : pageModel.view.id,
+      );
+      addNodeInStore(templateNodeASTs);
+      message.success('成功添加模板', 2);
+    },
+    [],
+  );
+
+  const updateComponent = useCallback(
     (
       id: number,
       props:
@@ -83,26 +109,27 @@ export const useUpdateNodeAST = () => {
     [],
   );
 
-  const removeNodeAST = useCallback((id: number) => {
+  const removeComponent = useCallback((id: number) => {
     const { pageModel, removeNodeAST: removeNodeASTInStore } =
       useStore.getState().editor;
     const { complete, nodes } = findPathById(pageModel.view, id);
     if (complete) {
-      // 在store中删除
-      removeNodeASTInStore(id);
       iterateNodeAST(nodes[0], (nodeAST) => {
         // 在高性能nodeAST数据结构中删除
         removeNodeASTFromMap(nodeAST.id);
         // 在nodeAST配置缓存中删除
         removeConfigFromMap(nodeAST.id);
       });
+      // 在store中删除
+      removeNodeASTInStore(id);
     }
   }, []);
 
   return {
-    addNodeASTFromExist,
-    addNodeASTFromInitial,
-    updateNodeAST,
-    removeNodeAST,
+    addComponentFromExist,
+    addComponentFromInitial,
+    addComponentFromTemplate,
+    updateComponent,
+    removeComponent,
   };
 };

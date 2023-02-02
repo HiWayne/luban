@@ -1,17 +1,17 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Drawer, Form } from 'antd';
+import { Button, Drawer, Form, Modal } from 'antd';
 import { isExist } from '@duitang/dt-base';
 import { CurrentComponent } from '@/frontend/store/editor';
 import { RenderConfig } from './components/RenderConfig';
 import useStore from '@/frontend/store';
-import { useUpdateNodeAST } from '../../hooks';
+import { useModifyPage } from '../../hooks';
 
 export const ConfigPanel: FC<{
   data: { component: CurrentComponent; config: any } | null;
 }> = ({ data }) => {
   const [show, setShow] = useState(false);
 
-  const { removeNodeAST } = useUpdateNodeAST();
+  const { removeComponent } = useModifyPage();
 
   const onClose = useCallback(() => {
     useStore.getState().editor.setCurrentChooseComponent(null);
@@ -19,10 +19,16 @@ export const ConfigPanel: FC<{
   }, []);
 
   const onDelete = useCallback(() => {
-    if (isExist(data?.component.id)) {
-      removeNodeAST(data?.component.id as number);
-      onClose();
-    }
+    Modal.confirm({
+      title: '删除',
+      content: `确定删除【${data?.component.name}】组件吗`,
+      onOk: () => {
+        if (isExist(data?.component.id)) {
+          removeComponent(data?.component.id as number);
+          onClose();
+        }
+      },
+    });
   }, [data?.component.id]);
 
   useEffect(() => {

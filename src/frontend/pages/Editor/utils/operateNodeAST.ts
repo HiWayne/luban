@@ -1,6 +1,5 @@
 import { isExist } from '@duitang/dt-base';
 import { NodeAST } from '@/frontend/types';
-import { findNodeASTById } from './highPerformanceStructureOfEditor';
 import { objectInclude } from '@/frontend/utils';
 
 export const add = (
@@ -19,8 +18,13 @@ export const add = (
         } else {
           target.children?.push(nodeAST as any);
         }
-      } else if ((target.props as any).renderItem && !Array.isArray(nodeAST)) {
-        (target.props as any).renderItem.render = nodeAST;
+      } else if ((target.props as any).renderItem) {
+        if (!Array.isArray(nodeAST)) {
+          (target.props as any).renderItem.render = nodeAST;
+        }
+        if (Array.isArray(nodeAST) && nodeAST.length === 1) {
+          (target.props as any).renderItem.render = nodeAST[0];
+        }
       }
       break;
     case 'renderItem':
@@ -40,10 +44,10 @@ export const iterateNodeAST = (
   if (nodeAST) {
     callback(nodeAST);
     if (nodeAST.children) {
-      nodeAST.children.forEach((child) => callback(child));
+      nodeAST.children.forEach((child) => iterateNodeAST(child, callback));
     }
     if ((nodeAST?.props as any)?.renderItem?.render) {
-      callback((nodeAST?.props as any)?.renderItem?.render);
+      iterateNodeAST((nodeAST?.props as any)?.renderItem?.render, callback);
     }
   }
 };
@@ -150,7 +154,9 @@ export const remove = (root: NodeAST, id: number) => {
     const parent = nodes[1];
     switch (parentProperty) {
       case 'children':
-        parent.children?.splice(childrenIndex, 1);
+        if (parent.children) {
+          parent.children.splice(childrenIndex, 1);
+        }
         break;
       case 'renderItem':
         (parent.props as any).renderItem.render = null;
@@ -161,35 +167,35 @@ export const remove = (root: NodeAST, id: number) => {
   }
 };
 
-export const move = (
-  root: NodeAST,
-  movedId: number,
-  targetId: number,
-  index?: number,
-) => {
-  const moved = findNodeASTById(movedId);
-  const target = findNodeASTById(targetId);
-  if (moved && target) {
-    const { nodes, complete, parentProperty } = findPathById(root, targetId);
-    if (complete) {
-      const targetInStore = nodes[0];
-      remove(root, movedId);
-      switch (parentProperty) {
-        case 'children':
-          if (typeof index === 'number') {
-            targetInStore.children?.splice(index, 0, moved as any);
-          } else {
-            throw new Error('index必须是数字');
-          }
-          break;
-        case 'renderItem':
-          (targetInStore.props as any).renderItem.render = moved;
-          break;
-        default:
-          break;
-      }
-    }
-  } else {
-    throw new Error('节点不存在');
-  }
-};
+// export const move = (
+//   root: NodeAST,
+//   movedId: number,
+//   targetId: number,
+//   index?: number,
+// ) => {
+//   const moved = findNodeASTById(movedId);
+//   const target = findNodeASTById(targetId);
+//   if (moved && target) {
+//     const { nodes, complete, parentProperty } = findPathById(root, targetId);
+//     if (complete) {
+//       const targetInStore = nodes[0];
+//       remove(root, movedId);
+//       switch (parentProperty) {
+//         case 'children':
+//           if (typeof index === 'number') {
+//             targetInStore.children?.splice(index, 0, moved as any);
+//           } else {
+//             throw new Error('index必须是数字');
+//           }
+//           break;
+//         case 'renderItem':
+//           (targetInStore.props as any).renderItem.render = moved;
+//           break;
+//         default:
+//           break;
+//       }
+//     }
+//   } else {
+//     throw new Error('节点不存在');
+//   }
+// };

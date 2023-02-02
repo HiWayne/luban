@@ -7,6 +7,7 @@ export interface SaveTemplateRequestDTO {
   name: string;
   desc?: string;
   view: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  config: Record<number, any>;
   author_id?: number;
   status: 'active' | 'inactive';
   tags?: string[];
@@ -20,6 +21,7 @@ export interface UpdateTemplateRequestDTO {
   name: string;
   desc?: string;
   view?: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  config?: Record<number, any>;
   status: 'active' | 'inactive';
   tags?: string[];
   collaborators?: number[];
@@ -81,6 +83,7 @@ export interface TemplateResponseDTO {
   name: string;
   desc: string;
   view: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  config: Record<number, any>;
   author: {
     author_name: string;
     author_id: number | null;
@@ -102,6 +105,7 @@ export interface TemplateEntity {
   name: string;
   desc: string;
   view: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  config: Record<number, any>;
   author: {
     author_name: string;
     author_id: number | null;

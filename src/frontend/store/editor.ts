@@ -42,6 +42,7 @@ const createEditorStore: (
     },
     view: {
       id: createUniqueId(),
+      parent: null,
       type: 'BlockContainer',
       props: {},
       children: [],
@@ -62,11 +63,7 @@ const createEditorStore: (
   addNodeAST(nodeAST: NodeAST | NodeAST[], targetId?: number) {
     set((state) => {
       if (targetId === undefined) {
-        if (Array.isArray(nodeAST)) {
-          nodeAST.forEach((node) => add(state.editor.pageModel.view, node));
-        } else {
-          add(state.editor.pageModel.view, nodeAST);
-        }
+        add(state.editor.pageModel.view, nodeAST);
       } else {
         const { complete, nodes, parentProperty } = findPathById(
           state.editor.pageModel.view,

@@ -47,6 +47,9 @@ export const updateTemplateService = async (
       if (isExist(templateModel.view)) {
         templateEntity.view = templateModel.view;
       }
+      if (isExist(templateModel.config)) {
+        templateEntity.config = templateModel.config;
+      }
       if (isExist(templateModel.status)) {
         templateEntity.status = templateModel.status;
       }

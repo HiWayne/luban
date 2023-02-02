@@ -6,6 +6,7 @@ import {
   useState,
 } from 'react';
 import { loadMicroApp, MicroApp } from 'qiankun';
+import styled from 'styled-components';
 import { Button, Input, notification } from 'antd';
 import shallow from 'zustand/shallow';
 import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
@@ -28,6 +29,16 @@ import { useEditorInteractive } from './hooks';
 export const toCComponents = Object.values(compileFunctions)
   .map((compileFunction) => (compileFunction as any).plugin as ToCComponent)
   .sort((a, b) => a.sort - b.sort);
+
+const Title = styled.h3`
+  margin: 20px 0 12px 0;
+`;
+
+const LightText = styled.p`
+  margin: 12px 0;
+  font-size: 10px;
+  color: #aaa;
+`;
 
 const ToCEditor = () => {
   const { pageModel, currentComponent } = useStore(
@@ -181,7 +192,8 @@ const ToCEditor = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
-        <h3>场景组件</h3>
+        <Title>场景组件</Title>
+        <LightText>可拖动到指定位置，若点击将在页面末尾添加</LightText>
         <ComponentsSelectArea>
           {/* toC */}
           {toCComponents.map((component) => (
@@ -207,7 +219,7 @@ const ToCEditor = () => {
             发布
           </Button>
         </div>
-        <h3>模板</h3>
+        <Title>模板市场</Title>
         <TemplateList />
         <div style={{ marginTop: '20px' }}>
           <Button onClick={getReactCode}>预览代码</Button>

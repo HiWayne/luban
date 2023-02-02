@@ -211,6 +211,7 @@ export const MarginCssConfig: FC<MarginCssConfigProps> = ({
   return (
     <Wrapper>
       <Tabs
+        defaultActiveKey={tab}
         style={{ width: '240px' }}
         size="small"
         tabBarGutter={8}
