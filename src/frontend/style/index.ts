@@ -3,6 +3,13 @@ import { createGlobalStyle } from 'styled-components';
 export * from './constants';
 
 export const GlobalStyle = createGlobalStyle`
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        user-select: none;
+    }
     [role="luban_component"] {
         & > .name {
             display: none;
@@ -14,7 +21,9 @@ export const GlobalStyle = createGlobalStyle`
     .editor-highlight {
         position: relative;
         &:hover {
-            border: 1px solid #1677ff;
+            border: 1px solid #409eff;
+            transition: all 0.2s ease-out;
+            box-shadow: 0 2px 12px 4px rgb(64 158 255 / 20%);
             & > .name {
                 display: flex;
             }
@@ -33,7 +42,7 @@ export const GlobalStyle = createGlobalStyle`
             align-items: center;
             font-size: 10px;
             color: #fff;
-            background-color: #1677ff;
+            background-color: #409eff;
             box-sizing: border-box;
             user-select: none;
         }

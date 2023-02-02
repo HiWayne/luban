@@ -1,7 +1,7 @@
 import { FC, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
-import { useUpdateNodeAST } from '../hooks/useUpdateNodeAST';
+import { useModifyPage } from '../hooks';
 
 const Wrapper = styled.div`
   display: flex;
@@ -45,7 +45,7 @@ export const ComponentItem: FC<ComponentItemProp> = ({
 
   const { name } = data;
 
-  const { addNodeASTFromInitial } = useUpdateNodeAST();
+  const { addComponentFromInitial } = useModifyPage();
 
   const onDragStart = useCallback(function (
     this: HTMLElement,
@@ -73,7 +73,7 @@ export const ComponentItem: FC<ComponentItemProp> = ({
     <Wrapper
       ref={wrapperRef}
       draggable
-      onClick={() => addNodeASTFromInitial(data)}>
+      onClick={() => addComponentFromInitial(data)}>
       {/* <Image src={icon} alt="小图标" /> */}
       <Name>{name}</Name>
     </Wrapper>

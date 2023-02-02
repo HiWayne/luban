@@ -132,6 +132,7 @@ export interface ParagraphProps {
 
 export interface NodeAST {
   id: number;
+  parent: number | null;
   key?: string | number | VariableName | BuiltInTypeCode;
   type: NodeType;
   // 左变量 === 右值 ? 渲染 : null

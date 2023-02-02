@@ -23,6 +23,7 @@ export const saveTemplateService = async (
         name: templateModel.name,
         desc: templateModel.desc || '',
         view: templateModel.view,
+        config: templateModel.config,
         author: {
           author_name: userData.name || DEFAULT_USER_NAME,
           author_id: userData.id || null,

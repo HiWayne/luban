@@ -22,6 +22,9 @@ import { useSearchUsers } from './api';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
 import useStore from '@/frontend/store';
 import { UploadImageConfig } from '../configComponents/UploadImageConfig';
+import { findConfigFromMap } from '../../utils';
+import { iterateNodeAST } from '../../utils/operateNodeAST';
+import { NodeAST } from '@/frontend/types';
 
 interface TagsProps {
   tags: string[];
@@ -204,6 +207,14 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       });
       return;
     }
+    const config: Record<number, any> = (
+      pageViewModel.children as any[]
+    ).reduce((result: any, child: NodeAST) => {
+      iterateNodeAST(child, (nodeAST) => {
+        result[nodeAST.id] = findConfigFromMap(nodeAST.id);
+      });
+      return result;
+    }, {});
     const templateData: SaveTemplateRequestDTO = {
       name,
       desc,
@@ -213,6 +224,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       collaborators: collaborators.map((collaborator) => collaborator.id),
       type: pageType,
       view: pageViewModel.children,
+      config,
       preview: preview || undefined,
     };
     onOk(templateData);

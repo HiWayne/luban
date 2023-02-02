@@ -49,6 +49,6 @@ export interface ToCComponent {
     | 'Text'
     | 'Paragraph';
   description: string;
-  defaultAST: Omit<NodeAST, 'id'>;
+  defaultAST: Omit<NodeAST, 'id' | 'parent'>;
   configs: Config[];
 }

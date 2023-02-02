@@ -1,2 +1,2 @@
-export * from './useUpdateNodeAST';
+export * from './useModifyPage';
 export * from './useEditorInteractive';

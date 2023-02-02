@@ -1,13 +1,12 @@
 import { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { Button, List, message } from 'antd';
+import { Button, List } from 'antd';
 import VirtualList from 'rc-virtual-list';
 import { DtIcon } from '@duitang/dt-react-mobile';
 import { Avatar, Flex } from '@/frontend/components';
 import { useGetTemplatesApi } from '../api';
-import { NodeAST } from '@/backend/types/frontstage';
-import useStore from '@/frontend/store';
-import { formatTemplateView } from '../utils';
+import { NodeAST } from '@/frontend/types';
+import { useModifyPage } from '../hooks';
 
 const ContainerHeight = 400;
 
@@ -38,9 +37,9 @@ const UserName = styled.span`
 `;
 
 export const TemplateList = styled(({ className }) => {
-  const addNodeAST = useStore((store) => store.editor.addNodeAST);
-
   const { templates, getTemplates } = useGetTemplatesApi();
+
+  const { addComponentFromTemplate } = useModifyPage();
 
   useEffect(() => {
     getTemplates();
@@ -53,11 +52,6 @@ export const TemplateList = styled(({ className }) => {
     ) {
       getTemplates();
     }
-  }, []);
-
-  const applyTemplate = useCallback((view: NodeAST[]) => {
-    addNodeAST(formatTemplateView(view));
-    message.success('成功添加模板', 2);
   }, []);
 
   return (
@@ -88,7 +82,12 @@ export const TemplateList = styled(({ className }) => {
             </Flex>
             <Button
               style={{ marginLeft: '20px' }}
-              onClick={() => applyTemplate(template.view as NodeAST[])}>
+              onClick={() => {
+                addComponentFromTemplate(
+                  template.view as NodeAST[],
+                  template.config,
+                );
+              }}>
               应用模板
             </Button>
           </Flex>

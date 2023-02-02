@@ -1,9 +1,15 @@
+import { cloneDeep } from 'lodash-es';
 import { NodeAST } from '@/frontend/types';
+import { remove } from './operateNodeAST';
 
 const nodeASTMap = new Map<number, NodeAST>();
 
+export const setNodeASTMap = (id: number, nodeAST: NodeAST) => {
+  nodeASTMap.set(id, cloneDeep(nodeAST));
+};
+
 export const addNodeASTToMap = (nodeAST: NodeAST) => {
-  nodeASTMap.set(nodeAST.id, nodeAST);
+  setNodeASTMap(nodeAST.id, nodeAST);
 };
 
 export const findNodeASTById = (id: number) => {
@@ -12,19 +18,30 @@ export const findNodeASTById = (id: number) => {
 
 export const updateNodeASTFromMap = (id: number, newProps: any) => {
   if (newProps) {
-    const oldNodeAST = nodeASTMap.get(id);
+    const oldNodeAST = findNodeASTById(id);
     if (oldNodeAST) {
       const newNodeAST = { ...oldNodeAST };
       newNodeAST.props = oldNodeAST.props
         ? { ...oldNodeAST.props, ...newProps }
         : newProps;
-      nodeASTMap.set(oldNodeAST.id, newNodeAST);
+      setNodeASTMap(oldNodeAST.id, newNodeAST);
     }
   }
 };
 
 export const removeNodeASTFromMap = (id: number) => {
-  nodeASTMap.delete(id);
+  const nodeAST = findNodeASTById(id);
+  if (nodeAST) {
+    nodeASTMap.delete(id);
+    const parentId = nodeAST.parent;
+    if (parentId !== null) {
+      const parentNodeAST = findNodeASTById(parentId);
+      if (parentNodeAST) {
+        remove(parentNodeAST, id);
+        setNodeASTMap(parentId, parentNodeAST);
+      }
+    }
+  }
 };
 
 const nodeConfigMap = new Map<number, Record<string, any>>();

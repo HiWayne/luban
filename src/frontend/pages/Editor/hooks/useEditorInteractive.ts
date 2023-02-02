@@ -1,5 +1,4 @@
 import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
-import shallow from 'zustand/shallow';
 import { message, Modal } from 'antd';
 import { getLuBanIdFromElement } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { findConfigFromMap, findNodeASTById } from '../utils';
@@ -7,16 +6,11 @@ import useStore from '@/frontend/store';
 import { toCComponents } from '../ToCEditor';
 import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 import { NodeAST } from '@/frontend/types';
-import { useUpdateNodeAST } from './useUpdateNodeAST';
+import { useModifyPage } from './useModifyPage';
 
 export const useEditorInteractive = (update: any) => {
-  const { root, setCurrentChooseComponent, removeNodeAST } = useStore(
-    (store) => ({
-      root: store.editor.pageModel.view,
-      setCurrentChooseComponent: store.editor.setCurrentChooseComponent,
-      removeNodeAST: store.editor.removeNodeAST,
-    }),
-    shallow,
+  const setCurrentChooseComponent = useStore(
+    (store) => store.editor.setCurrentChooseComponent,
   );
   const draggedTargetRef: MutableRefObject<{
     nodeAST?: NodeAST;
@@ -24,7 +18,7 @@ export const useEditorInteractive = (update: any) => {
     element: Element;
   } | null> = useRef(null);
 
-  const { addNodeASTFromExist, addNodeASTFromInitial } = useUpdateNodeAST();
+  const { addComponentFromExist, addComponentFromInitial, removeComponent } = useModifyPage();
 
   const createComponentNameTag = useCallback((name: string) => {
     const div = document.createElement('div');
@@ -102,13 +96,13 @@ export const useEditorInteractive = (update: any) => {
               toCComponents.find((c) => c.type === nodeASTType);
             if (targetComponent) {
               const config = findConfigFromMap(draggedNodeAST.id);
-              removeNodeAST(draggedNodeAST.id);
-              addNodeASTFromExist(draggedNodeAST, config, id);
+              removeComponent(draggedNodeAST.id);
+              addComponentFromExist(draggedNodeAST, config, id);
               message.success(`成功移动【${targetComponent.name}】组件`, 2);
             }
           }
         } else {
-          addNodeASTFromInitial(draggedTargetRef.current.component, id);
+          addComponentFromInitial(draggedTargetRef.current.component, id);
         }
         draggedTargetRef.current = null;
       }
@@ -156,7 +150,7 @@ export const useEditorInteractive = (update: any) => {
             title: '删除',
             content: `确定删除【${data.name}】组件吗`,
             onOk: () => {
-              removeNodeAST(data.id);
+              removeComponent(data.id);
             },
           });
         });

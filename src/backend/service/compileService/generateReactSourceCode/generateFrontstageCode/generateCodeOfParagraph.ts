@@ -97,13 +97,13 @@ export const generateCodeOfParagraph = (
   )}${generateCodeOfProp('color', color)}${generateCodeOfProp(
     'fontSize',
     fontSize,
-  )}${generateCodeOfProp(
-    'lineHeight',
-    typeof lineHeight === 'number' ? `${lineHeight}px` : lineHeight,
-  )}${generateCodeOfProp('fontWeight', fontWeight)}${generateCodeOfProp(
-    'fontFamily',
-    fontFamily,
-  )}${generateCodeOfProp('textDecoration', textDecoration)}>${
+  )}${generateCodeOfProp('lineHeight', lineHeight)}${generateCodeOfProp(
+    'fontWeight',
+    fontWeight,
+  )}${generateCodeOfProp('fontFamily', fontFamily)}${generateCodeOfProp(
+    'textDecoration',
+    textDecoration,
+  )}>${
     Array.isArray(texts)
       ? texts.reduce(
           (childrenCode, text) =>
