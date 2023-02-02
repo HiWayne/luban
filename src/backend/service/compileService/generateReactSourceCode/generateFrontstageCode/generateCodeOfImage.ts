@@ -184,6 +184,9 @@ generateCodeOfImage.plugin = {
       description: '上传图片或设置变量名',
       required: true,
       propName: 'src',
+      formSchema: {
+        type: 'image-src',
+      },
     },
     { ...layoutConfig, defaultConfig: 'inline' },
     widthConfig,

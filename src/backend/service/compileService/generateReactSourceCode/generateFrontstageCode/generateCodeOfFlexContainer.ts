@@ -121,20 +121,84 @@ generateCodeOfFlexContainer.plugin = {
       description: '内部内容的排列方向。"row"-水平排列、"column"-垂直排列。',
       required: false,
       propName: 'direction',
+      formSchema: {
+        type: 'select',
+        options: [
+          {
+            label: '水平',
+            value: 'row',
+          },
+          {
+            label: '竖直',
+            value: 'column',
+          },
+        ],
+      },
+      defaultConfig: 'row',
     },
     {
-      name: '排列方向的对齐方式',
+      name: '主轴对齐方式',
       description:
-        '比如容器内部水平排列，这个配置影响的就是内容在水平方向上的对齐方式。"flex-start"-居左、"flex-end"-居右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
+        '比如容器内部水平排列，这个配置影响的就是内容在水平方向上的对齐方式。"flex-start"-开始方向、"flex-end"-结束方向、"center"-居中、"space-between"-两边的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
       required: false,
       propName: 'justifyContent',
+      formSchema: {
+        type: 'select',
+        options: [
+          {
+            label: '居中',
+            value: 'center',
+          },
+          {
+            label: '沿开始',
+            value: 'flex-start',
+          },
+          {
+            label: '沿结束',
+            value: 'flex-end',
+          },
+          {
+            label: '靠两边',
+            value: 'space-between',
+          },
+          {
+            label: '均等间隔',
+            value: 'space-around',
+          },
+        ],
+      },
     },
     {
-      name: '与排列垂直方向的对齐方式',
+      name: '交叉轴对齐方式',
       description:
-        '比如容器内部水平排列，这个配置影响的就是内容在垂直方向上的对齐方式。"flex-start"-居左、"flex-end"-居右、"center"-居中、"space-between"-最左、最右的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
+        '比如容器内部水平排列，这个配置影响的就是内容在垂直方向上的对齐方式。"flex-start"-开始方向、"flex-end"-结束方向、"center"-居中、"space-between"-两边的内容紧靠两边，中间内容均等间隔、"space-around"-所有内容之间均有间隔。',
       required: false,
       propName: 'alignItems',
+      formSchema: {
+        type: 'select',
+        options: [
+          {
+            label: '居中',
+            value: 'center',
+          },
+          {
+            label: '沿开始',
+            value: 'flex-start',
+          },
+          {
+            label: '沿结束',
+            value: 'flex-end',
+          },
+          {
+            label: '靠两边',
+            value: 'space-between',
+          },
+          {
+            label: '均等间隔',
+            value: 'space-around',
+          },
+        ],
+      },
     },
     ...commonContainerConfigs,
   ],

@@ -150,6 +150,12 @@ generateCodeOfText.plugin = {
       description: '文字内容。可以是字符串，也可以是变量',
       required: true,
       propName: 'text',
+      formSchema: {
+        type: 'text-content',
+      },
+      defaultConfig: {
+        text: '文字文字文字',
+      },
     },
     marginConfig,
     paddingConfig,

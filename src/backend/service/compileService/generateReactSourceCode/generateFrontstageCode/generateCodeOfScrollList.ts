@@ -87,18 +87,24 @@ generateCodeOfScrollList.plugin = {
   configs: [
     listDataConfig,
     {
-      name: '外层样式wrapperStyle',
+      name: '外层高级样式',
       description:
-        '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置，style类型是React.CSSProperties',
+        '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置',
       required: false,
       propName: 'wrapperStyle',
+      formSchema: {
+        type: 'custom-style',
+      },
     },
     {
-      name: '列表样式listStyle',
+      name: '列表高级样式',
       description:
-        '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置，style类型是React.CSSProperties',
+        '在基础样式无法满足需求的情况下使用，一般由有前端开发经验的人员设置',
       required: false,
       propName: 'listStyle',
+      formSchema: {
+        type: 'custom-style',
+      },
     },
     ...renderItemConfig,
     {

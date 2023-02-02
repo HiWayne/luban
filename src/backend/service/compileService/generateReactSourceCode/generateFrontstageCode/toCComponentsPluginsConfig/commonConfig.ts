@@ -20,6 +20,9 @@ export const heightConfig: Config = {
   formSchema: {
     type: 'css-length',
   },
+  defaultConfig: {
+    value: 100,
+  },
 };
 
 export const marginConfig: Config = {
@@ -78,7 +81,12 @@ export const actionConfig: Config = {
 };
 
 export const commonContainerConfigs: Config[] = [
-  widthConfig,
+  {
+    ...widthConfig,
+    defaultConfig: {
+      value: 100,
+    },
+  },
   heightConfig,
   marginConfig,
   paddingConfig,
@@ -114,6 +122,9 @@ export const commonContainerConfigs: Config[] = [
       '容器背景图片大小。举例："cover"-图片最小能填满容器背景的大小（图片一定能填满背景，但可能显示不完整）、"contain"-图片最大能完整显示的大小（图片一定能显示完整，但可能填不满容器背景）、"200px"-宽200px，高以图片原始比例自适应、"200px 100px"-宽200px，高100px。',
     required: false,
     propName: 'backgroundSize',
+    formSchema: {
+      type: 'bg-size',
+    },
   },
   {
     name: '是否重复铺满',
