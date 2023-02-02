@@ -1,12 +1,24 @@
 import { useCallback, useMemo } from 'react';
 import {
   GetTemplatesRequestDTO,
-  TemplateResponseDTO,
+  TemplateBriefResponseDTO,
+  TemplateDetailResponseDTO,
 } from '@/backend/service/templateService/types';
 import { request } from '@/frontend/utils';
 import { usePagination } from '@/frontend/hooks';
 
 export const useGetTemplatesApi = () => {
+  const getTemplateDetail = useCallback(async (id: string) => {
+    const response = await request<TemplateDetailResponseDTO>(
+      `/api/get/template/detail/?id=${id}`,
+    );
+    if (response && response.data) {
+      return response.data;
+    } else {
+      return null;
+    }
+  }, []);
+
   const fetcher = useCallback(
     async (page: number, params: GetTemplatesRequestDTO) => {
       const response = await request(
@@ -31,13 +43,14 @@ export const useGetTemplatesApi = () => {
     fetch: getTemplates,
     loading,
     more,
-  } = usePagination<TemplateResponseDTO>(fetcher);
+  } = usePagination<TemplateBriefResponseDTO>(fetcher);
 
   const templates = useMemo(() => response?.list || [], [response]);
 
   return {
     templates,
     getTemplates,
+    getTemplateDetail,
     loading,
     more,
   };

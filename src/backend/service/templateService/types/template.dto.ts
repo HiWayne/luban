@@ -42,7 +42,6 @@ export interface GetTemplatesRequestDTO {
 }
 
 export interface FormatGetTemplatesRequestDTO {
-  id?: string;
   type?: 'toc' | 'tob';
   name?: string;
   desc?: string;
@@ -76,7 +75,27 @@ export interface FormatGetOwnRequestDTO {
   limit?: number;
 }
 
-export interface TemplateResponseDTO {
+export interface TemplateBriefResponseDTO {
+  id: string;
+  type: 'toc' | 'tob';
+  private: boolean;
+  name: string;
+  desc: string;
+  author: {
+    author_name: string;
+    author_id: number | null;
+    author_avatar: string;
+  };
+  collect_count: number;
+  like_count: number;
+  use_count: number;
+  create_time: number;
+  update_time: number;
+  tags: string[];
+  preview?: string;
+}
+
+export interface TemplateDetailResponseDTO {
   id: string;
   type: 'toc' | 'tob';
   private: boolean;

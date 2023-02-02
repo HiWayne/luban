@@ -14,6 +14,12 @@ export interface RequestConfig {
   errorNotify?: boolean;
 }
 
+interface Response<T> {
+  status: 0 | 1 | 4;
+  data: T;
+  message: string;
+}
+
 /**
  * @description 请求函数，自动保存、携带登录凭证，登录失效自动续期
  * @param {string} url 请求地址
@@ -21,7 +27,7 @@ export interface RequestConfig {
  * @param {boolean} useToken 是否带上登录凭证，默认true
  * @returns
  */
-export const request = (
+export const request = <T = any>(
   url: RequestInfo | URL,
   fetchOption: RequestInit = {},
   config?: RequestConfig,
@@ -75,7 +81,7 @@ export const request = (
       }
       return Promise.reject(data);
     })
-    .then((data: any): any => {
+    .then((data: Response<T>) => {
       if (data.status === 1) {
         if (successNotify) {
           notification.success({
@@ -88,7 +94,7 @@ export const request = (
         if (refreshToken) {
           return fetch('/api/refresh/accessToken/', {
             headers: { [REFRESH_TOKEN_HEADER]: refreshToken },
-          }).then((response) => {
+          }).then((response): Promise<Response<T>> => {
             const token = response.headers.get(ACCESS_TOKEN_HEADER);
             if (token) {
               if (saveToken) {

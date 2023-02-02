@@ -5,10 +5,29 @@ import { mongoConfig } from '@/backend/config';
 import { FormatGetOwnRequestDTO, TemplateEntity } from './types';
 import { escapeRegex } from '@/backend/utils';
 
-export const formatData = (data: any) => {
+export const formatBriefData = (data: TemplateEntity) => {
   if (data) {
     const id = data._id;
-    const newData = { id, ...data };
+    const newData: any = {
+      id,
+      ...data,
+    };
+    delete newData._id;
+    delete newData.view;
+    delete newData.config;
+    return newData;
+  } else {
+    return data;
+  }
+};
+
+export const formatDetailData = (data: TemplateEntity) => {
+  if (data) {
+    const id = data._id;
+    const newData: any = {
+      id,
+      ...data,
+    };
     delete newData._id;
     return newData;
   } else {
@@ -73,7 +92,7 @@ export const getOwnTemplatesService = async (
       collection.countDocuments({ ...conditions, status: { $ne: 'delete' } }),
     ]);
     return {
-      list: list.map((item: TemplateEntity) => formatData(item)),
+      list: list.map((item: TemplateEntity) => formatBriefData(item)),
       more: total > start + limit,
       total,
     };
