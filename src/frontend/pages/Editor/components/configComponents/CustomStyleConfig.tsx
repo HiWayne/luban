@@ -31,11 +31,13 @@ export interface BorderStyleConfig {
 }
 
 export interface CustomStyleConfigData {
+  open?: boolean;
   positionStyleConfig?: PositionStyleConfig;
   borderStyleConfig?: BorderStyleConfig;
 }
 
 interface CustomStyleConfigProps {
+  defaultOpen?: boolean;
   defaultStyleConfig?: CustomStyleConfigData;
   onChange: (data: {
     style: CSSProperties;
@@ -44,6 +46,7 @@ interface CustomStyleConfigProps {
 }
 
 export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
+  defaultOpen,
   defaultStyleConfig,
   onChange,
 }) => {
@@ -51,11 +54,16 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
     defaultStyleConfig || null,
   );
   const [style, setStyle] = useState<CSSProperties | null>(null);
-  const [list, setList] = useState<{ type: string; render: JSX.Element }[]>([]);
 
   useEffect(() => {
     if (typeof onChange === 'function' && style && styleConfig) {
-      onChange({ style, styleConfig });
+      onChange({
+        style,
+        styleConfig:
+          styleConfig.borderStyleConfig || styleConfig.positionStyleConfig
+            ? { ...styleConfig, open: true }
+            : styleConfig,
+      });
     }
   }, [style, styleConfig]);
 
@@ -75,7 +83,7 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
                 data;
               setStyleConfig((oldStyleConfig) => ({
                 ...oldStyleConfig,
-                border: borderStyleConfig,
+                borderStyleConfig,
               }));
               setStyle((oldStyle) => ({ ...oldStyle, ...borderStyle }));
             } else {
@@ -112,14 +120,29 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
     return (
       <Form.Item label="定位">
         <PositionCssConfig
+          defaultPosition={styleConfig?.positionStyleConfig?.type}
+          defaultTop={styleConfig?.positionStyleConfig?.topValue}
+          defaultTopUnit={styleConfig?.positionStyleConfig?.topUnit}
+          defaultLeft={styleConfig?.positionStyleConfig?.leftValue}
+          defaultLeftUnit={styleConfig?.positionStyleConfig?.leftUnit}
+          defaultRight={styleConfig?.positionStyleConfig?.rightValue}
+          defaultRightUnit={styleConfig?.positionStyleConfig?.rightUnit}
+          defaultBottom={styleConfig?.positionStyleConfig?.bottomValue}
+          defaultBottomUnit={styleConfig?.positionStyleConfig?.bottomUnit}
           onChange={(data) => {
             if (data) {
               const { style: positionStyle, styleConfig: positionStyleConfig } =
                 data;
-              setStyleConfig((oldStyleConfig) => ({
-                ...oldStyleConfig,
-                ...positionStyleConfig,
-              }));
+              setStyleConfig((oldStyleConfig) =>
+                oldStyleConfig
+                  ? {
+                      ...oldStyleConfig,
+                      positionStyleConfig: {
+                        ...positionStyleConfig,
+                      },
+                    }
+                  : { positionStyleConfig: { ...positionStyleConfig } },
+              );
               setStyle((oldStyleObj) => ({
                 ...oldStyleObj,
                 ...positionStyle,
@@ -178,6 +201,10 @@ export const CustomStyleConfig: FC<CustomStyleConfigProps> = ({
       },
     ],
     [],
+  );
+
+  const [list, setList] = useState<{ type: string; render: JSX.Element }[]>(
+    defaultOpen ? data : [],
   );
 
   const show = useCallback(() => {

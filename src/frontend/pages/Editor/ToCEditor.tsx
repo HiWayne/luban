@@ -186,12 +186,12 @@ const ToCEditor = () => {
         gap: '20px',
       }}>
       <div style={{ flex: '0 0 400px' }}>
-        <Input value={key} onChange={(e) => setKey(e.target.value)} />
+        {/* <Input value={key} onChange={(e) => setKey(e.target.value)} />
         <Input.TextArea
           style={{ width: '400px', height: '200px' }}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-        />
+        /> */}
         <Title>场景组件</Title>
         <LightText>可拖动到指定位置，若点击将在页面末尾添加</LightText>
         <ComponentsSelectArea>

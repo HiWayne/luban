@@ -18,7 +18,8 @@ export const useEditorInteractive = (update: any) => {
     element: Element;
   } | null> = useRef(null);
 
-  const { addComponentFromExist, addComponentFromInitial, removeComponent } = useModifyPage();
+  const { addComponentFromExist, addComponentFromInitial, removeComponent } =
+    useModifyPage();
 
   const createComponentNameTag = useCallback((name: string) => {
     const div = document.createElement('div');
@@ -207,7 +208,14 @@ export const useEditorInteractive = (update: any) => {
     const componentsWrapperElements = document.querySelectorAll(
       '[role="luban_component"]',
     );
-    componentsWrapperElements.forEach((element: any) => {
+    (componentsWrapperElements as any).forEach((element: HTMLElement) => {
+      const { width, height } = element.getBoundingClientRect();
+      if (width <= 0) {
+        element.style.minWidth = '100px';
+      }
+      if (height <= 0) {
+        element.style.minHeight = '100px';
+      }
       element.setAttribute('draggable', 'true');
       element.addEventListener('click', onClick);
       element.addEventListener('mouseover', onMouseOver);

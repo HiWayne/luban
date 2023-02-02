@@ -17,7 +17,10 @@ export type FormSchemaType =
   | 'css-margin'
   | 'css-padding'
   | 'css-border-radius'
-  | 'custom-style';
+  | 'custom-style'
+  | 'image-src'
+  | 'text-content'
+  | 'bg-size';
 
 export interface FormSchema {
   type: FormSchemaType;

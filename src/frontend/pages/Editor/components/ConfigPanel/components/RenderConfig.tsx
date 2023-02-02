@@ -3,7 +3,10 @@ import { Checkbox, Form, Input, Radio, Select, Switch } from 'antd';
 import { debounce } from '@duitang/dt-base';
 import { Flex } from '@/frontend/components';
 import { ColorPicker } from '../../configComponents/ColorPicker';
-import { CustomStyleConfig } from '../../configComponents/CustomStyleConfig';
+import {
+  CustomStyleConfig,
+  CustomStyleConfigData,
+} from '../../configComponents/CustomStyleConfig';
 import {
   LengthCssConfig,
   LengthStyleConfig,
@@ -16,6 +19,18 @@ import { VariableSelect } from '../../configComponents/VariableSelect';
 import { UploadImageConfig } from '../../configComponents/UploadImageConfig';
 import { useModifyPage } from '../../../hooks';
 import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import {
+  ImageSrcConfig,
+  ImageSrcStyleConfig,
+} from '../../configComponents/ImageSrcConfig';
+import {
+  TextContentConfig,
+  TextContentStyleConfig,
+} from '../../configComponents/TextContentConfig';
+import {
+  BgSizeConfig,
+  BgSizeStyleConfig,
+} from '../../configComponents/BgSizeConfig';
 
 export const RenderConfig: FC<{
   data: ToCComponent & { id: number };
@@ -63,6 +78,7 @@ export const RenderConfig: FC<{
       case 'select':
         formItemContent = (
           <Select
+            style={{ maxWidth: '200px' }}
             key={id}
             defaultValue={initialConfig[propName]}
             options={formSchema.options}
@@ -278,6 +294,7 @@ export const RenderConfig: FC<{
         formItemContent = (
           <MarginCssConfig
             key={id}
+            labels={['左上角', '右上角', '右下角', '左下角']}
             defaultTab={(initialConfig[propName] as MarginStyleConfig)?.tab}
             defaultValue={
               (initialConfig[propName] as MarginStyleConfig)?.singleValue
@@ -327,6 +344,9 @@ export const RenderConfig: FC<{
         formItemContent = (
           <CustomStyleConfig
             key={id}
+            defaultOpen={
+              (initialConfig[propName] as CustomStyleConfigData)?.open
+            }
             defaultStyleConfig={initialConfig[propName]}
             onChange={(changeData) => {
               if (changeData) {
@@ -373,6 +393,84 @@ export const RenderConfig: FC<{
                   id,
                   { [propName]: changeData },
                   { [propName]: changeData },
+                );
+              } else {
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
+              }
+            }}
+          />
+        );
+        break;
+      case 'image-src':
+        formItemContent = (
+          <ImageSrcConfig
+            key={id}
+            defaultTab={(initialConfig[propName] as ImageSrcStyleConfig)?.tab}
+            defaultSrc={(initialConfig[propName] as ImageSrcStyleConfig)?.src}
+            onChange={(changeData) => {
+              if (changeData) {
+                updateNodeASTWithDebounce(
+                  id,
+                  { [propName]: changeData.style },
+                  { [propName]: changeData.styleConfig },
+                );
+              } else {
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
+              }
+            }}
+          />
+        );
+        break;
+      case 'text-content':
+        formItemContent = (
+          <TextContentConfig
+            key={id}
+            defaultTab={
+              (initialConfig[propName] as TextContentStyleConfig)?.tab
+            }
+            defaultText={
+              (initialConfig[propName] as TextContentStyleConfig)?.text
+            }
+            onChange={(changeData) => {
+              if (changeData) {
+                updateNodeASTWithDebounce(
+                  id,
+                  { [propName]: changeData.style },
+                  { [propName]: changeData.styleConfig },
+                );
+              } else {
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
+              }
+            }}
+          />
+        );
+        break;
+      case 'bg-size':
+        formItemContent = (
+          <BgSizeConfig
+            key={id}
+            defaultTab={(initialConfig[propName] as BgSizeStyleConfig)?.tab}
+            defaultSimpleSize={
+              (initialConfig[propName] as BgSizeStyleConfig)?.simpleSize
+            }
+            defaultCustomWidth={
+              (initialConfig[propName] as BgSizeStyleConfig)?.customWidth
+            }
+            defaultCustomWidthUnit={
+              (initialConfig[propName] as BgSizeStyleConfig)?.customWidthUnit
+            }
+            defaultCustomHeight={
+              (initialConfig[propName] as BgSizeStyleConfig)?.customHeight
+            }
+            defaultCustomHeightUnit={
+              (initialConfig[propName] as BgSizeStyleConfig)?.customHeightUnit
+            }
+            onChange={(changeData) => {
+              if (changeData) {
+                updateNodeASTWithDebounce(
+                  id,
+                  { [propName]: changeData.style },
+                  { [propName]: changeData.styleConfig },
                 );
               } else {
                 updateNodeASTWithDebounce(id, deleteProp, deleteProp);

@@ -84,7 +84,7 @@ export const BorderCssConfig: FC<BorderCssConfigProps> = ({
   }, []);
 
   return (
-    <Flex>
+    <Flex direction="column">
       <ValueWithUnit
         value={borderWidth}
         setValue={setBorderWidth}
@@ -92,6 +92,7 @@ export const BorderCssConfig: FC<BorderCssConfigProps> = ({
         setUnitValue={setBorderWidthUnit}
       />
       <Select
+        style={{ width: '100px' }}
         defaultValue={borderStyle}
         options={options}
         onChange={setBorderStyle}

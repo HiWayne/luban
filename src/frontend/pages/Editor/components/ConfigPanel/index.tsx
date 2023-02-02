@@ -47,7 +47,7 @@ export const ConfigPanel: FC<{
       onClose={onClose}
       bodyStyle={{ paddingBottom: 80 }}
       mask={false}>
-      <Form labelCol={{ span: 6 }} labelAlign="left">
+      <Form labelCol={{ span: 7 }} labelAlign="left">
         {data.component.configs.map((config, index) => (
           <RenderConfig
             key={config.name}

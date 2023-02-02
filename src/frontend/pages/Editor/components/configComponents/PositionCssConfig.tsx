@@ -110,12 +110,23 @@ export const PositionCssConfig: FC<PositionCssConfigProps> = ({
         onChange({ styleConfig: positionStyleConfig, style: positionStyle });
       }
     }
-  }, [position, left, leftUnit, top, topUnit]);
+  }, [
+    position,
+    left,
+    leftUnit,
+    top,
+    topUnit,
+    right,
+    rightUnit,
+    bottom,
+    bottomUnit,
+  ]);
 
   return (
     <Flex direction="column" alignItems="flex-start">
       <Form.Item label="定位类型">
         <Select
+          style={{ width: '100px' }}
           defaultValue={position}
           options={options}
           onChange={setPosition}

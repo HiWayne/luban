@@ -374,7 +374,7 @@ try {
                   .send({ status: 0, data: null, message: '保存模板失败' });
               }
             } catch (e) {
-              reply.status(500).send({ status: 0, data: null, message: e });
+              catchErrorReply(e, reply);
             }
           }
         }
