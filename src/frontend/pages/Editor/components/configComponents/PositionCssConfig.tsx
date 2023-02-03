@@ -1,5 +1,5 @@
 import { CSSProperties, FC, useEffect, useState } from 'react';
-import { Form, Select } from 'antd';
+import { Form, InputNumber, Select } from 'antd';
 import { Flex } from '@/frontend/components';
 import { ValueWithUnit } from './LengthCssConfig';
 import { LengthUnit, PositionType } from '../../type';
@@ -26,14 +26,15 @@ const options = [
 
 interface PositionCssConfigProps {
   defaultPosition?: PositionType;
-  defaultLeft?: number;
+  defaultLeft?: number | null;
   defaultLeftUnit?: LengthUnit;
-  defaultTop?: number;
+  defaultTop?: number | null;
   defaultTopUnit?: LengthUnit;
-  defaultRight?: number;
+  defaultRight?: number | null;
   defaultRightUnit?: LengthUnit;
-  defaultBottom?: number;
+  defaultBottom?: number | null;
   defaultBottomUnit?: LengthUnit;
+  defaultZIndex?: number;
   onChange: (
     data: {
       styleConfig: PositionStyleConfig;
@@ -52,19 +53,31 @@ export const PositionCssConfig: FC<PositionCssConfigProps> = ({
   defaultRightUnit,
   defaultBottom,
   defaultBottomUnit,
+  defaultZIndex,
   onChange,
 }) => {
   const [position, setPosition] = useState<PositionType>(
     defaultPosition || 'static',
   );
-  const [left, setLeft] = useState<number | null>(defaultLeft || 0);
+  const [left, setLeft] = useState<number | null>(
+    defaultLeft === undefined ? null : defaultLeft,
+  );
   const [leftUnit, setLeftUnit] = useState(defaultLeftUnit || 'px');
-  const [top, setTop] = useState<number | null>(defaultTop || 0);
+  const [top, setTop] = useState<number | null>(
+    defaultTop === undefined ? null : defaultTop,
+  );
   const [topUnit, setTopUnit] = useState(defaultTopUnit || 'px');
-  const [right, setRight] = useState<number | null>(defaultRight || 0);
+  const [right, setRight] = useState<number | null>(
+    defaultRight === undefined ? null : defaultRight,
+  );
   const [rightUnit, setRightUnit] = useState(defaultRightUnit || 'px');
-  const [bottom, setBottom] = useState<number | null>(defaultBottom || 0);
+  const [bottom, setBottom] = useState<number | null>(
+    defaultBottom === undefined ? null : defaultBottom,
+  );
   const [bottomUnit, setBottomUnit] = useState(defaultBottomUnit || 'px');
+  const [zIndex, setZIndex] = useState(
+    defaultZIndex === undefined ? null : defaultZIndex,
+  );
 
   useEffect(() => {
     if (typeof onChange === 'function') {
@@ -73,40 +86,45 @@ export const PositionCssConfig: FC<PositionCssConfigProps> = ({
       } else {
         const positionStyle: CSSProperties = {
           position,
-          top: `${top || 0}${topUnit}`,
-          left: `${left || 0}${leftUnit}`,
         };
         if (left !== null) {
           positionStyle.left = `${left || 0}${leftUnit}`;
+        } else {
+          positionStyle.left = 'unset';
         }
         if (right !== null) {
           positionStyle.right = `${right || 0}${rightUnit}`;
+        } else {
+          positionStyle.right = 'unset';
         }
         if (top !== null) {
           positionStyle.top = `${top || 0}${topUnit}`;
+        } else {
+          positionStyle.top = 'unset';
         }
         if (bottom !== null) {
           positionStyle.bottom = `${bottom || 0}${bottomUnit}`;
+        } else {
+          positionStyle.bottom = 'unset';
+        }
+        if (zIndex !== null) {
+          positionStyle.zIndex = zIndex;
+        } else {
+          positionStyle.zIndex = 'unset';
         }
         const positionStyleConfig: PositionStyleConfig = {
           type: position,
         };
-        if (left !== null) {
-          positionStyleConfig.leftValue = left;
-          positionStyleConfig.leftUnit = leftUnit;
-        }
-        if (right !== null) {
-          positionStyleConfig.rightValue = right;
-          positionStyleConfig.rightUnit = rightUnit;
-        }
-        if (top !== null) {
-          positionStyleConfig.topValue = top;
-          positionStyleConfig.topUnit = topUnit;
-        }
-        if (bottom !== null) {
-          positionStyleConfig.bottomValue = bottom;
-          positionStyleConfig.bottomUnit = bottomUnit;
-        }
+        positionStyleConfig.leftValue = left;
+        positionStyleConfig.leftUnit = leftUnit;
+        positionStyleConfig.rightValue = right;
+        positionStyleConfig.rightUnit = rightUnit;
+        positionStyleConfig.topValue = top;
+        positionStyleConfig.topUnit = topUnit;
+        positionStyleConfig.bottomValue = bottom;
+        positionStyleConfig.bottomUnit = bottomUnit;
+        positionStyleConfig.zIndex = zIndex;
+
         onChange({ styleConfig: positionStyleConfig, style: positionStyle });
       }
     }
@@ -120,6 +138,7 @@ export const PositionCssConfig: FC<PositionCssConfigProps> = ({
     rightUnit,
     bottom,
     bottomUnit,
+    zIndex,
   ]);
 
   return (
@@ -162,6 +181,13 @@ export const PositionCssConfig: FC<PositionCssConfigProps> = ({
           setValue={setBottom}
           unitValue={bottomUnit}
           setUnitValue={setBottomUnit}
+        />
+      </Form.Item>
+      <Form.Item label="z-index">
+        <InputNumber
+          style={{ width: '100px' }}
+          value={zIndex}
+          onChange={setZIndex}
         />
       </Form.Item>
     </Flex>

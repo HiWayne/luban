@@ -11,6 +11,7 @@ import {
   prepareTemplateView,
   removeConfigFromMap,
   removeNodeASTFromMap,
+  setNodeASTMap,
   updateConfigFromMap,
   updateNodeASTFromMap,
 } from '../utils';
@@ -78,11 +79,11 @@ export const useModifyPage = () => {
       const { addNodeAST: addNodeInStore, pageModel } =
         useStore.getState().editor;
       const templateNodeASTs = prepareTemplateView(
-        cloneDeep(view),
+        view,
         config,
         target !== undefined ? target : pageModel.view.id,
       );
-      addNodeInStore(templateNodeASTs);
+      addNodeInStore(cloneDeep(templateNodeASTs));
       message.success('成功添加模板', 2);
     },
     [],
@@ -125,11 +126,23 @@ export const useModifyPage = () => {
     }
   }, []);
 
+  const moveComponent = useCallback((nodeAST: NodeAST, targetId: number) => {
+    const {
+      addNodeAST: addNodeASTInStore,
+      removeNodeAST: removeNodeASTInStore,
+    } = useStore.getState().editor;
+    const newNodeAST = { ...nodeAST, parent: targetId };
+    removeNodeASTInStore(newNodeAST.id);
+    addNodeASTInStore(newNodeAST, targetId);
+    setNodeASTMap(newNodeAST.id, newNodeAST);
+  }, []);
+
   return {
     addComponentFromExist,
     addComponentFromInitial,
     addComponentFromTemplate,
     updateComponent,
     removeComponent,
+    moveComponent,
   };
 };

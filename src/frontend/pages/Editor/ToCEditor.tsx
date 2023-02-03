@@ -25,6 +25,7 @@ import useStore from '@/frontend/store';
 import { useCreateTemplateApi } from './api';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
 import { useEditorInteractive } from './hooks';
+import { request } from '@/frontend/utils';
 
 export const toCComponents = Object.values(compileFunctions)
   .map((compileFunction) => (compileFunction as any).plugin as ToCComponent)
@@ -48,6 +49,7 @@ const ToCEditor = () => {
     }),
     shallow,
   );
+
   const [key, setKey] = useState('test1');
   const [content, setContent] = useState(JSON.stringify(pageModel));
   const [sourceCode, setSourceCode] = useState('');
@@ -55,10 +57,11 @@ const ToCEditor = () => {
   const [updateCount, setUpdateCount] = useState(0);
 
   const microAppRef: MutableRefObject<MicroApp | null> = useRef(null);
+  const controllerRef: MutableRefObject<AbortController | null> = useRef(null);
 
   const { createTemplate } = useCreateTemplateApi();
 
-  const { onDragStart, onDragEnd, onDragOver } =
+  const { onDragStart, onDragEnd, onDragOver, onDrop } =
     useEditorInteractive(updateCount);
 
   useEffect(() => {
@@ -72,6 +75,15 @@ const ToCEditor = () => {
   }, [key]);
 
   const previewPage = useCallback(async () => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    controllerRef.current = controller;
+
     const suffix = getRandomString();
     const randomKey = `${key}${suffix}`;
     const tempPageModel: PageModel = {
@@ -79,10 +91,15 @@ const ToCEditor = () => {
       meta: { ...pageModel.meta },
     };
     tempPageModel.meta.key = randomKey;
-    const data: any = await fetch('/api/generatePage/', {
-      method: 'post',
-      body: JSON.stringify(tempPageModel),
-    }).then((response) => response.json());
+    const data = await request(
+      '/api/generatePage/',
+      {
+        method: 'post',
+        body: JSON.stringify(tempPageModel),
+        signal,
+      },
+      { errorNotify: false },
+    );
     if (data && data.data) {
       const htmlPath = data.data.htmlPath;
       if (htmlPath) {
@@ -114,10 +131,10 @@ const ToCEditor = () => {
     };
     tempPageModel.meta.key = randomKey;
     tempPageModel.meta.mode = 'production';
-    const data: any = await fetch('/api/generatePage/', {
+    const data: any = await request('/api/generatePage/', {
       method: 'post',
       body: JSON.stringify(tempPageModel),
-    }).then((response) => response.json());
+    });
     if (data && data.data) {
       const htmlPath = data.data.htmlPath;
       if (htmlPath) {
@@ -255,7 +272,7 @@ const ToCEditor = () => {
         key="container"
       />
       <div>
-        <ConfigPanel data={currentComponent} />
+        <ConfigPanel data={currentComponent} onDrop={onDrop} />
       </div>
       <TemplateConfig
         open={templateConfigShow}

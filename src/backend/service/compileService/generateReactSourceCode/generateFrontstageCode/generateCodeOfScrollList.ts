@@ -1,3 +1,4 @@
+import { CSSProperties } from 'react';
 import { NodeAST, ScrollListProps } from '@/backend/types/frontstage';
 import { astToReactNodeCodeOfFrontstage, Context, Declarations } from '..';
 import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
@@ -7,6 +8,7 @@ import {
   _BUILT_IN_TYPE,
 } from '../utils';
 import {
+  heightConfig,
   listDataConfig,
   renderItemConfig,
   ToCComponent,
@@ -21,8 +23,18 @@ export const generateCodeOfScrollList = (
 ) => {
   const { props, key } = nodeAST;
 
-  const { data, renderItem, wrapperStyle, listStyle, rowKey } =
-    props as ScrollListProps;
+  const {
+    data,
+    renderItem,
+    wrapperHeight,
+    wrapperMargin,
+    wrapperPadding,
+    listMargin,
+    listPadding,
+    wrapperStyle,
+    listStyle,
+    rowKey,
+  } = props as ScrollListProps;
 
   let renderItemCodeOfProp;
 
@@ -52,20 +64,48 @@ export const generateCodeOfScrollList = (
     };
   }
 
+  let finalWrapperStyle: CSSProperties | undefined = {};
+  let finalListStyle: CSSProperties | undefined = {};
+  if (wrapperHeight) {
+    finalWrapperStyle.height = wrapperHeight;
+  }
+  if (wrapperMargin) {
+    finalWrapperStyle.margin = wrapperMargin;
+  }
+  if (wrapperPadding) {
+    finalWrapperStyle.padding = wrapperPadding;
+  }
+  if (listMargin) {
+    finalListStyle.margin = listMargin;
+  }
+  if (listPadding) {
+    finalListStyle.padding = listPadding;
+  }
+  if (wrapperStyle) {
+    finalWrapperStyle = { ...finalWrapperStyle, ...wrapperStyle };
+  }
+  if (listStyle) {
+    finalListStyle = { ...finalListStyle, ...wrapperStyle };
+  }
+  if (Reflect.ownKeys(finalWrapperStyle).length === 0) {
+    finalWrapperStyle = undefined;
+  }
+  if (Reflect.ownKeys(finalListStyle).length === 0) {
+    finalListStyle = undefined;
+  }
+
   const componentName = `ScrollList`;
 
   const componentElement = `<div${createIdAttrInDev(
     context.development,
     id,
   )}><${componentName}${generateCodeOfProp('key', key)}${generateCodeOfProp(
-    'data',
-    data,
-  )}${generateCodeOfProp('wrapperStyle', wrapperStyle)}${generateCodeOfProp(
-    'listStyle',
-    listStyle,
-  )}${generateCodeOfProp('renderItem', renderItemCodeOfProp)}>${
-    children || ''
-  }</${componentName}></div>`;
+    'wrapperStyle',
+    finalWrapperStyle,
+  )}${generateCodeOfProp('listStyle', finalListStyle)}${generateCodeOfProp(
+    'renderItem',
+    renderItemCodeOfProp,
+  )}>${children || ''}</${componentName}></div>`;
 
   return createGenerateCodeFnReturn({
     componentName,
@@ -86,6 +126,50 @@ generateCodeOfScrollList.plugin = {
   },
   configs: [
     listDataConfig,
+    {
+      ...heightConfig,
+      name: '容器高度',
+      propName: 'wrapperHeight',
+      defaultConfig: {
+        value: 100,
+      },
+    },
+    {
+      name: '外层外边距',
+      description: '容器最外层的外边距',
+      required: false,
+      propName: 'wrapperMargin',
+      formSchema: {
+        type: 'css-margin',
+      },
+    },
+    {
+      name: '外层内边距',
+      description: '容器最外层的内边距',
+      required: false,
+      propName: 'wrapperPadding',
+      formSchema: {
+        type: 'css-padding',
+      },
+    },
+    {
+      name: '列表外边距',
+      description: '容器内部列表的外边距',
+      required: false,
+      propName: 'listMargin',
+      formSchema: {
+        type: 'css-margin',
+      },
+    },
+    {
+      name: '列表内边距',
+      description: '容器内部列表的内边距',
+      required: false,
+      propName: 'listPadding',
+      formSchema: {
+        type: 'css-padding',
+      },
+    },
     {
       name: '外层高级样式',
       description:

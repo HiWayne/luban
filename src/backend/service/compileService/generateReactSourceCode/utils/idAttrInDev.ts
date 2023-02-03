@@ -3,7 +3,7 @@ export const createIdAttrInDev = (dev: boolean, id: number) =>
 
 export const getElementByLuBanId = (id: number) =>
   typeof window !== undefined
-    ? document.querySelector(`luban_${id}`) || null
+    ? document.querySelector(`#luban_${id}`) || null
     : () => new Error('in nodejs');
 
 const lubanIdReg = /^\s*luban_(\d+)\s*$/;

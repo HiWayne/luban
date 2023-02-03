@@ -20,9 +20,6 @@ export const heightConfig: Config = {
   formSchema: {
     type: 'css-length',
   },
-  defaultConfig: {
-    value: 100,
-  },
 };
 
 export const marginConfig: Config = {
@@ -87,7 +84,12 @@ export const commonContainerConfigs: Config[] = [
       value: 100,
     },
   },
-  heightConfig,
+  {
+    ...heightConfig,
+    defaultConfig: {
+      value: 100,
+    },
+  },
   marginConfig,
   paddingConfig,
   borderRadiusConfig,

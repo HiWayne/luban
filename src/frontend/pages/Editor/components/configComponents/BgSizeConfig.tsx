@@ -61,7 +61,7 @@ export const BgSizeConfig: FC<BgSizeConfigProps> = ({
   onChange,
 }) => {
   const [tab, setTab] = useState<Tab>(defaultTab || 'simple');
-  const [simpleSize, setSimpleSize] = useState(defaultSimpleSize || 'cover');
+  const [simpleSize, setSimpleSize] = useState(defaultSimpleSize || '');
   const [customWidth, setCustomWidth] = useState<number | null>(
     defaultCustomWidth || null,
   );

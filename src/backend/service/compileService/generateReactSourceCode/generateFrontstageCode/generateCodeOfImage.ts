@@ -165,6 +165,8 @@ export const generateCodeOfImage = (
 
 generateCodeOfImage.plugin = {
   sort: 5,
+  leaf: true,
+  noEditorTag: true,
   name: '图片',
   type: 'Image',
   description: '图片',
