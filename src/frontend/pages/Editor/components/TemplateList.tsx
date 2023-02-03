@@ -95,7 +95,7 @@ export const TemplateList = styled(({ className }) => {
             style={{ margin: '8px 0' }}
             justifyContent="flex-start"
             alignItems="center">
-            <DtIcon width="200px" height="100px" src={template.preview} />
+            <DtIcon src={template.preview} />
             <Flex
               style={{ marginLeft: '12px', height: '100px' }}
               direction="column"

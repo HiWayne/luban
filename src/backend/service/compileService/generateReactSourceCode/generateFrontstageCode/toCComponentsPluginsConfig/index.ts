@@ -41,6 +41,10 @@ export interface Config {
 
 export interface ToCComponent {
   sort: number;
+  // 改组件是否能有子组件
+  leaf?: boolean;
+  // hover时是否有操作标签
+  noEditorTag?: boolean;
   name: string;
   type:
     | 'BlockContainer'

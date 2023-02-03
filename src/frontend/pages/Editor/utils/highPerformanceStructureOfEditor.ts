@@ -1,11 +1,10 @@
-import { cloneDeep } from 'lodash-es';
 import { NodeAST } from '@/frontend/types';
 import { remove } from './operateNodeAST';
 
 const nodeASTMap = new Map<number, NodeAST>();
 
 export const setNodeASTMap = (id: number, nodeAST: NodeAST) => {
-  nodeASTMap.set(id, cloneDeep(nodeAST));
+  nodeASTMap.set(id, nodeAST);
 };
 
 export const addNodeASTToMap = (nodeAST: NodeAST) => {

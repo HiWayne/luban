@@ -13,14 +13,15 @@ import { PositionCssConfig } from './PositionCssConfig';
 
 export interface PositionStyleConfig {
   type: PositionType;
-  leftValue?: number;
+  leftValue?: number | null;
   leftUnit?: LengthUnit;
-  rightValue?: number;
+  rightValue?: number | null;
   rightUnit?: LengthUnit;
-  topValue?: number;
+  topValue?: number | null;
   topUnit?: LengthUnit;
-  bottomValue?: number;
+  bottomValue?: number | null;
   bottomUnit?: LengthUnit;
+  zIndex?: number | null;
 }
 
 export interface BorderStyleConfig {

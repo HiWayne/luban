@@ -4,14 +4,19 @@ import { isExist } from '@duitang/dt-base';
 import { CurrentComponent } from '@/frontend/store/editor';
 import { RenderConfig } from './components/RenderConfig';
 import useStore from '@/frontend/store';
-import { useModifyPage } from '../../hooks';
+import { useEditorInteractive, useModifyPage } from '../../hooks';
+import { AddDropArea } from './components';
+import { findNodeASTById } from '../../utils';
 
 export const ConfigPanel: FC<{
   data: { component: CurrentComponent; config: any } | null;
-}> = ({ data }) => {
+  onDrop: any;
+}> = ({ data, onDrop }) => {
   const [show, setShow] = useState(false);
 
   const { removeComponent } = useModifyPage();
+
+  const { openSpecifyEditorPanel } = useEditorInteractive(1);
 
   const onClose = useCallback(() => {
     useStore.getState().editor.setCurrentChooseComponent(null);
@@ -47,6 +52,25 @@ export const ConfigPanel: FC<{
       onClose={onClose}
       bodyStyle={{ paddingBottom: 80 }}
       mask={false}>
+      {data.component.leaf ? null : (
+        <AddDropArea id={data.component.id} onDrop={onDrop} />
+      )}
+      {data.component.noEditorTag ? (
+        <div style={{ marginBottom: '12px' }}>
+          <Button
+            onClick={() => {
+              const nodeAST = findNodeASTById(data.component.id);
+              if (nodeAST) {
+                const parentId = nodeAST.parent;
+                if (parentId) {
+                  openSpecifyEditorPanel(parentId);
+                }
+              }
+            }}>
+            选中父组件
+          </Button>
+        </div>
+      ) : null}
       <Form labelCol={{ span: 7 }} labelAlign="left">
         {data.component.configs.map((config, index) => (
           <RenderConfig

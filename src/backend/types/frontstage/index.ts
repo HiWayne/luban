@@ -62,6 +62,11 @@ export interface GridContainerProps extends CommonContainerProps {
 
 export interface ScrollListProps {
   data?: VariableName;
+  wrapperHeight?: number | string;
+  wrapperMargin?: string;
+  wrapperPadding?: string;
+  listMargin?: string;
+  listPadding?: string;
   wrapperStyle?: CSSProperties;
   listStyle?: CSSProperties;
   renderItem?: {

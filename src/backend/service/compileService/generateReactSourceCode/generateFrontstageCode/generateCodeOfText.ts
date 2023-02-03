@@ -131,6 +131,7 @@ export const generateCodeOfText = (
 
 generateCodeOfText.plugin = {
   sort: 6,
+  leaf: true,
   name: '文字',
   type: 'Text',
   description: '文字',

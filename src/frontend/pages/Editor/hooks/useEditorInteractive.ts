@@ -1,6 +1,10 @@
 import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import shallow from 'zustand/shallow';
 import { message, Modal } from 'antd';
-import { getLuBanIdFromElement } from '@/backend/service/compileService/generateReactSourceCode/utils';
+import {
+  getElementByLuBanId,
+  getLuBanIdFromElement,
+} from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { findConfigFromMap, findNodeASTById } from '../utils';
 import useStore from '@/frontend/store';
 import { toCComponents } from '../ToCEditor';
@@ -9,16 +13,21 @@ import { NodeAST } from '@/frontend/types';
 import { useModifyPage } from './useModifyPage';
 
 export const useEditorInteractive = (update: any) => {
-  const setCurrentChooseComponent = useStore(
-    (store) => store.editor.setCurrentChooseComponent,
+  const { currentChooseComponent, setCurrentChooseComponent } = useStore(
+    (store) => ({
+      currentChooseComponent: store.editor.currentChooseComponent,
+      setCurrentChooseComponent: store.editor.setCurrentChooseComponent,
+    }),
+    shallow,
   );
   const draggedTargetRef: MutableRefObject<{
     nodeAST?: NodeAST;
     component: ToCComponent;
     element: Element;
   } | null> = useRef(null);
+  const prevOpenedIdRef = useRef<number | null>(null);
 
-  const { addComponentFromExist, addComponentFromInitial, removeComponent } =
+  const { addComponentFromInitial, removeComponent, moveComponent } =
     useModifyPage();
 
   const createComponentNameTag = useCallback((name: string) => {
@@ -33,6 +42,120 @@ export const useEditorInteractive = (update: any) => {
     div.className = 'delete';
     div.innerHTML = '删除';
     return div;
+  }, []);
+
+  const createParentSelectorTag = useCallback(() => {
+    const div = document.createElement('div');
+    div.className = 'parent-selector';
+    div.innerHTML = '选中父组件';
+    return div;
+  }, []);
+
+  const openSpecifyEditorPanel = useCallback((id: number) => {
+    if (id !== null) {
+      const nodeAST = findNodeASTById(id);
+      if (nodeAST) {
+        const component = toCComponents.find(
+          (toCComponent) => toCComponent.type === nodeAST.type,
+        );
+        if (component) {
+          const initialConfig = findConfigFromMap(id);
+          setCurrentChooseComponent({
+            component: { ...component, id },
+            config: initialConfig,
+          });
+        }
+      }
+    }
+  }, []);
+
+  const appendHighLightTags = useCallback((targetElement: HTMLElement) => {
+    const id = getLuBanIdFromElement(targetElement);
+    if (id !== null) {
+      const nodeASTType = findNodeASTById(id)?.type;
+      if (nodeASTType) {
+        const targetComponent: ToCComponent | undefined = toCComponents.find(
+          (component) => component.type === nodeASTType,
+        );
+        if (targetComponent) {
+          if (targetComponent.name && targetElement) {
+            const data = {
+              ...targetComponent,
+              id,
+            };
+            targetElement.appendChild(
+              createComponentNameTag(targetComponent.name),
+            );
+
+            const componentDeleteTag = createComponentDeleteTag();
+            componentDeleteTag.addEventListener('click', (e) => {
+              e.stopPropagation();
+              Modal.confirm({
+                title: '删除',
+                content: `确定删除【${data.name}】组件吗`,
+                onOk: () => {
+                  removeComponent(data.id);
+                },
+              });
+            });
+            targetElement.appendChild(componentDeleteTag);
+
+            const parentSelectorTag = createParentSelectorTag();
+            parentSelectorTag.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (id !== null) {
+                const nodeAST = findNodeASTById(id);
+                const parentId = nodeAST?.parent;
+                if (parentId) {
+                  openSpecifyEditorPanel(parentId);
+                }
+              }
+            });
+            targetElement.appendChild(parentSelectorTag);
+          }
+        }
+      }
+    }
+  }, []);
+
+  const hasHighLightTags = useCallback((targetElement: HTMLElement) => {
+    if (targetElement) {
+      const id = targetElement.getAttribute('id');
+      const nameTag = targetElement.querySelector(`#${id} > .name`);
+      const deleteTag = targetElement.querySelector(`#${id} > .delete`);
+      const parentSelector = targetElement.querySelector(
+        `#${id} > .parent-selector`,
+      );
+      if (nameTag && deleteTag && parentSelector) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }, []);
+
+  const highLightComponent = useCallback((element: HTMLElement) => {
+    element.classList.add('editor-highlight');
+    const id = getLuBanIdFromElement(element);
+    if (id !== null) {
+      const nodeASTType = findNodeASTById(id)?.type;
+      if (nodeASTType) {
+        const targetComponent: ToCComponent | undefined = toCComponents.find(
+          (component) => component.type === nodeASTType,
+        );
+        if (targetComponent) {
+          if (!targetComponent.noEditorTag && !hasHighLightTags(element)) {
+            appendHighLightTags(element);
+          }
+        }
+      }
+    }
+  }, []);
+
+  const unHighLightComponent = useCallback((element: HTMLElement) => {
+    element.classList.remove('editor-highlight');
   }, []);
 
   const onDragStart = useCallback(function (
@@ -75,11 +198,25 @@ export const useEditorInteractive = (update: any) => {
     }, 200);
   }, []);
 
+  const onDragEnter = useCallback((event: DragEvent) => {
+    const element = event.target as HTMLElement;
+    highLightComponent(element);
+  }, []);
+
+  const onDragLeave = useCallback((event: DragEvent) => {
+    const element = event.target as HTMLElement;
+    unHighLightComponent(element);
+  }, []);
+
   const onDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();
   }, []);
 
-  const onDrop = useCallback(function (this: HTMLElement, event: Event) {
+  const onDrop = useCallback(function (
+    this: HTMLElement,
+    event: Event,
+    selfId?: number,
+  ) {
     event.stopPropagation();
     event.preventDefault();
     const element = this;
@@ -87,6 +224,25 @@ export const useEditorInteractive = (update: any) => {
       draggedTargetRef.current &&
       draggedTargetRef.current.element !== element
     ) {
+      if (selfId) {
+        const draggedNodeAST = draggedTargetRef.current.nodeAST;
+        if (draggedNodeAST) {
+          const nodeASTType = draggedNodeAST.type;
+          if (nodeASTType) {
+            const targetComponent: ToCComponent | undefined =
+              toCComponents.find((c) => c.type === nodeASTType);
+            if (targetComponent) {
+              moveComponent(draggedNodeAST, selfId);
+              message.success(`成功移动【${targetComponent.name}】组件`, 2);
+            }
+          }
+        } else {
+          addComponentFromInitial(draggedTargetRef.current.component, selfId);
+        }
+        draggedTargetRef.current = null;
+        return;
+      }
+
       const id = getLuBanIdFromElement(element);
       if (id !== null) {
         const draggedNodeAST = draggedTargetRef.current.nodeAST;
@@ -96,9 +252,7 @@ export const useEditorInteractive = (update: any) => {
             const targetComponent: ToCComponent | undefined =
               toCComponents.find((c) => c.type === nodeASTType);
             if (targetComponent) {
-              const config = findConfigFromMap(draggedNodeAST.id);
-              removeComponent(draggedNodeAST.id);
-              addComponentFromExist(draggedNodeAST, config, id);
+              moveComponent(draggedNodeAST, id);
               message.success(`成功移动【${targetComponent.name}】组件`, 2);
             }
           }
@@ -108,100 +262,31 @@ export const useEditorInteractive = (update: any) => {
         draggedTargetRef.current = null;
       }
     }
-  }, []);
+  },
+  []);
 
   const onClick = useCallback(function (this: HTMLElement, event: Event) {
     event.stopPropagation();
     const element = this;
     const id = getLuBanIdFromElement(element);
-    if (id !== null) {
-      const nodeAST = findNodeASTById(id);
-      if (nodeAST) {
-        const componentsCount = toCComponents.length;
-        let component = null;
-        for (let i = 0; i < componentsCount; i++) {
-          if (toCComponents[i].type === nodeAST.type) {
-            component = toCComponents[i];
-            break;
-          }
-        }
-        if (component) {
-          const initialConfig = findConfigFromMap(id);
-          setCurrentChooseComponent({
-            component: { ...component, id },
-            config: initialConfig,
-          });
-        }
-      }
-    }
-  }, []);
-
-  const appendHighLightTags = useCallback(
-    (
-      name: string,
-      targetElement: HTMLElement,
-      data: ToCComponent & { id: number },
-    ) => {
-      if (name && targetElement) {
-        targetElement.appendChild(createComponentNameTag(name));
-        const componentDeleteTag = createComponentDeleteTag();
-        componentDeleteTag.addEventListener('click', (e) => {
-          e.stopPropagation();
-          Modal.confirm({
-            title: '删除',
-            content: `确定删除【${data.name}】组件吗`,
-            onOk: () => {
-              removeComponent(data.id);
-            },
-          });
-        });
-        targetElement.appendChild(componentDeleteTag);
-      }
-    },
-    [],
-  );
-
-  const hasHighLightTags = useCallback((targetElement: HTMLElement) => {
-    if (targetElement) {
-      const nameTag = targetElement.querySelector('.name');
-      const deleteTag = targetElement.querySelector('.delete');
-      if (nameTag || deleteTag) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
+    if (id) {
+      openSpecifyEditorPanel(id);
     }
   }, []);
 
   const onMouseOver = useCallback(function (this: HTMLElement, event: Event) {
     event.stopPropagation();
     const element = this;
-    element.classList.add('editor-highlight');
-    if (!hasHighLightTags(element)) {
-      const id = getLuBanIdFromElement(element);
-      if (id !== null) {
-        const nodeASTType = findNodeASTById(id)?.type;
-        if (nodeASTType) {
-          const targetComponent: ToCComponent | undefined = toCComponents.find(
-            (component) => component.type === nodeASTType,
-          );
-          if (targetComponent) {
-            appendHighLightTags(targetComponent!.name, element, {
-              ...targetComponent,
-              id,
-            });
-          }
-        }
-      }
-    }
+    highLightComponent(element);
   }, []);
 
   const onMouseOut = useCallback(function (this: HTMLElement, event: Event) {
     event.stopPropagation();
     const element = this;
-    element.classList.remove('editor-highlight');
+    const id = getLuBanIdFromElement(element);
+    if (id && prevOpenedIdRef.current !== id) {
+      unHighLightComponent(element);
+    }
   }, []);
 
   useEffect(() => {
@@ -222,14 +307,46 @@ export const useEditorInteractive = (update: any) => {
       element.addEventListener('mouseout', onMouseOut);
       element.addEventListener('dragstart', onDragStart);
       element.addEventListener('dragend', onDragEnd);
+      element.addEventListener('dragenter', onDragEnter);
+      element.addEventListener('dragleave', onDragLeave);
       element.addEventListener('dragover', onDragOver);
       element.addEventListener('drop', onDrop);
     });
+    const _currentChooseComponent =
+      useStore.getState().editor.currentChooseComponent;
+    if (_currentChooseComponent) {
+      const currentId = _currentChooseComponent.component.id;
+      const element = getElementByLuBanId(currentId) as HTMLElement;
+      if (element) {
+        prevOpenedIdRef.current = currentId;
+        highLightComponent(element);
+      }
+    }
   }, [update]);
+
+  useEffect(() => {
+    if (currentChooseComponent) {
+      const currentId = currentChooseComponent.component.id;
+      const element = getElementByLuBanId(currentId) as HTMLElement;
+      if (element) {
+        prevOpenedIdRef.current = currentId;
+        highLightComponent(element);
+      }
+    } else if (prevOpenedIdRef.current !== null) {
+      const id = prevOpenedIdRef.current;
+      prevOpenedIdRef.current = null;
+      const element = getElementByLuBanId(id) as HTMLElement;
+      if (element) {
+        unHighLightComponent(element);
+      }
+    }
+  }, [currentChooseComponent]);
 
   return {
     onDragStart,
     onDragEnd,
     onDragOver,
+    onDrop,
+    openSpecifyEditorPanel,
   };
 };
