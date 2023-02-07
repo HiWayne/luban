@@ -94,27 +94,49 @@ export const generateCodeOfScrollList = (
     finalListStyle = undefined;
   }
 
-  const componentName = `ScrollList`;
+  const componentName = `ScrollListComponent`;
 
-  const componentElement = `<div${createIdAttrInDev(
+  const componentDeclaration = `const ${componentName} = ({ role, id, data, wrapperStyle, listStyle, renderItem, children }) => {
+    ${context.development ? `const scrollWrapperRef = useRef(null)`: ''}
+    const config = useMemo(() => ({ eventPassthrough: 'vertical'}), []);
+
+    return <div role={role} id={id}>
+      ${
+        context.development
+          ? `<div ref={scrollWrapperRef} style={wrapperStyle ? {overflow: 'auto', ...wrapperStyle} : {overflow: 'auto'}}>
+              <div style={listStyle ? {display: 'inline-flex', whiteSpace: 'nowrap', ...listStyle} : {display: 'inline-flex', whiteSpace: 'nowrap'}}>
+                {Array.isArray(data) && renderItem ? data.map(item => renderItem((item, index), {
+                  index: index,
+                  bscrollRef: {current: null},
+                  scrollWrapperRef: scrollWrapperRef
+                })) : children}
+              </div>
+            </div>`
+          : `<ScrollList wrapperStyle={wrapperStyle} listStyle={listStyle} renderItem={renderItem} config={config}>{children}</ScrollList>`
+      }
+    </div>
+  }`;
+
+  const componentCall = `<${componentName}${createIdAttrInDev(
     context.development,
     id,
-  )}><${componentName}${generateCodeOfProp('key', key)}${generateCodeOfProp(
+  )}${generateCodeOfProp('key', key)}${generateCodeOfProp('data', data)}${generateCodeOfProp(
     'wrapperStyle',
     finalWrapperStyle,
   )}${generateCodeOfProp('listStyle', finalListStyle)}${generateCodeOfProp(
     'renderItem',
     renderItemCodeOfProp,
-  )}>${children || ''}</${componentName}></div>`;
+  )}>${children || ''}</${componentName}>`;
 
   return createGenerateCodeFnReturn({
     componentName,
-    componentElement,
-    canHoist: false,
+    componentDeclaration,
+    componentCall,
   });
 };
 
 generateCodeOfScrollList.plugin = {
+  level: 1,
   sort: 4,
   name: '水平滚动容器',
   type: 'ScrollList',

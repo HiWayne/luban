@@ -6,7 +6,7 @@ export interface SaveTemplateRequestDTO {
   private: boolean;
   name: string;
   desc?: string;
-  view: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  view: NodeASTOfFrontstage | NodeASTOfBackstage;
   config: Record<number, any>;
   author_id?: number;
   status: 'active' | 'inactive';
@@ -20,7 +20,7 @@ export interface UpdateTemplateRequestDTO {
   private: boolean;
   name: string;
   desc?: string;
-  view?: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  view?: NodeASTOfFrontstage | NodeASTOfBackstage;
   config?: Record<number, any>;
   status: 'active' | 'inactive';
   tags?: string[];
@@ -101,7 +101,7 @@ export interface TemplateDetailResponseDTO {
   private: boolean;
   name: string;
   desc: string;
-  view: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  view: NodeASTOfFrontstage | NodeASTOfBackstage;
   config: Record<number, any>;
   author: {
     author_name: string;
@@ -123,7 +123,7 @@ export interface TemplateEntity {
   private: boolean;
   name: string;
   desc: string;
-  view: NodeASTOfFrontstage[] | NodeASTOfBackstage[];
+  view: NodeASTOfFrontstage | NodeASTOfBackstage;
   config: Record<number, any>;
   author: {
     author_name: string;

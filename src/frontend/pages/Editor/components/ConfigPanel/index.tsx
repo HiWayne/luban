@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Drawer, Form, Modal } from 'antd';
+import { Button, Drawer, Form, message, Modal } from 'antd';
 import { isExist } from '@duitang/dt-base';
 import { CurrentComponent } from '@/frontend/store/editor';
 import { RenderConfig } from './components/RenderConfig';
@@ -7,6 +7,8 @@ import useStore from '@/frontend/store';
 import { useEditorInteractive, useModifyPage } from '../../hooks';
 import { AddDropArea } from './components';
 import { findNodeASTById } from '../../utils';
+import { Flex } from '@/frontend/components';
+import { findChildrenOfNodeAST } from '../../utils/operateNodeAST';
 
 export const ConfigPanel: FC<{
   data: { component: CurrentComponent; config: any } | null;
@@ -14,7 +16,7 @@ export const ConfigPanel: FC<{
 }> = ({ data, onDrop }) => {
   const [show, setShow] = useState(false);
 
-  const { removeComponent } = useModifyPage();
+  const { removeComponent, copyComponentToParent } = useModifyPage();
 
   const { openSpecifyEditorPanel } = useEditorInteractive(1);
 
@@ -55,8 +57,33 @@ export const ConfigPanel: FC<{
       {data.component.leaf ? null : (
         <AddDropArea id={data.component.id} onDrop={onDrop} />
       )}
-      {data.component.noEditorTag ? (
-        <div style={{ marginBottom: '12px' }}>
+      {data.component.emptyTag ? (
+        <Flex style={{ marginBottom: '12px' }}>
+          <Button
+            type="primary"
+            style={{ marginRight: '12px' }}
+            onClick={() => {
+              const id = data.component.id;
+              const nodeAST = findNodeASTById(id);
+              if (nodeAST) {
+                copyComponentToParent(id);
+                const parent = findNodeASTById(nodeAST.parent!);
+                if (parent) {
+                  const children = findChildrenOfNodeAST(parent);
+                  console.log(parent)
+                  if (children) {
+                    const lastChild = children[children.length - 1];
+                    if (lastChild) {
+                      openSpecifyEditorPanel(lastChild.id);
+                    }
+                  }
+                }
+              } else {
+                message.error('复制失败，组件不存在', 2);
+              }
+            }}>
+            复制
+          </Button>
           <Button
             onClick={() => {
               const nodeAST = findNodeASTById(data.component.id);
@@ -69,7 +96,7 @@ export const ConfigPanel: FC<{
             }}>
             选中父组件
           </Button>
-        </div>
+        </Flex>
       ) : null}
       <Form labelCol={{ span: 7 }} labelAlign="left">
         {data.component.configs.map((config, index) => (

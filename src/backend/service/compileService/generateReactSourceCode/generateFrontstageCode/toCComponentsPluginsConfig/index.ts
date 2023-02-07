@@ -40,11 +40,13 @@ export interface Config {
 }
 
 export interface ToCComponent {
+  // 组件等级，1-基础组件、2-复合组件
+  level: 1 | 2;
   sort: number;
-  // 改组件是否能有子组件
+  // 是否能有子组件
   leaf?: boolean;
-  // hover时是否有操作标签
-  noEditorTag?: boolean;
+  // html是否是空标签（不能有子元素，如img、hr）
+  emptyTag?: boolean;
   name: string;
   type:
     | 'BlockContainer'

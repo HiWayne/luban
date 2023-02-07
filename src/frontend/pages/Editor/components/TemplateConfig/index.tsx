@@ -143,7 +143,9 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
   onOk,
   type,
 }) => {
-  const pageViewModel = useStore((store) => store.editor.pageModel?.view);
+  const pageViewModel = useStore(
+    (store) => store.editor.pageModel?.view,
+  ) as NodeAST;
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
   const [isPublic, setPublic] = useState(true);
@@ -215,6 +217,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       });
       return result;
     }, {});
+    pageViewModel.isRoot = true;
     const templateData: SaveTemplateRequestDTO = {
       name,
       desc,
@@ -223,7 +226,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       tags,
       collaborators: collaborators.map((collaborator) => collaborator.id),
       type: pageType,
-      view: pageViewModel.children,
+      view: pageViewModel,
       config,
       preview: preview || undefined,
     };

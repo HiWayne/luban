@@ -61,7 +61,7 @@ export const AddDropArea: FC<AddDropAreaProps> = ({ id, onDrop }) => {
           color: 'rgba(0,0,0,.88)',
           fontSize: '16px',
         }}>
-        将子组件拖入这里
+        将子组件拖入这里也可添加
       </p>
     </Dragger>
   );

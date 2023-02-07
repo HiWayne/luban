@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import shallow from 'zustand/shallow';
 import { request, RequestConfig } from '@/frontend/utils';
 import useStore from '@/frontend/store';
@@ -9,16 +9,19 @@ export const useQueryUserApi = (requestConfig?: RequestConfig) => {
     shallow,
   );
   const [queriedUser, setQueriedUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [ownLoading, setLoading] = useState(false);
+  const ownLoadingRef = useRef(false);
 
   const queryOwnUser = useCallback(async () => {
     setLoading(true);
+    ownLoadingRef.current = true;
     const response = await request(
       `/api/get/user/`,
       undefined,
       requestConfig,
     ).finally(() => {
       setLoading(false);
+      ownLoadingRef.current = false;
     });
     const userData = response?.data;
     if (userData) {
@@ -28,8 +31,10 @@ export const useQueryUserApi = (requestConfig?: RequestConfig) => {
 
   const queryUserById = useCallback(async (id: number) => {
     setLoading(true);
+    ownLoadingRef.current = true;
     const response = await request(`/api/get/user/?id=${id}`).finally(() => {
       setLoading(false);
+      ownLoadingRef.current = false;
     });
     const userData = response?.data;
     if (userData) {
@@ -40,7 +45,8 @@ export const useQueryUserApi = (requestConfig?: RequestConfig) => {
   return {
     user,
     queriedUser,
-    loading,
+    ownLoading,
+    ownLoadingRef,
     queryOwnUser,
     queryUserById,
   };

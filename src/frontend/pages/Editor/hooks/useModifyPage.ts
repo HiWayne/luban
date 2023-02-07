@@ -8,7 +8,7 @@ import {
   addConfigToMap,
   addNodeASTToMap,
   createUniqueId,
-  prepareTemplateView,
+  prepareNodeASTs,
   removeConfigFromMap,
   removeNodeASTFromMap,
   setNodeASTMap,
@@ -75,10 +75,10 @@ export const useModifyPage = () => {
   );
 
   const addComponentFromTemplate = useCallback(
-    (view: NodeAST[], config: Record<number, any>, target?: number) => {
+    (view: NodeAST, config: Record<number, any>, target?: number) => {
       const { addNodeAST: addNodeInStore, pageModel } =
         useStore.getState().editor;
-      const templateNodeASTs = prepareTemplateView(
+      const templateNodeASTs = prepareNodeASTs(
         view,
         config,
         target !== undefined ? target : pageModel.view.id,
@@ -137,6 +137,11 @@ export const useModifyPage = () => {
     setNodeASTMap(newNodeAST.id, newNodeAST);
   }, []);
 
+  const copyComponentToParent = useCallback((id: number) => {
+    const { copyNodeASTToParent } = useStore.getState().editor;
+    copyNodeASTToParent(id);
+  }, []);
+
   return {
     addComponentFromExist,
     addComponentFromInitial,
@@ -144,5 +149,6 @@ export const useModifyPage = () => {
     updateComponent,
     removeComponent,
     moveComponent,
+    copyComponentToParent,
   };
 };

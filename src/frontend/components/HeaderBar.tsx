@@ -66,7 +66,7 @@ const Menus = styled(({ className }) => {
   display: ${(props) => (props.show ? 'block' : 'none')};
   position: absolute;
   left: -20px;
-  bottom: -110px;
+  bottom: -100px;
   width: 120px;
   box-sizing: border-box;
   border-radius: 12px;
@@ -130,10 +130,14 @@ const User = styled<FC<UserProps>>(({ className, data }) => {
 `;
 
 export const HeaderBar = () => {
-  const { user, queryOwnUser } = useQueryUserApi({ errorNotify: false });
+  const { user, queryOwnUser, ownLoadingRef } = useQueryUserApi({
+    errorNotify: false,
+  });
 
   useEffect(() => {
-    queryOwnUser();
+    if (!ownLoadingRef.current) {
+      queryOwnUser();
+    }
   }, []);
 
   return (

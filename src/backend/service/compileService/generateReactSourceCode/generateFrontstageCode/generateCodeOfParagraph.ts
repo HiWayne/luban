@@ -129,6 +129,7 @@ export const generateCodeOfParagraph = (
 };
 
 generateCodeOfParagraph.plugin = {
+  level: 1,
   sort: 7,
   name: '段落',
   type: 'Paragraph',

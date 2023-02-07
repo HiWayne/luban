@@ -5,7 +5,6 @@ import VirtualList from 'rc-virtual-list';
 import { DtIcon } from '@duitang/dt-react-mobile';
 import { Avatar, Flex } from '@/frontend/components';
 import { useGetTemplatesApi } from '../api';
-import { NodeAST } from '@/frontend/types';
 import { useModifyPage } from '../hooks';
 
 const ContainerHeight = 400;
@@ -52,7 +51,7 @@ const ApplyButton = ({ templateId }: { templateId: string }) => {
           .then((templateDetail) => {
             if (templateDetail) {
               addComponentFromTemplate(
-                templateDetail.view as NodeAST[],
+                templateDetail.view,
                 templateDetail.config,
               );
             }

@@ -74,6 +74,7 @@ export const generateCodeOfBlockContainer = (
 };
 
 generateCodeOfBlockContainer.plugin = {
+  level: 1,
   sort: 0,
   name: '块级布局容器',
   type: 'BlockContainer',

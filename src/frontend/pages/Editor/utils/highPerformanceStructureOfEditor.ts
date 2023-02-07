@@ -1,5 +1,8 @@
+import { cloneDeep } from 'lodash-es';
+import { message } from 'antd';
 import { NodeAST } from '@/frontend/types';
-import { remove } from './operateNodeAST';
+import { iterateNodeAST, remove } from './operateNodeAST';
+import { createResetId } from './prepareNodeASTs';
 
 const nodeASTMap = new Map<number, NodeAST>();
 
@@ -84,5 +87,31 @@ export const findConfigFromMap = (id: number, propName?: string) => {
     return configs ? configs[propName] : undefined;
   } else {
     return nodeConfigMap.get(id);
+  }
+};
+
+export const copyNodeASTToParentInMap = (id: number) => {
+  const nodeAST = findNodeASTById(id);
+  if (nodeAST) {
+    const copiedNodeAST = cloneDeep(nodeAST);
+    const resetId = createResetId();
+    const parent = findNodeASTById(nodeAST.parent!);
+    if (parent) {
+      iterateNodeAST(copiedNodeAST, (n) => {
+        const { oldId, newId } = resetId(n, nodeAST.parent as number);
+        const config = findConfigFromMap(oldId);
+        addNodeASTToMap(n);
+        addConfigToMap(newId, cloneDeep(config));
+      });
+      setNodeASTMap(nodeAST.parent!, {
+        ...parent!,
+        children: [...parent!.children!, copiedNodeAST],
+      } as any);
+      return copiedNodeAST;
+    } else {
+      message.error('父组件不存在');
+    }
+  } else {
+    message.error('目标组件不存在');
   }
 };
