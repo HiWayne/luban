@@ -1,12 +1,23 @@
 import { isExist } from '@duitang/dt-base';
+import { message } from 'antd';
 import { NodeAST } from '@/frontend/types';
 import { objectInclude } from '@/frontend/utils';
+import {
+  copyNodeASTToParentInMap,
+  findNodeASTById,
+} from './highPerformanceStructureOfEditor';
+import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { toCComponents } from '../ToCEditor';
 
 export const add = (
-  target: NodeAST,
+  target: NodeAST | null,
   nodeAST: NodeAST | NodeAST[],
   parentProperty?: string,
 ) => {
+  if (!target?.children && !target?.props) {
+    (target as any).view = nodeAST;
+    return;
+  }
   if (!parentProperty) {
     parentProperty = 'children';
   }
@@ -34,6 +45,16 @@ export const add = (
       break;
     default:
       break;
+  }
+};
+
+export const findChildrenOfNodeAST = (nodeAST: NodeAST): NodeAST[] | null => {
+  if (nodeAST.children) {
+    return nodeAST.children;
+  } else if ((nodeAST.props as any)?.renderItem?.render) {
+    return [(nodeAST.props as any).renderItem.render];
+  } else {
+    return null;
   }
 };
 
@@ -167,35 +188,32 @@ export const remove = (root: NodeAST, id: number) => {
   }
 };
 
-// export const move = (
-//   root: NodeAST,
-//   movedId: number,
-//   targetId: number,
-//   index?: number,
-// ) => {
-//   const moved = findNodeASTById(movedId);
-//   const target = findNodeASTById(targetId);
-//   if (moved && target) {
-//     const { nodes, complete, parentProperty } = findPathById(root, targetId);
-//     if (complete) {
-//       const targetInStore = nodes[0];
-//       remove(root, movedId);
-//       switch (parentProperty) {
-//         case 'children':
-//           if (typeof index === 'number') {
-//             targetInStore.children?.splice(index, 0, moved as any);
-//           } else {
-//             throw new Error('index必须是数字');
-//           }
-//           break;
-//         case 'renderItem':
-//           (targetInStore.props as any).renderItem.render = moved;
-//           break;
-//         default:
-//           break;
-//       }
-//     }
-//   } else {
-//     throw new Error('节点不存在');
-//   }
-// };
+export const copyNodeASTToParent = (root: NodeAST, id: number) => {
+  const nodeAST = findNodeASTById(id);
+  if (nodeAST?.parent) {
+    const { complete, nodes } = findPathById(root, nodeAST.parent);
+    if (complete) {
+      const parent = nodes[0];
+      if (!parent?.children) {
+        message.warning('父组件该位置只允许单节点');
+        return;
+      }
+      const copiedNodeAST = copyNodeASTToParentInMap(id);
+      if (copiedNodeAST) {
+        add(parent, copiedNodeAST);
+      }
+    }
+  }
+};
+
+export const getComponentOfNodeAST = (id: number) => {
+  const nodeASTType = findNodeASTById(id)?.type;
+  if (nodeASTType) {
+    const targetComponent: ToCComponent | undefined = toCComponents.find(
+      (component) => component.type === nodeASTType,
+    );
+    return targetComponent || null;
+  } else {
+    return null;
+  }
+};

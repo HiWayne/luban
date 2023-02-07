@@ -7,6 +7,7 @@ import {
 } from 'react';
 import { loadMicroApp, MicroApp } from 'qiankun';
 import styled from 'styled-components';
+import { isExist } from '@duitang/dt-base';
 import { Button, Input, notification } from 'antd';
 import shallow from 'zustand/shallow';
 import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
@@ -26,6 +27,9 @@ import { useCreateTemplateApi } from './api';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
 import { useEditorInteractive } from './hooks';
 import { request } from '@/frontend/utils';
+import { addConfigToMap, addNodeASTToMap, createUniqueId } from './utils';
+import { NodeAST } from '@/frontend/types';
+import { getComponentOfNodeAST } from './utils/operateNodeAST';
 
 export const toCComponents = Object.values(compileFunctions)
   .map((compileFunction) => (compileFunction as any).plugin as ToCComponent)
@@ -65,8 +69,35 @@ const ToCEditor = () => {
     useEditorInteractive(updateCount);
 
   useEffect(() => {
-    setContent(JSON.stringify(pageModel));
-  }, [pageModel]);
+    const addNodeInStore = useStore.getState().editor.addNodeAST;
+    const view = useStore.getState().editor.pageModel.view;
+    if (!view) {
+      const rootNodeAST: NodeAST = {
+        id: createUniqueId(),
+        parent: null,
+        type: 'BlockContainer',
+        props: {},
+        children: [],
+      };
+      // 在store中添加
+      addNodeInStore(rootNodeAST);
+      // 在高性能nodeAST数据结构中添加
+      addNodeASTToMap(rootNodeAST);
+      // 在nodeAST配置缓存添加
+      const component = getComponentOfNodeAST(rootNodeAST.id);
+      if (component) {
+        if (Array.isArray(component.configs)) {
+          const defaultConfigs = component.configs.reduce((configs, config) => {
+            if (isExist(config.defaultConfig)) {
+              configs[config.propName] = config.defaultConfig;
+            }
+            return configs;
+          }, {} as any);
+          addConfigToMap(rootNodeAST.id, defaultConfigs);
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     setContent(
@@ -119,6 +150,7 @@ const ToCEditor = () => {
   }, [pageModel]);
 
   useEffect(() => {
+    setContent(JSON.stringify(pageModel));
     previewPage();
   }, [pageModel]);
 
@@ -209,7 +241,7 @@ const ToCEditor = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         /> */}
-        <Title>场景组件</Title>
+        <Title>基础组件</Title>
         <LightText>可拖动到指定位置，若点击将在页面末尾添加</LightText>
         <ComponentsSelectArea>
           {/* toC */}
@@ -267,7 +299,6 @@ const ToCEditor = () => {
           width: '375px',
           height: '90vh',
           border: '1px solid #ddd',
-          boxSizing: 'border-box',
         }}
         key="container"
       />

@@ -130,6 +130,7 @@ export const generateCodeOfText = (
 };
 
 generateCodeOfText.plugin = {
+  level: 1,
   sort: 6,
   leaf: true,
   name: '文字',

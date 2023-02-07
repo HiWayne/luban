@@ -1,5 +1,5 @@
 import { getParams } from '@duitang/dt-base';
-import styled from 'styled-components';
+import { EditorQuery } from '../../types';
 import ToBEditor from './ToBEditor';
 import ToCEditor from './ToCEditor';
 
@@ -9,9 +9,13 @@ const renderMap = {
 };
 
 const Editor = () => {
-  const { type = 'toc' } = (getParams() || {}) as { type: 'toc' | 'tob' };
+  const { type, ui } = getParams() as any as EditorQuery;
 
-  const RenderEditor = renderMap[type];
+  if (!type || !ui) {
+    return <h3>页面缺少参数</h3>;
+  }
+
+  const RenderEditor = renderMap[ui];
 
   return <RenderEditor />;
 };

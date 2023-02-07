@@ -1,14 +1,16 @@
 import { generateCodeOfCondition } from '../generateBackstageCode/generateCodeOfCondition';
-import { generateCodeOfBlockContainer } from './generateCodeOfBlockContainer';
-import { generateCodeOfScrollList } from './generateCodeOfScrollList';
 import type { Context, Declarations } from '..';
-import { generateCodeOfImage } from './generateCodeOfImage';
-import { generateCodeOfInlineContainer } from './generateCodeOfInlineContainer';
-import { generateCodeOfText } from './generateCodeOfText';
-import { generateCodeOfParagraph } from './generateCodeOfParagraph';
-import { generateCodeOfFlexContainer } from './generateCodeOfFlexContainer';
-import { generateCodeOfGridContainer } from './generateCodeOfGridContainer';
 import { NodeAST } from '@/backend/types/frontstage';
+import {
+  generateCodeOfScrollList,
+  generateCodeOfBlockContainer,
+  generateCodeOfInlineContainer,
+  generateCodeOfFlexContainer,
+  generateCodeOfGridContainer,
+  generateCodeOfImage,
+  generateCodeOfText,
+  generateCodeOfParagraph,
+} from './plugins';
 
 export const generateCodeByNodeAST = (
   context: Context,

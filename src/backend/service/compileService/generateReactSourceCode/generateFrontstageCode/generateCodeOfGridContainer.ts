@@ -205,6 +205,7 @@ export const generateCodeOfGridContainer = (
 };
 
 generateCodeOfGridContainer.plugin = {
+  level: 1,
   sort: 3,
   name: '网格布局容器',
   type: 'GridContainer',

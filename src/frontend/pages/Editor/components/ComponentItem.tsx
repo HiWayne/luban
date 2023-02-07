@@ -12,6 +12,7 @@ const Wrapper = styled.div`
   box-sizing: border-box;
   border-radius: 3px;
   padding: 0 8px;
+  cursor: grab;
 `;
 
 const Name = styled.div`
@@ -19,7 +20,6 @@ const Name = styled.div`
   white-space: nowrap;
   text-overflow: ellipsis;
   color: #13161b;
-  cursor: grab;
 `;
 
 // const Image = styled.img`

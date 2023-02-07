@@ -80,6 +80,7 @@ export const generateCodeOfInlineContainer = (
 };
 
 generateCodeOfInlineContainer.plugin = {
+  level: 1,
   sort: 1,
   name: '行内布局容器',
   type: 'InlineContainer',

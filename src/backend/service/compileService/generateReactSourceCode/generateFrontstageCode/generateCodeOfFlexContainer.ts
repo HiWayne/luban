@@ -99,6 +99,7 @@ export const generateCodeOfFlexContainer = (
 };
 
 generateCodeOfFlexContainer.plugin = {
+  level: 1,
   sort: 2,
   name: 'Flex布局容器',
   type: 'FlexContainer',

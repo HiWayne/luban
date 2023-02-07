@@ -164,9 +164,10 @@ export const generateCodeOfImage = (
 };
 
 generateCodeOfImage.plugin = {
+  level: 1,
   sort: 5,
   leaf: true,
-  noEditorTag: true,
+  emptyTag: true,
   name: '图片',
   type: 'Image',
   description: '图片',

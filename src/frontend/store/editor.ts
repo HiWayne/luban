@@ -1,7 +1,7 @@
 import { Meta, PageModel } from '@/backend/types';
-import { createUniqueId } from '../pages/Editor/utils';
 import {
   add,
+  copyNodeASTToParent,
   findPathById,
   remove,
   update,
@@ -23,6 +23,7 @@ export interface EditorStore {
   addNodeAST: (nodeAST: NodeAST | NodeAST[], targetId?: number) => void;
   updateNodeAST: (id: number, props: any) => void;
   removeNodeAST: (id: number) => void;
+  copyNodeASTToParent: (id: number) => void;
 }
 
 const createEditorStore: (
@@ -40,13 +41,7 @@ const createEditorStore: (
       env: ['mobile', 'react', 'mpa'],
       mode: 'development',
     },
-    view: {
-      id: createUniqueId(),
-      parent: null,
-      type: 'BlockContainer',
-      props: {},
-      children: [],
-    },
+    view: null as any,
   },
   setCurrentChooseComponent(
     data: { component: CurrentComponent; config: any } | null,
@@ -63,7 +58,11 @@ const createEditorStore: (
   addNodeAST(nodeAST: NodeAST | NodeAST[], targetId?: number) {
     set((state) => {
       if (targetId === undefined) {
-        add(state.editor.pageModel.view, nodeAST);
+        if (!state.editor.pageModel.view) {
+          add(state.editor.pageModel, nodeAST);
+        } else {
+          add(state.editor.pageModel.view, nodeAST);
+        }
       } else {
         const { complete, nodes, parentProperty } = findPathById(
           state.editor.pageModel.view,
@@ -90,6 +89,11 @@ const createEditorStore: (
   removeNodeAST(id: number) {
     set((state) => {
       remove(state.editor.pageModel.view, id);
+    });
+  },
+  copyNodeASTToParent(id: number) {
+    set((state) => {
+      copyNodeASTToParent(state.editor.pageModel.view, id);
     });
   },
 });
