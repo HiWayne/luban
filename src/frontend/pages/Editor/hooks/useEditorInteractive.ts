@@ -41,11 +41,11 @@ export const useEditorInteractive = (update: any) => {
     return div;
   }, []);
 
-  const createSetRootButton = useCallback((isRoot: boolean = false) => {
+  const createSetRootButton = useCallback((convergent: boolean = false) => {
     const div = document.createElement('div');
     div.className = 'root-setter';
-    div.innerHTML = isRoot ? '解除绑定' : '绑定子元素';
-    if (isRoot) {
+    div.innerHTML = convergent ? '解除绑定' : '绑定子元素';
+    if (convergent) {
       div.classList.add('root');
     }
     return div;
@@ -153,10 +153,10 @@ export const useEditorInteractive = (update: any) => {
               const element = e.target as HTMLElement;
               const currentNodeAST = findNodeASTById(id);
               if (currentNodeAST) {
-                const isRoot = !currentNodeAST?.isRoot;
-                setNodeASTMap(id, { ...currentNodeAST, isRoot });
-                const text = isRoot ? '解除绑定' : '绑定子元素';
-                if (isRoot) {
+                const convergent = !currentNodeAST?.convergent;
+                setNodeASTMap(id, { ...currentNodeAST, convergent });
+                const text = convergent ? '解除绑定' : '绑定子元素';
+                if (convergent) {
                   element.classList.add('root');
                 } else {
                   element.classList.remove('root');
@@ -254,11 +254,11 @@ export const useEditorInteractive = (update: any) => {
       const nodeAST = findNodeASTById(id);
       if (nodeAST) {
         let targetNodeAST: NodeAST;
-        if (nodeAST?.isRoot) {
+        if (nodeAST?.convergent) {
           targetNodeAST = nodeAST;
         } else {
           const findNodeASTIsRoot = (_nodeAST: NodeAST): NodeAST | null => {
-            if (_nodeAST.isRoot) {
+            if (_nodeAST.convergent) {
               return _nodeAST;
             } else {
               const parentId = _nodeAST.parent;

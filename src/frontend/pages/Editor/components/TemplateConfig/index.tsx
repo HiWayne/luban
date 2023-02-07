@@ -217,7 +217,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       });
       return result;
     }, {});
-    pageViewModel.isRoot = true;
+    pageViewModel.convergent = true;
     const templateData: SaveTemplateRequestDTO = {
       name,
       desc,
