@@ -6,15 +6,20 @@ import { RenderConfig } from './components/RenderConfig';
 import useStore from '@/frontend/store';
 import { useEditorInteractive, useModifyPage } from '../../hooks';
 import { AddDropArea } from './components';
-import { findNodeASTById } from '../../utils';
+import {
+  findNodeASTById,
+  findChildrenOfNodeAST,
+  setNodeASTMap,
+} from '../../utils';
 import { Flex } from '@/frontend/components';
-import { findChildrenOfNodeAST } from '../../utils/operateNodeAST';
+import { getElementByLuBanId } from '@/backend/service/compileService/generateReactSourceCode/utils';
 
 export const ConfigPanel: FC<{
   data: { component: CurrentComponent; config: any } | null;
   onDrop: any;
 }> = ({ data, onDrop }) => {
   const [show, setShow] = useState(false);
+  const [convergent, setConvergent] = useState(false);
 
   const { removeComponent, copyComponentToParent } = useModifyPage();
 
@@ -43,6 +48,12 @@ export const ConfigPanel: FC<{
       setShow(false);
     } else {
       setShow(true);
+      const id = data.component.id;
+      const currentNodeAST = findNodeASTById(id);
+      if (currentNodeAST) {
+        const _convergent = !!currentNodeAST?.convergent;
+        setConvergent(_convergent);
+      }
     }
   }, [data]);
 
@@ -57,47 +68,78 @@ export const ConfigPanel: FC<{
       {data.component.leaf ? null : (
         <AddDropArea id={data.component.id} onDrop={onDrop} />
       )}
-      {data.component.emptyTag ? (
-        <Flex style={{ marginBottom: '12px' }}>
-          <Button
-            type="primary"
-            style={{ marginRight: '12px' }}
-            onClick={() => {
-              const id = data.component.id;
-              const nodeAST = findNodeASTById(id);
-              if (nodeAST) {
-                copyComponentToParent(id);
-                const parent = findNodeASTById(nodeAST.parent!);
-                if (parent) {
-                  const children = findChildrenOfNodeAST(parent);
-                  console.log(parent)
-                  if (children) {
-                    const lastChild = children[children.length - 1];
-                    if (lastChild) {
-                      openSpecifyEditorPanel(lastChild.id);
-                    }
+      <Flex style={{ marginBottom: '12px' }}>
+        <Button
+          type="primary"
+          style={{ marginRight: '12px' }}
+          onClick={() => {
+            const id = data.component.id;
+            const nodeAST = findNodeASTById(id);
+            if (nodeAST) {
+              copyComponentToParent(id);
+              const parent = findNodeASTById(nodeAST.parent!);
+              if (parent) {
+                const children = findChildrenOfNodeAST(parent);
+                if (children) {
+                  const lastChild = children[children.length - 1];
+                  if (lastChild) {
+                    openSpecifyEditorPanel(lastChild.id);
                   }
                 }
-              } else {
-                message.error('复制失败，组件不存在', 2);
               }
-            }}>
-            复制
-          </Button>
+            } else {
+              message.error('复制失败，组件不存在', 2);
+            }
+          }}>
+          复制
+        </Button>
+        {!data.component.leaf ? (
           <Button
+            style={
+              convergent
+                ? {
+                    marginRight: '12px',
+                    backgroundColor: '#E6A23C',
+                    color: '#fff',
+                  }
+                : { marginRight: '12px' }
+            }
             onClick={() => {
-              const nodeAST = findNodeASTById(data.component.id);
-              if (nodeAST) {
-                const parentId = nodeAST.parent;
-                if (parentId) {
-                  openSpecifyEditorPanel(parentId);
+              const id = data.component.id;
+              const currentNodeAST = findNodeASTById(id);
+              const element = getElementByLuBanId(id) as HTMLElement;
+              if (element && currentNodeAST) {
+                const _convergent = !currentNodeAST?.convergent;
+                setNodeASTMap(id, {
+                  ...currentNodeAST,
+                  convergent: _convergent,
+                });
+                const text = _convergent ? '解除绑定' : '绑定子元素';
+                setConvergent(_convergent);
+                if (_convergent) {
+                  element.classList.add('root');
+                } else {
+                  element.classList.remove('root');
                 }
+                element.innerHTML = text;
               }
             }}>
-            选中父组件
+            {convergent ? '解除绑定' : '绑定子元素'}
           </Button>
-        </Flex>
-      ) : null}
+        ) : null}
+        <Button
+          onClick={() => {
+            const nodeAST = findNodeASTById(data.component.id);
+            if (nodeAST) {
+              const parentId = nodeAST.parent;
+              if (parentId) {
+                openSpecifyEditorPanel(parentId);
+              }
+            }
+          }}>
+          选中父组件
+        </Button>
+      </Flex>
       <Form labelCol={{ span: 7 }} labelAlign="left">
         {data.component.configs.map((config, index) => (
           <RenderConfig

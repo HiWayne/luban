@@ -1,4 +1,4 @@
-import { InlineContainerProps, NodeAST } from '@/backend/types/frontstage';
+import { BasicContainerProps, NodeAST } from '@/backend/types/frontstage';
 import { Context } from '..';
 import { generateCodeOfAction } from '../generateCodeCommon/generateCodeOfAction';
 import { generateCodeOfProp } from '../generateCodeCommon/generateCodeOfProp';
@@ -12,7 +12,7 @@ import {
   ToCComponent,
 } from './toCComponentsPluginsConfig';
 
-export const generateCodeOfInlineContainer = (
+export const generateCodeOfBasicContainer = (
   nodeAST: NodeAST,
   id: number,
   children: string | undefined,
@@ -20,6 +20,7 @@ export const generateCodeOfInlineContainer = (
 ) => {
   const { props, key } = nodeAST;
   const {
+    layout,
     width,
     height,
     margin,
@@ -32,11 +33,11 @@ export const generateCodeOfInlineContainer = (
     borderRadius,
     style,
     action,
-  } = props as InlineContainerProps;
+  } = props as BasicContainerProps;
 
-  const componentName = 'InlineContainer';
+  const componentName = 'BasicContainer';
 
-  const inlineContainerStyle = {
+  const BasicContainerStyle = {
     width,
     height,
     margin,
@@ -52,7 +53,15 @@ export const generateCodeOfInlineContainer = (
     ...(style || {}),
   };
 
-  const componentDeclaration = `const ${componentName} = ({ role, id, children, onClick, style = {} }) => (<div role={role} id={id} style={{display: 'inline-block', ...style}} onClick={onClick}>{children}</div>);`;
+  Reflect.ownKeys(BasicContainerStyle).forEach((styleKey: any) => {
+    if ((BasicContainerStyle as any)[styleKey] === undefined) {
+      delete (BasicContainerStyle as any)[styleKey];
+    }
+  });
+
+  const componentDeclaration = `const ${componentName} = ({ role, id, children, onClick, style = {} }) => (<div role={role} id={id} style={${
+    layout === 'inline' ? `{display: 'inline-block', ...style}` : 'style'
+  }} onClick={onClick}>{children}</div>);`;
 
   const onClickCode =
     !context.development && action
@@ -67,7 +76,7 @@ export const generateCodeOfInlineContainer = (
     id,
   )}${generateCodeOfProp('key', key)}${generateCodeOfProp(
     'style',
-    inlineContainerStyle,
+    BasicContainerStyle,
   )}${generateCodeOfProp('onClick', onClickCode)}>${
     children || ''
   }</${componentName}>`;
@@ -79,15 +88,15 @@ export const generateCodeOfInlineContainer = (
   });
 };
 
-generateCodeOfInlineContainer.plugin = {
+generateCodeOfBasicContainer.plugin = {
   level: 1,
   sort: 1,
-  name: '行内布局容器',
-  type: 'InlineContainer',
+  name: '普通容器',
+  type: 'BasicContainer',
   description:
-    '默认大小由内容大小决定，多个行内容器（单个宽度不足一行时）可以放在一行。本身没有内容，里面需要添加内容。',
+    '默认是【块级】容器。块级：内部内容（或容器指定了宽度）不足一行时依然会占满一行。也可将布局设置为【行内】。行内：容器宽度由内部内容撑开、也可以指定容器宽度，多个行内容器，单个宽度不足一行时会在一行排列。【块级】/【行内】容器本身没有内容，里面需要添加内容。',
   defaultAST: {
-    type: 'InlineContainer',
+    type: 'BasicContainer',
     props: {},
     children: [],
   },

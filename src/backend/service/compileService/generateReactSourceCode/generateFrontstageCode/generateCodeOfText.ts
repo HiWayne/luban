@@ -135,7 +135,8 @@ generateCodeOfText.plugin = {
   leaf: true,
   name: '文字',
   type: 'Text',
-  description: '文字',
+  description:
+    '文字。所有字符只能共用同一套样式。若一段文字中有不同样式，请使用【段落】组件。文字组件内部不能再有子组件。',
   defaultAST: {
     type: 'Text',
     props: {

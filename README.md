@@ -131,7 +131,7 @@ const generateCodeOfXxx = (nodeAST, id, context) => {
    * 开发环境或者叫编辑环境，是低代码后台编辑页面时所在的环境
    * 这种环境下，UI本身应该不能交互，否则会和低代码后台的交互（比如拖拽、点击）冲突
    * 所以需要根据context.development决定是否不编译交互相关的代码
-   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBlockContainer.ts 里的onClickCode
+   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBasicContainer.ts 里的onClickCode
    */
   // 必须二：
   /**
@@ -139,7 +139,7 @@ const generateCodeOfXxx = (nodeAST, id, context) => {
    * 低代码后台在配置页面时，可以通过点击某个页面UI，唤起它的配置面板，或者可以拖拽某个UI和其他调换位置等操作
    * 但是低代码后台是不知道预览页面里的UI和组件模块的对应关系的
    * 所以需要编译时，在development环境下，给组件的最外层元素加上特殊的id，用来标记这是一个组件模块。如果id=1，那就是<div id="luban_1"></div>
-   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBlockContainer.ts 里的createIdAttrInDev，它帮你封装好了根据context.development是否添加id属性的逻辑
+   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBasicContainer.ts 里的createIdAttrInDev，它帮你封装好了根据context.development是否添加id属性的逻辑
    */
 };
 ```
@@ -303,7 +303,7 @@ canHoist: false 代表不可以提升到全局声明，于是它只会在 App �
 
 ### 编译写法三。组件如何接收 children。
 
-有些组件是有子组件的，比如 BlockContainer 这个块级容器，只是负责占用整行，children 一定有实际负责展示的 UI 组件。下面看看编译时怎么让父组件带上 children 的编译结果。
+有些组件是有子组件的，比如 BasicContainer 这个容器，只是负责包裹子组件，必须有 children 负责实际展示 UI。下面看看编译时怎么让父组件带上 children 的编译结果。
 
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
@@ -311,8 +311,8 @@ import { generateCodeOfProp } from '../generateCodeOfProp';
 // createGenerateCodeFnReturn是用来生成generateCodeOfXxx系列函数返回值的工厂函数
 import { createGenerateCodeFnReturn } from '../utils';
 
-// 编译BlockContainer组件
-const generateCodeOfBlockContainer = (nodeAST, id, children, context) => {
+// 编译BasicContainer组件
+const generateCodeOfBasicContainer = (nodeAST, id, children, context) => {
   // 因为是简单组件，所以用写法二，将来直接在App里调用reactElement就行（<xxx></xxx>）
   const componentCall = `<div>${children}</div>`;
 
@@ -333,9 +333,9 @@ import { generateCodeOfProp } from '../generateCodeOfProp';
 // createGenerateCodeFnReturn是用来生成generateCodeOfXxx系列函数返回值的工厂函数
 import { createGenerateCodeFnReturn } from '../utils';
 
-// 编译BlockContainer组件
-const generateCodeOfBlockContainer = (nodeAST, id, context) => {
-  const componentName = 'BlockContainer';
+// 编译BasicContainer组件
+const generateCodeOfBasicContainer = (nodeAST, id, context) => {
+  const componentName = 'BasicContainer';
   const componentElement = `<div>{children}</div>`;
 
   return createGenerateCodeFnReturn({
@@ -345,7 +345,7 @@ const generateCodeOfBlockContainer = (nodeAST, id, context) => {
 };
 ```
 
-`componentElement`会被自动封装成`const BlockContainer = ({children}) => (<div>{children}</div>)`函数，相当于自动帮你写好了`componentDeclaration`。
+`componentElement`会被自动封装成`const BasicContainer = ({children}) => (<div>{children}</div>)`函数，相当于自动帮你写好了`componentDeclaration`。
 
 如果你不想有组件声明，加上`canHoist: false`, `{children}`会自动被外部替换成 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`），直接在 App 里调用。
 

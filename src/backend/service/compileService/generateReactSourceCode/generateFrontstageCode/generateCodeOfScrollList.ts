@@ -96,14 +96,22 @@ export const generateCodeOfScrollList = (
 
   const componentName = `ScrollListComponent`;
 
-  const componentDeclaration = `const ${componentName} = ({ role, id, data, wrapperStyle, listStyle, renderItem, children }) => {
-    ${context.development ? `const scrollWrapperRef = useRef(null)`: ''}
+  const componentDeclaration = `const NoScrollBarWrapper = styled.div\`
+    &:-webkit-scrollbar {
+      display: none;
+    }
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  \`
+
+  const ${componentName} = ({ role, id, data, wrapperStyle, listStyle, renderItem, children }) => {
+    ${context.development ? `const scrollWrapperRef = useRef(null)` : ''}
     const config = useMemo(() => ({ eventPassthrough: 'vertical'}), []);
 
     return <div role={role} id={id}>
       ${
         context.development
-          ? `<div ref={scrollWrapperRef} style={wrapperStyle ? {overflow: 'auto', ...wrapperStyle} : {overflow: 'auto'}}>
+          ? `<NoScrollBarWrapper ref={scrollWrapperRef} style={wrapperStyle ? wrapperStyle : undefined}>
               <div style={listStyle ? {display: 'inline-flex', whiteSpace: 'nowrap', ...listStyle} : {display: 'inline-flex', whiteSpace: 'nowrap'}}>
                 {Array.isArray(data) && renderItem ? data.map(item => renderItem((item, index), {
                   index: index,
@@ -111,16 +119,19 @@ export const generateCodeOfScrollList = (
                   scrollWrapperRef: scrollWrapperRef
                 })) : children}
               </div>
-            </div>`
+            </NoScrollBarWrapper>`
           : `<ScrollList wrapperStyle={wrapperStyle} listStyle={listStyle} renderItem={renderItem} config={config}>{children}</ScrollList>`
       }
     </div>
-  }`;
+  };`;
 
   const componentCall = `<${componentName}${createIdAttrInDev(
     context.development,
     id,
-  )}${generateCodeOfProp('key', key)}${generateCodeOfProp('data', data)}${generateCodeOfProp(
+  )}${generateCodeOfProp('key', key)}${generateCodeOfProp(
+    'data',
+    data,
+  )}${generateCodeOfProp(
     'wrapperStyle',
     finalWrapperStyle,
   )}${generateCodeOfProp('listStyle', finalListStyle)}${generateCodeOfProp(
@@ -140,7 +151,8 @@ generateCodeOfScrollList.plugin = {
   sort: 4,
   name: '水平滚动容器',
   type: 'ScrollList',
-  description: '水平滚动列表',
+  description:
+    '有回弹和滑动惯性的水平滚动列表。容器本身没有内容，里面需要添加内容。',
   defaultAST: {
     type: 'ScrollList',
     props: {},
@@ -152,9 +164,6 @@ generateCodeOfScrollList.plugin = {
       ...heightConfig,
       name: '容器高度',
       propName: 'wrapperHeight',
-      defaultConfig: {
-        value: 100,
-      },
     },
     {
       name: '外层外边距',

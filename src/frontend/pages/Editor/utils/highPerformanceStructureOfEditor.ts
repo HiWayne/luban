@@ -2,7 +2,9 @@ import { cloneDeep } from 'lodash-es';
 import { message } from 'antd';
 import { NodeAST } from '@/frontend/types';
 import { iterateNodeAST, remove } from './operateNodeAST';
-import { createResetId } from './prepareNodeASTs';
+import { createResetId } from './prepareNodeAST';
+import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { toCComponents } from '../ToCEditor';
 
 const nodeASTMap = new Map<number, NodeAST>();
 
@@ -113,5 +115,45 @@ export const copyNodeASTToParentInMap = (id: number) => {
     }
   } else {
     message.error('目标组件不存在');
+  }
+};
+
+export const getComponentOfNodeAST = (data: number | NodeAST) => {
+  const nodeASTType =
+    typeof data === 'number' ? findNodeASTById(data)?.type : data?.type;
+  if (nodeASTType) {
+    const targetComponent: ToCComponent | undefined = toCComponents.find(
+      (component) => component.type === nodeASTType,
+    );
+    return targetComponent || null;
+  } else {
+    return null;
+  }
+};
+
+export const findConvergentNodeAST = (id: number): NodeAST | null => {
+  const nodeAST = findNodeASTById(id);
+  if (nodeAST) {
+    if (nodeAST.convergent) {
+      return nodeAST;
+    } else {
+      const parentId = nodeAST.parent;
+      if (parentId !== null) {
+        return findConvergentNodeAST(parentId);
+      }
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+export const findChildrenOfNodeAST = (nodeAST: NodeAST): NodeAST[] | null => {
+  if (nodeAST.children) {
+    return nodeAST.children;
+  } else if ((nodeAST.props as any)?.renderItem?.render) {
+    return [(nodeAST.props as any).renderItem.render];
+  } else {
+    return null;
   }
 };

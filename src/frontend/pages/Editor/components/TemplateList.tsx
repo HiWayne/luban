@@ -1,17 +1,27 @@
-import { useCallback, useEffect, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
-import { Button, List } from 'antd';
+import { Button, Card, List, Tooltip } from 'antd';
 import VirtualList from 'rc-virtual-list';
 import { DtIcon } from '@duitang/dt-react-mobile';
 import { Avatar, Flex } from '@/frontend/components';
 import { useGetTemplatesApi } from '../api';
 import { useModifyPage } from '../hooks';
+import { DragContext } from '../ToCEditor/DragProvider';
+import { TemplateBriefResponseDTO } from '@/backend/service/templateService/types';
 
 const ContainerHeight = 400;
 
 const TemplateName = styled.h3`
   margin: 0;
   padding: 0;
+  width: 80px;
   font-size: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -32,7 +42,11 @@ const TemplateDesc = styled.p`
 `;
 
 const UserName = styled.span`
-  font-size: 12px;
+  font-size: 10px;
+  width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const ApplyButton = ({ templateId }: { templateId: string }) => {
@@ -42,28 +56,108 @@ const ApplyButton = ({ templateId }: { templateId: string }) => {
   const { addComponentFromTemplate } = useModifyPage();
 
   return (
-    <Button
-      loading={loading}
-      style={{ marginLeft: '20px' }}
-      onClick={() => {
-        setLoading(true);
-        getTemplateDetail(templateId)
-          .then((templateDetail) => {
-            if (templateDetail) {
-              addComponentFromTemplate(
-                templateDetail.view,
-                templateDetail.config,
-              );
-            }
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      }}>
-      应用模板
-    </Button>
+    <Tooltip title="模板可拖动到指定位置，也可点击【应用模板】按钮添加到页面末尾">
+      <Button
+        loading={loading}
+        style={{ marginLeft: '20px' }}
+        onClick={() => {
+          setLoading(true);
+          getTemplateDetail(templateId)
+            .then((templateDetail) => {
+              if (templateDetail) {
+                addComponentFromTemplate(templateDetail);
+              }
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+        }}>
+        应用模板
+      </Button>
+    </Tooltip>
   );
 };
+
+const ListCard = styled(
+  forwardRef(
+    (
+      {
+        template,
+        className,
+      }: { template: TemplateBriefResponseDTO; className?: string },
+      ref,
+    ) => {
+      const [loading, setLoading] = useState(false);
+      const cardRef = useRef<HTMLDivElement>(null);
+
+      const { getTemplateDetail } = useGetTemplatesApi();
+
+      const { onDragStart, onDragEnd, onDragOver } = useContext(DragContext)!;
+
+      const handleDragStart = useCallback(function (
+        this: HTMLElement,
+        event: DragEvent,
+      ) {
+        setLoading(true);
+        const awaitTemplateDetail = getTemplateDetail(template.id)
+          .then((templateDetail) => {
+            setLoading(false);
+            return templateDetail;
+          })
+          .catch(() => {
+            setLoading(false);
+            return null;
+          });
+        onDragStart.call(this, event, awaitTemplateDetail);
+      },
+      []);
+
+      useEffect(() => {
+        if (cardRef.current) {
+          cardRef.current.addEventListener('dragstart', handleDragStart);
+          cardRef.current.addEventListener('dragover', onDragOver);
+          cardRef.current.addEventListener('dragend', onDragEnd);
+
+          return () => {
+            cardRef.current?.removeEventListener('dragstart', handleDragStart);
+            cardRef.current?.removeEventListener('dragover', onDragOver);
+            cardRef.current?.removeEventListener('dragend', onDragEnd);
+          };
+        }
+      }, []);
+
+      return (
+        <Card
+          hoverable
+          draggable
+          ref={cardRef}
+          style={{ padding: '8px', cursor: 'grab' }}
+          className={className}>
+          <Flex justifyContent="flex-start" alignItems="center" ref={ref}>
+            <DtIcon width="80px" src={template.preview} />
+            <Flex
+              style={{ marginLeft: '12px', height: '100px' }}
+              direction="column"
+              justifyContent="space-around"
+              alignItems="flex-start">
+              <TemplateName>{template.name}</TemplateName>
+              <TemplateDesc>{template.desc}</TemplateDesc>
+              <Flex justifyContent="flex-start" alignItems="center">
+                <Avatar size="small" src={template.author.author_avatar} />
+                <UserName>{template.author.author_name}</UserName>
+              </Flex>
+            </Flex>
+            <ApplyButton templateId={template.id} />
+          </Flex>
+        </Card>
+      );
+    },
+  ),
+)`
+  & > .ant-card-body {
+    padding: 0;
+  }
+`;
 
 export const TemplateList = styled(({ className }) => {
   const { templates, getTemplates } = useGetTemplatesApi();
@@ -89,32 +183,12 @@ export const TemplateList = styled(({ className }) => {
         itemHeight={47}
         itemKey="id"
         onScroll={onScroll}>
-        {(template) => (
-          <Flex
-            style={{ margin: '8px 0' }}
-            justifyContent="flex-start"
-            alignItems="center">
-            <DtIcon src={template.preview} />
-            <Flex
-              style={{ marginLeft: '12px', height: '100px' }}
-              direction="column"
-              justifyContent="space-between"
-              alignItems="flex-start">
-              <TemplateName>{template.name}</TemplateName>
-              <TemplateDesc>{template.desc}</TemplateDesc>
-              <Flex justifyContent="flex-start" alignItems="center">
-                <Avatar size="small" src={template.author.author_avatar} />
-                <UserName>{template.author.author_name}</UserName>
-              </Flex>
-            </Flex>
-            <ApplyButton templateId={template.id} />
-          </Flex>
-        )}
+        {(template) => <ListCard template={template} />}
       </VirtualList>
     </List>
   );
 })`
-  height: 400px;
+  height: 500px;
   overflow: auto;
   padding: 0 16px;
   border: 1px solid rgba(140, 140, 140, 0.35);

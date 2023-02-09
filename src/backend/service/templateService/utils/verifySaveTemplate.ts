@@ -27,7 +27,7 @@ export const verifySaveTemplate = (template: SaveTemplateRequestDTO) => {
     { key: 'type', type: ['toc', 'tob'] },
     { key: 'private', type: [BOOLEAN] },
     { key: 'name', type: [STRING], empty: false },
-    { key: 'view', type: [ARRAY], empty: false },
+    { key: 'view', type: [OBJECT], empty: false },
     { key: 'config', type: [OBJECT], empty: false },
     { key: 'status', type: ['active', 'inactive'] },
     { key: 'desc', type: [STRING], required: false },

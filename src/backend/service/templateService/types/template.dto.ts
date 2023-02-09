@@ -1,12 +1,16 @@
 import type { NodeAST as NodeASTOfFrontstage } from '@/backend/types/frontstage';
 import type { NodeAST as NodeASTOfBackstage } from '@/backend/types/backstage';
 
+export type TemplateNodeAST = (NodeASTOfFrontstage | NodeASTOfBackstage) & {
+  convergent?: boolean;
+};
+
 export interface SaveTemplateRequestDTO {
   type: 'toc' | 'tob';
   private: boolean;
   name: string;
   desc?: string;
-  view: NodeASTOfFrontstage | NodeASTOfBackstage;
+  view: TemplateNodeAST;
   config: Record<number, any>;
   author_id?: number;
   status: 'active' | 'inactive';
@@ -20,7 +24,7 @@ export interface UpdateTemplateRequestDTO {
   private: boolean;
   name: string;
   desc?: string;
-  view?: NodeASTOfFrontstage | NodeASTOfBackstage;
+  view?: TemplateNodeAST;
   config?: Record<number, any>;
   status: 'active' | 'inactive';
   tags?: string[];
@@ -101,7 +105,7 @@ export interface TemplateDetailResponseDTO {
   private: boolean;
   name: string;
   desc: string;
-  view: NodeASTOfFrontstage | NodeASTOfBackstage;
+  view: TemplateNodeAST;
   config: Record<number, any>;
   author: {
     author_name: string;
@@ -123,7 +127,7 @@ export interface TemplateEntity {
   private: boolean;
   name: string;
   desc: string;
-  view: NodeASTOfFrontstage | NodeASTOfBackstage;
+  view: TemplateNodeAST;
   config: Record<number, any>;
   author: {
     author_name: string;

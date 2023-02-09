@@ -6,8 +6,6 @@ import {
   copyNodeASTToParentInMap,
   findNodeASTById,
 } from './highPerformanceStructureOfEditor';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
-import { toCComponents } from '../ToCEditor';
 
 export const add = (
   target: NodeAST | null,
@@ -45,16 +43,6 @@ export const add = (
       break;
     default:
       break;
-  }
-};
-
-export const findChildrenOfNodeAST = (nodeAST: NodeAST): NodeAST[] | null => {
-  if (nodeAST.children) {
-    return nodeAST.children;
-  } else if ((nodeAST.props as any)?.renderItem?.render) {
-    return [(nodeAST.props as any).renderItem.render];
-  } else {
-    return null;
   }
 };
 
@@ -203,17 +191,5 @@ export const copyNodeASTToParent = (root: NodeAST, id: number) => {
         add(parent, copiedNodeAST);
       }
     }
-  }
-};
-
-export const getComponentOfNodeAST = (id: number) => {
-  const nodeASTType = findNodeASTById(id)?.type;
-  if (nodeASTType) {
-    const targetComponent: ToCComponent | undefined = toCComponents.find(
-      (component) => component.type === nodeASTType,
-    );
-    return targetComponent || null;
-  } else {
-    return null;
   }
 };

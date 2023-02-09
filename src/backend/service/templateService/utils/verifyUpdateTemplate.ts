@@ -25,7 +25,7 @@ export const verifyUpdateTemplate = (template: any) => {
     { key: 'id', type: [STRING] },
     { key: 'private', type: [BOOLEAN], required: false },
     { key: 'name', type: [STRING], required: false },
-    { key: 'view', type: [ARRAY], required: false },
+    { key: 'view', type: [OBJECT], required: false },
     { key: 'config', type: [OBJECT], required: false },
     { key: 'status', type: ['active', 'inactive'], required: false },
     { key: 'desc', type: [STRING], required: false },

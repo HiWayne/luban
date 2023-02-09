@@ -1,7 +1,10 @@
 import { FC, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { Tooltip } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 import { useModifyPage } from '../hooks';
+import { Flex } from '@/frontend/components';
 
 const Wrapper = styled.div`
   display: flex;
@@ -74,8 +77,15 @@ export const ComponentItem: FC<ComponentItemProp> = ({
       ref={wrapperRef}
       draggable
       onClick={() => addComponentFromInitial(data)}>
-      {/* <Image src={icon} alt="小图标" /> */}
-      <Name>{name}</Name>
+      <Flex alignItems="center">
+        {/* <Image src={icon} alt="小图标" /> */}
+        <Name>{name}</Name>
+        <Tooltip title={data.description}>
+          <QuestionCircleOutlined
+            style={{ marginLeft: '8px', color: 'rgb(139, 180, 237)' }}
+          />
+        </Tooltip>
+      </Flex>
     </Wrapper>
   );
 };

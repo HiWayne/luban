@@ -170,7 +170,7 @@ generateCodeOfImage.plugin = {
   emptyTag: true,
   name: '图片',
   type: 'Image',
-  description: '图片',
+  description: '单张图片。内部不能再有子组件。',
   defaultAST: {
     type: 'Image',
     props: {
@@ -184,7 +184,7 @@ generateCodeOfImage.plugin = {
   configs: [
     {
       name: '图片',
-      description: '上传图片或设置变量名',
+      description: '上传图片、填写图片url或设置变量名',
       required: true,
       propName: 'src',
       formSchema: {

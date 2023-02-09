@@ -1,6 +1,6 @@
-import { FC, useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
-import { Loading, AccessDenied } from "components/index";
+import { FC, useEffect, useState } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
+import { AccessDenied, Loading } from 'components/index';
 
 interface Auth {
   loading: boolean;
@@ -23,7 +23,7 @@ const RouterGuard: FC<RouterGuardProps> = ({
   getAuth,
 }) => {
   const [{ loading, auth, login }, setStatus] = useState(
-    typeof getAuth === "function"
+    typeof getAuth === 'function'
       ? {
           loading: false,
           auth: false,
@@ -33,14 +33,14 @@ const RouterGuard: FC<RouterGuardProps> = ({
           loading: false,
           auth: true,
           login: true,
-        }
+        },
   );
 
   const params = useParams() || {};
 
   useEffect(() => {
     (async () => {
-      if (typeof getAuth === "function") {
+      if (typeof getAuth === 'function') {
         setStatus((status) => ({
           ...status,
           loading: true,
@@ -52,7 +52,7 @@ const RouterGuard: FC<RouterGuardProps> = ({
   }, []);
 
   if (loading) {
-    return <Loading />;
+    return <Loading size="large" />;
   }
   if (auth) {
     return <Element />;

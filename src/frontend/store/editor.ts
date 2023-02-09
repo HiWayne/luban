@@ -5,7 +5,7 @@ import {
   findPathById,
   remove,
   update,
-} from '../pages/Editor/utils/operateNodeAST';
+} from '../pages/Editor/utils';
 import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 import { NodeAST } from '../types';
 
@@ -19,7 +19,7 @@ export interface EditorStore {
     data: { component: CurrentComponent; config: any } | null,
   ) => void;
   pageModel: PageModel;
-  setPageMeta: (meta: Meta) => void;
+  setPageMeta: (meta: Partial<Meta>) => void;
   addNodeAST: (nodeAST: NodeAST | NodeAST[], targetId?: number) => void;
   updateNodeAST: (id: number, props: any) => void;
   removeNodeAST: (id: number) => void;
@@ -50,9 +50,14 @@ const createEditorStore: (
       state.editor.currentChooseComponent = data;
     });
   },
-  setPageMeta(meta: Meta) {
+  setPageMeta(meta: Partial<Meta>) {
     set((state) => {
-      state.editor.pageModel.meta = meta;
+      if (meta) {
+        state.editor.pageModel.meta = {
+          ...state.editor.pageModel.meta,
+          ...meta,
+        };
+      }
     });
   },
   addNodeAST(nodeAST: NodeAST | NodeAST[], targetId?: number) {
