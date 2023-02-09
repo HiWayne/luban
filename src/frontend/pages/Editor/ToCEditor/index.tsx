@@ -2,66 +2,66 @@ import {
   MutableRefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import { loadMicroApp, MicroApp } from 'qiankun';
-import styled from 'styled-components';
 import { isExist } from '@duitang/dt-base';
-import { Button, Input, notification } from 'antd';
+import { Button, Card, Form, Input, message, notification } from 'antd';
 import shallow from 'zustand/shallow';
 import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
-import { HighLightCodeEditor } from '@/frontend/components';
+import { Flex } from '@/frontend/components';
 import * as compileFunctions from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/plugins';
 import type { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ConfigPanel, TemplateConfig } from '../components';
 import {
-  ConfigPanel,
-  ComponentsSelectArea,
-  ComponentItem,
-  TemplateConfig,
-  TemplateList,
+  BasicComponents,
+  PreviewSourceCode,
+  TemplateMarket,
+  SimulateReal,
 } from './components';
 import useStore from '@/frontend/store';
-import { useCreateTemplateApi } from './api';
+import { useCreateTemplateApi } from '../api';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
-import { useEditorInteractive } from './hooks';
+import { useEditorInteractive } from '../hooks';
 import { request } from '@/frontend/utils';
-import { addConfigToMap, addNodeASTToMap, createUniqueId } from './utils';
+import {
+  addConfigToMap,
+  addNodeASTToMap,
+  createUniqueId,
+  getComponentOfNodeAST,
+} from '../utils';
 import { NodeAST } from '@/frontend/types';
-import { getComponentOfNodeAST } from './utils/operateNodeAST';
+import { OutputPageArea } from './components/OutputPageArea';
+import { DragContext } from './DragProvider';
 
 export const toCComponents = Object.values(compileFunctions)
   .map((compileFunction) => (compileFunction as any).plugin as ToCComponent)
   .sort((a, b) => a.sort - b.sort);
 
-const Title = styled.h3`
-  margin: 20px 0 12px 0;
-`;
+export const KEY = 'lubanApp';
 
-const LightText = styled.p`
-  margin: 12px 0;
-  font-size: 10px;
-  color: #aaa;
-`;
-
-const ToCEditor = () => {
-  const { pageModel, currentComponent } = useStore(
+const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
+  const { pageModel, currentComponent, setPageMeta } = useStore(
     (state) => ({
       pageModel: state.editor.pageModel,
       currentComponent: state.editor.currentChooseComponent,
+      setPageMeta: state.editor.setPageMeta,
     }),
     shallow,
   );
 
-  const [key, setKey] = useState('test1');
-  const [content, setContent] = useState(JSON.stringify(pageModel));
+  const [title, setTitle] = useState('未命名');
   const [sourceCode, setSourceCode] = useState('');
   const [templateConfigShow, setTemplateConfigShow] = useState(false);
   const [updateCount, setUpdateCount] = useState(0);
 
   const microAppRef: MutableRefObject<MicroApp | null> = useRef(null);
   const controllerRef: MutableRefObject<AbortController | null> = useRef(null);
+
+  const usedForPage = useMemo(() => type === 'page', [type]);
 
   const { createTemplate } = useCreateTemplateApi();
 
@@ -75,7 +75,7 @@ const ToCEditor = () => {
       const rootNodeAST: NodeAST = {
         id: createUniqueId(),
         parent: null,
-        type: 'BlockContainer',
+        type: 'BasicContainer',
         props: {},
         children: [],
       };
@@ -100,12 +100,16 @@ const ToCEditor = () => {
   }, []);
 
   useEffect(() => {
-    setContent(
-      JSON.stringify({ ...pageModel, meta: { ...pageModel.meta, key } }),
-    );
-  }, [key]);
+    setPageMeta({
+      key: KEY,
+      title,
+    });
+  }, [title]);
 
   const previewPage = useCallback(async () => {
+    if (!pageModel.view) {
+      return;
+    }
     if (controllerRef.current) {
       controllerRef.current.abort();
     }
@@ -116,7 +120,7 @@ const ToCEditor = () => {
     controllerRef.current = controller;
 
     const suffix = getRandomString();
-    const randomKey = `${key}${suffix}`;
+    const randomKey = `${KEY}${suffix}`;
     const tempPageModel: PageModel = {
       ...pageModel,
       meta: { ...pageModel.meta },
@@ -140,7 +144,7 @@ const ToCEditor = () => {
         microAppRef.current = loadMicroApp({
           name: `luban-app-${randomKey}`,
           entry: `${htmlPath}`,
-          container: '#lubanAppContainer',
+          container: '#lubanAppContainer-development',
           props: {
             setUpdateCount: () => setUpdateCount((count) => count + 1),
           },
@@ -150,39 +154,14 @@ const ToCEditor = () => {
   }, [pageModel]);
 
   useEffect(() => {
-    setContent(JSON.stringify(pageModel));
     previewPage();
   }, [pageModel]);
 
-  const runPage = useCallback(async () => {
-    const suffix = getRandomString();
-    const randomKey = `${key}${suffix}`;
-    const tempPageModel: PageModel = {
-      ...pageModel,
-      meta: { ...pageModel.meta },
-    };
-    tempPageModel.meta.key = randomKey;
-    tempPageModel.meta.mode = 'production';
-    const data: any = await request('/api/generatePage/', {
-      method: 'post',
-      body: JSON.stringify(tempPageModel),
-    });
-    if (data && data.data) {
-      const htmlPath = data.data.htmlPath;
-      if (htmlPath) {
-        if (microAppRef.current) {
-          microAppRef.current.unmount();
-        }
-        microAppRef.current = loadMicroApp({
-          name: `luban-app-${randomKey}`,
-          entry: `${htmlPath}`,
-          container: '#lubanAppContainer',
-        });
-      }
-    }
-  }, [pageModel]);
-
   const deploy = useCallback(async () => {
+    if (!pageModel.view) {
+      message.error('页面内容不能为空');
+      return;
+    }
     const tempPageModel: PageModel = {
       ...pageModel,
       meta: { ...pageModel.meta },
@@ -195,15 +174,15 @@ const ToCEditor = () => {
     console.log(data);
   }, [pageModel]);
 
-  const getReactCode = async () => {
+  const getReactCode = useCallback(async () => {
     const code = await fetch('/api/compileToSourceCode/', {
       method: 'post',
-      body: content,
+      body: JSON.stringify(pageModel),
     })
       .then((response) => response.json())
       .then((json) => json.data);
     setSourceCode(code);
-  };
+  }, [pageModel]);
 
   const openTemplateConfigModal = useCallback(() => {
     setTemplateConfigShow(true);
@@ -227,91 +206,89 @@ const ToCEditor = () => {
     [],
   );
 
+  const dragContextValue = useMemo(
+    () => ({ onDragStart, onDragEnd, onDragOver }),
+    [],
+  );
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100vw',
-        gap: '20px',
-      }}>
-      <div style={{ flex: '0 0 400px' }}>
-        {/* <Input value={key} onChange={(e) => setKey(e.target.value)} />
-        <Input.TextArea
-          style={{ width: '400px', height: '200px' }}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        /> */}
-        <Title>基础组件</Title>
-        <LightText>可拖动到指定位置，若点击将在页面末尾添加</LightText>
-        <ComponentsSelectArea>
-          {/* toC */}
-          {toCComponents.map((component) => (
-            <ComponentItem
-              data={component}
-              key={component.name}
-              onDragStart={onDragStart}
-              onDragOver={onDragOver}
-              onDragEnd={onDragEnd}
-            />
-          ))}
-        </ComponentsSelectArea>
-        <div style={{ marginTop: '20px' }}>
-          <Button
-            style={{ marginLeft: '20px' }}
-            onClick={openTemplateConfigModal}>
-            保存为模板
-          </Button>
-          <Button style={{ marginLeft: '20px' }} onClick={runPage}>
-            运行真实页面
-          </Button>
-          <Button style={{ marginLeft: '20px' }} onClick={deploy}>
-            发布
-          </Button>
-        </div>
-        <Title>模板市场</Title>
-        <TemplateList />
-        <div style={{ marginTop: '20px' }}>
-          <Button onClick={getReactCode}>预览代码</Button>
-        </div>
-        <div>
-          <HighLightCodeEditor
-            language="jsx"
-            code={sourceCode}
-            onChange={setSourceCode}
-            style={{ width: '400px' }}
-            wrapperStyle={{
-              width: '400px',
-              height: '300px',
-            }}
-          />
-          {/* <Input.TextArea
-          style={{ width: '300px', height: '300px' }}
-          value={sourceCode}
-          onChange={(e) => setSourceCode(e.target.value)}
-        /> */}
-        </div>
-      </div>
-      <div
-        id="lubanAppContainer"
+    <DragContext.Provider value={dragContextValue}>
+      <Flex
         style={{
-          marginTop: '5vh',
-          position: 'relative',
-          width: '375px',
-          height: '90vh',
-          border: '1px solid #ddd',
+          width: '100vw',
+          gap: '80px',
         }}
-        key="container"
-      />
-      <div>
+        alignItems="flex-start">
+        <div style={{ flex: '0 0 400px', height: '100vh', overflow: 'auto' }}>
+          {usedForPage ? (
+            <Form style={{ margin: '24px 0 0 24px' }}>
+              <Form.Item label="页面标题">
+                <Input
+                  style={{ width: '200px' }}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </Form.Item>
+            </Form>
+          ) : null}
+          {usedForPage ? null : (
+            <Card style={{ marginTop: '20px' }}>
+              <BasicComponents />
+            </Card>
+          )}
+          <div style={{ marginTop: '20px' }}>
+            {usedForPage ? null : (
+              <Button
+                type="primary"
+                style={{ marginLeft: '20px' }}
+                onClick={openTemplateConfigModal}>
+                保存为模板
+              </Button>
+            )}
+            {usedForPage ? (
+              <Button
+                type="primary"
+                style={{ marginLeft: '20px' }}
+                onClick={deploy}>
+                发布
+              </Button>
+            ) : null}
+          </div>
+          <Card style={{ marginTop: '20px' }}>
+            <TemplateMarket />
+          </Card>
+          {usedForPage ? (
+            <Card style={{ marginTop: '20px' }}>
+              <BasicComponents />
+            </Card>
+          ) : null}
+        </div>
+        <Flex
+          style={{ flex: '0 0 auto' }}
+          direction="column"
+          justifyContent="center"
+          alignItems="flex-end">
+          <Flex alignItems="center" style={{ marginBottom: '12px' }}>
+            {usedForPage ? (
+              <PreviewSourceCode
+                sourceCode={sourceCode}
+                setSourceCode={setSourceCode}
+                getReactCode={getReactCode}
+              />
+            ) : null}
+            <SimulateReal />
+          </Flex>
+          <OutputPageArea mode="development" />
+        </Flex>
         <ConfigPanel data={currentComponent} onDrop={onDrop} />
-      </div>
-      <TemplateConfig
-        open={templateConfigShow}
-        onOk={createTemplateAndCloseModal}
-        onCancel={closeTemplateConfigModal}
-        type="create"
-      />
-    </div>
+        <TemplateConfig
+          open={templateConfigShow}
+          onOk={createTemplateAndCloseModal}
+          onCancel={closeTemplateConfigModal}
+          type="create"
+        />
+      </Flex>
+    </DragContext.Provider>
   );
 };
 

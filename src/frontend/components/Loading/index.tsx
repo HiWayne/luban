@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import styled from 'styled-components';
-import loadingIcon from '@/frontend/assets/loading.svg';
+import { Spin } from 'antd';
 
 const globalStyle = `
 position: fixed;
@@ -9,6 +9,11 @@ top: 0;
 right: 0;
 bottom: 0;
 margin: auto;
+display: flex;
+justify-content: center;
+align-items: center;
+width: 200px;
+height: 200px;
 `;
 
 const inlineStyle = `
@@ -18,6 +23,7 @@ const inlineStyle = `
 const blockStyle = `
   display: block;
   margin: 0 auto;
+  text-align: center;
 `;
 
 type LoadingPropsType = 'global' | 'inline' | 'block';
@@ -26,7 +32,7 @@ interface LoadingProps {
   // eslint-disable-next-line react/no-unused-prop-types
   type?: LoadingPropsType;
   // eslint-disable-next-line react/no-unused-prop-types
-  size?: number;
+  size?: 'small' | 'default' | 'large';
   className?: string;
 }
 
@@ -37,22 +43,11 @@ const styleMap: Record<LoadingPropsType, string> = {
 };
 
 export const Loading = styled(
-  forwardRef<any, LoadingProps>(({ className }, ref) => (
-    <div ref={ref} className={className} />
+  forwardRef<any, LoadingProps>(({ className, size }, ref) => (
+    <div className={className} ref={ref}>
+      <Spin size={size} />
+    </div>
   )),
 )`
   ${(props) => styleMap[props.type || 'global']}
-  width: ${(props) => (props.size ? `${props.size}px` : '48px')};
-  height: ${(props) => (props.size ? `${props.size}px` : '48px')};
-  background: url('${loadingIcon}') center / cover no-repeat;
-  animation: 2s Round linear infinite;
-
-  @keyframes Round {
-    0% {
-      transform: rotate(0);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
 `;

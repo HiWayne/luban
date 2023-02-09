@@ -10,13 +10,12 @@ import {
   Avatar as AntdAvatar,
   Select,
   notification,
-  Spin,
 } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { InputRef } from 'antd';
 import { TweenOneGroup } from 'rc-tween-one';
 import { debounce, getParams } from '@duitang/dt-base';
-import { Avatar } from '@/frontend/components';
+import { Avatar, Loading } from '@/frontend/components';
 import { UserResponseDTO } from '@/backend/service/userService/types';
 import { useSearchUsers } from './api';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
@@ -158,7 +157,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
 
   const { users, usersMap, searchUsers } = useSearchUsers();
 
-  const pageType = useMemo(() => getParams().type as 'toc' | 'tob', []);
+  const pageType = useMemo(() => getParams().ui as 'toc' | 'tob', []);
 
   const searchResultList = useMemo(
     () =>
@@ -209,15 +208,16 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       });
       return;
     }
-    const config: Record<number, any> = (
-      pageViewModel.children as any[]
-    ).reduce((result: any, child: NodeAST) => {
-      iterateNodeAST(child, (nodeAST) => {
-        result[nodeAST.id] = findConfigFromMap(nodeAST.id);
-      });
-      return result;
-    }, {});
-    pageViewModel.convergent = true;
+    const config: Record<number, any> = {};
+    let view;
+    if (pageViewModel.children.length === 1) {
+      view = pageViewModel.children[0];
+    } else {
+      view = pageViewModel;
+    }
+    iterateNodeAST(view, (nodeAST) => {
+      config[nodeAST.id] = findConfigFromMap(nodeAST.id);
+    });
     const templateData: SaveTemplateRequestDTO = {
       name,
       desc,
@@ -226,7 +226,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       tags,
       collaborators: collaborators.map((collaborator) => collaborator.id),
       type: pageType,
-      view: pageViewModel,
+      view: { ...view, convergent: true } as any,
       config,
       preview: preview || undefined,
     };
@@ -306,7 +306,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
             filterOption={false}
             onSearch={handleSearch}
             onChange={handleSearchConfirm}
-            notFoundContent={searchLoading ? <Spin size="small" /> : null}
+            notFoundContent={searchLoading ? <Loading size="small" /> : null}
             options={searchResultList}
             loading={searchLoading}
           />

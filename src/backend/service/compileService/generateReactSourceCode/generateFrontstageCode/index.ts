@@ -3,13 +3,12 @@ import type { Context, Declarations } from '..';
 import { NodeAST } from '@/backend/types/frontstage';
 import {
   generateCodeOfScrollList,
-  generateCodeOfBlockContainer,
-  generateCodeOfInlineContainer,
   generateCodeOfFlexContainer,
   generateCodeOfGridContainer,
   generateCodeOfImage,
   generateCodeOfText,
   generateCodeOfParagraph,
+  generateCodeOfBasicContainer,
 } from './plugins';
 
 export const generateCodeByNodeAST = (
@@ -38,11 +37,8 @@ export const generateCodeByNodeAST = (
         context,
       );
       break;
-    case 'BlockContainer':
-      output = generateCodeOfBlockContainer(nodeAST, id, children, context);
-      break;
-    case 'InlineContainer':
-      output = generateCodeOfInlineContainer(nodeAST, id, children, context);
+    case 'BasicContainer':
+      output = generateCodeOfBasicContainer(nodeAST, id, children, context);
       break;
     case 'FlexContainer':
       output = generateCodeOfFlexContainer(nodeAST, id, children, context);

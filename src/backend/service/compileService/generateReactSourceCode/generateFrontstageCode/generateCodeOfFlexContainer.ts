@@ -9,7 +9,6 @@ import {
 } from '../utils';
 import {
   commonContainerConfigs,
-  layoutConfig,
   ToCComponent,
 } from './toCComponentsPluginsConfig';
 
@@ -104,7 +103,7 @@ generateCodeOfFlexContainer.plugin = {
   name: 'Flex布局容器',
   type: 'FlexContainer',
   description:
-    '可以控制内容按水平或垂直方向排列，以及它们的对齐位置。本身没有内容，里面需要添加内容。',
+    '可以控制内容按水平或垂直方向排列，可以控制内容的对齐方式。本身没有内容，里面需要添加内容。',
   defaultAST: {
     type: 'FlexContainer',
     props: {
@@ -116,7 +115,6 @@ generateCodeOfFlexContainer.plugin = {
     children: [],
   },
   configs: [
-    layoutConfig,
     {
       name: '排列方向',
       description: '内部内容的排列方向。"row"-水平排列、"column"-垂直排列。',

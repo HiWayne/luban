@@ -205,7 +205,7 @@ export const MarginCssConfig: FC<MarginCssConfigProps> = ({
         ),
       },
     ],
-    [number, top, bottom, left, right],
+    [number, numberUnit, top, bottom, left, right],
   );
 
   return (

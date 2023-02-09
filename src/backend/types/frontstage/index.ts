@@ -3,8 +3,7 @@ import { CSSProperties } from 'react';
 import { Action, BuiltInTypeCode, Condition, VariableName } from '..';
 
 type NodeType =
-  | 'BlockContainer'
-  | 'InlineContainer'
+  | 'BasicContainer'
   | 'ScrollList'
   | 'Image'
   | 'Text'
@@ -13,6 +12,7 @@ type NodeType =
   | 'GridContainer';
 
 interface CommonContainerProps {
+  layout?: 'block' | 'inline';
   width?: number | string;
   height?: number | string;
   margin?: number | string;
@@ -27,7 +27,7 @@ interface CommonContainerProps {
   action?: Action;
 }
 
-export interface BlockContainerProps extends CommonContainerProps {}
+export interface BasicContainerProps extends CommonContainerProps {}
 
 export interface InlineContainerProps extends CommonContainerProps {}
 
@@ -39,7 +39,6 @@ type FlexAlign =
   | 'space-between';
 
 export interface FlexContainerProps extends CommonContainerProps {
-  layout?: 'block' | 'inline';
   direction?: 'row' | 'column';
   justifyContent?: FlexAlign;
   alignItems?: FlexAlign;
@@ -47,7 +46,6 @@ export interface FlexContainerProps extends CommonContainerProps {
 
 export interface GridContainerProps extends CommonContainerProps {
   data?: VariableName;
-  layout?: 'block' | 'inline';
   // 列数
   columns?: number;
   // 间隙（最边缘的item与外层没有间隙），10-上下左右间隙10px、"10vw"-上下左右间隙10vw、"10vw 20px"-上下10vw间隙 左右20px间隙
@@ -143,8 +141,7 @@ export interface NodeAST {
   // 左变量 === 右值 ? 渲染 : null
   condition?: Condition;
   props?:
-    | BlockContainerProps
-    | InlineContainerProps
+    | BasicContainerProps
     | FlexContainerProps
     | GridContainerProps
     | ScrollListProps

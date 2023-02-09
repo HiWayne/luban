@@ -77,19 +77,32 @@ export const actionConfig: Config = {
   propName: 'action',
 };
 
+export const layoutConfig: Config = {
+  name: '布局类型',
+  description:
+    '默认块级(block)。块级(block): 该容器会占满一行（哪怕实际内容宽度不足一行，下面的内容依然会另起一行）；行内(inline)-该容器宽度默认由内容决定，多个inline(单个不满一行时)可以放在一行。',
+  required: false,
+  propName: 'layout',
+  formSchema: {
+    type: 'select',
+    options: [
+      {
+        label: '块级',
+        value: 'block',
+      },
+      {
+        label: '行内',
+        value: 'inline',
+      },
+    ],
+  },
+  defaultConfig: 'block',
+};
+
 export const commonContainerConfigs: Config[] = [
-  {
-    ...widthConfig,
-    defaultConfig: {
-      value: 100,
-    },
-  },
-  {
-    ...heightConfig,
-    defaultConfig: {
-      value: 100,
-    },
-  },
+  layoutConfig,
+  widthConfig,
+  heightConfig,
   marginConfig,
   paddingConfig,
   borderRadiusConfig,
@@ -260,28 +273,6 @@ export const commonTextConfig = [
   textAlignConfig,
   textDecorationConfig,
 ];
-
-export const layoutConfig: Config = {
-  name: '布局类型',
-  description:
-    '默认块级(block)。块级(block): 该容器会占满一行（哪怕实际内容宽度不足一行，下面的内容依然会另起一行）；行内(inline)-该容器宽度默认由内容决定，多个inline(单个不满一行时)可以放在一行。',
-  required: false,
-  propName: 'layout',
-  formSchema: {
-    type: 'select',
-    options: [
-      {
-        label: '块级',
-        value: 'block',
-      },
-      {
-        label: '行内',
-        value: 'inline',
-      },
-    ],
-  },
-  defaultConfig: 'block',
-};
 
 export const listDataConfig: Config = {
   name: '数据',

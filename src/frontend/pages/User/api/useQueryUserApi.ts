@@ -10,7 +10,9 @@ export const useQueryUserApi = (requestConfig?: RequestConfig) => {
   );
   const [queriedUser, setQueriedUser] = useState(null);
   const [ownLoading, setLoading] = useState(false);
+  const [queryLoading, setQueryLoading] = useState(false);
   const ownLoadingRef = useRef(false);
+  const queryLoadingRef = useRef(false);
 
   const queryOwnUser = useCallback(async () => {
     setLoading(true);
@@ -30,11 +32,11 @@ export const useQueryUserApi = (requestConfig?: RequestConfig) => {
   }, []);
 
   const queryUserById = useCallback(async (id: number) => {
-    setLoading(true);
-    ownLoadingRef.current = true;
+    setQueryLoading(true);
+    queryLoadingRef.current = true;
     const response = await request(`/api/get/user/?id=${id}`).finally(() => {
-      setLoading(false);
-      ownLoadingRef.current = false;
+      setQueryLoading(false);
+      queryLoadingRef.current = false;
     });
     const userData = response?.data;
     if (userData) {
@@ -47,6 +49,8 @@ export const useQueryUserApi = (requestConfig?: RequestConfig) => {
     queriedUser,
     ownLoading,
     ownLoadingRef,
+    queryLoading,
+    queryLoadingRef,
     queryOwnUser,
     queryUserById,
   };

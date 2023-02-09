@@ -17,7 +17,7 @@ const Editor = () => {
 
   const RenderEditor = renderMap[ui];
 
-  return <RenderEditor />;
+  return <RenderEditor type={type} />;
 };
 
 export default Editor;

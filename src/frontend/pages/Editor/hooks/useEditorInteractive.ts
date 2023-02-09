@@ -1,16 +1,25 @@
 import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import shallow from 'zustand/shallow';
-import { message, Modal } from 'antd';
+import { isExist } from '@duitang/dt-base';
+import { Modal } from 'antd';
 import {
   getElementByLuBanId,
   getLuBanIdFromElement,
 } from '@/backend/service/compileService/generateReactSourceCode/utils';
-import { findConfigFromMap, findNodeASTById, setNodeASTMap } from '../utils';
+import {
+  findConfigFromMap,
+  findNodeASTById,
+  setNodeASTMap,
+  getComponentOfNodeAST,
+  isPromise,
+  findConvergentNodeAST,
+  findChildrenOfNodeAST,
+} from '../utils';
 import useStore from '@/frontend/store';
 import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
 import { NodeAST } from '@/frontend/types';
 import { useModifyPage } from './useModifyPage';
-import { getComponentOfNodeAST } from '../utils/operateNodeAST';
+import { TemplateDetailResponseDTO } from '@/backend/service/templateService/types';
 
 export const useEditorInteractive = (update: any) => {
   const { currentChooseComponent, setCurrentChooseComponent } = useStore(
@@ -21,7 +30,7 @@ export const useEditorInteractive = (update: any) => {
     shallow,
   );
   const draggedTargetRef: MutableRefObject<{
-    nodeAST?: NodeAST;
+    nodeAST?: NodeAST | Promise<TemplateDetailResponseDTO | null>;
     component: ToCComponent;
     element: Element;
   } | null> = useRef(null);
@@ -29,6 +38,7 @@ export const useEditorInteractive = (update: any) => {
 
   const {
     addComponentFromInitial,
+    addComponentFromTemplate,
     removeComponent,
     moveComponent,
     copyComponentToParent,
@@ -147,7 +157,7 @@ export const useEditorInteractive = (update: any) => {
               id,
             };
 
-            const setRootButton = createSetRootButton();
+            const setRootButton = createSetRootButton(nodeAST.convergent);
             setRootButton.addEventListener('click', (e) => {
               e.stopPropagation();
               const element = e.target as HTMLElement;
@@ -169,10 +179,35 @@ export const useEditorInteractive = (update: any) => {
             const copyButton = createCopyButton();
             copyButton.addEventListener('click', (e) => {
               e.stopPropagation();
-              copyComponentToParent(id);
-              const parentId = findNodeASTById(nodeAST.parent!)?.id;
-              if (parentId) {
-                openSpecifyEditorPanel(parentId);
+              const convergentNodeAST = findConvergentNodeAST(nodeAST.id);
+              if (convergentNodeAST) {
+                copyComponentToParent(convergentNodeAST.id);
+                const convergentNodeASTParent = findNodeASTById(
+                  convergentNodeAST.parent!,
+                );
+                if (convergentNodeASTParent) {
+                  const children = findChildrenOfNodeAST(
+                    convergentNodeASTParent,
+                  );
+                  if (children) {
+                    const lastChild = children[children.length - 1];
+                    if (lastChild) {
+                      openSpecifyEditorPanel(lastChild.id);
+                    }
+                  }
+                }
+              } else {
+                copyComponentToParent(id);
+                const parent = findNodeASTById(nodeAST.parent!);
+                if (parent) {
+                  const children = findChildrenOfNodeAST(parent);
+                  if (children) {
+                    const lastChild = children[children.length - 1];
+                    if (lastChild) {
+                      openSpecifyEditorPanel(lastChild.id);
+                    }
+                  }
+                }
               }
             });
             targetElement.appendChild(copyButton);
@@ -224,12 +259,15 @@ export const useEditorInteractive = (update: any) => {
   }, []);
 
   const showShortCutsButtons = useCallback((element: HTMLElement) => {
-    element.classList.add('editor-shortcuts');
     const id = getLuBanIdFromElement(element);
     if (id !== null) {
-      const targetComponent = getComponentOfNodeAST(id);
-      if (targetComponent && !targetComponent.emptyTag) {
-        appendShortcutsButtons(element, targetComponent);
+      const nodeAST = findNodeASTById(id);
+      if (nodeAST && nodeAST.parent !== null) {
+        element.classList.add('editor-shortcuts');
+        const targetComponent = getComponentOfNodeAST(id);
+        if (targetComponent && !targetComponent.emptyTag) {
+          appendShortcutsButtons(element, targetComponent);
+        }
       }
     }
   }, []);
@@ -245,7 +283,7 @@ export const useEditorInteractive = (update: any) => {
   const onDragStart = useCallback(function (
     this: HTMLElement,
     event: DragEvent,
-    component?: ToCComponent,
+    data?: ToCComponent | Promise<TemplateDetailResponseDTO | null>,
   ) {
     event.stopPropagation();
     const element = this;
@@ -257,23 +295,7 @@ export const useEditorInteractive = (update: any) => {
         if (nodeAST?.convergent) {
           targetNodeAST = nodeAST;
         } else {
-          const findNodeASTIsRoot = (_nodeAST: NodeAST): NodeAST | null => {
-            if (_nodeAST.convergent) {
-              return _nodeAST;
-            } else {
-              const parentId = _nodeAST.parent;
-              if (parentId !== null) {
-                const parentNodeAST = findNodeASTById(parentId);
-                if (parentNodeAST) {
-                  return findNodeASTIsRoot(parentNodeAST);
-                } else {
-                  return null;
-                }
-              }
-              return null;
-            }
-          };
-          targetNodeAST = findNodeASTIsRoot(nodeAST) || nodeAST;
+          targetNodeAST = findConvergentNodeAST(nodeAST.id) || nodeAST;
         }
         const targetComponent = getComponentOfNodeAST(targetNodeAST.id);
         if (targetComponent) {
@@ -284,11 +306,28 @@ export const useEditorInteractive = (update: any) => {
           };
         }
       }
-    } else if (component) {
-      draggedTargetRef.current = {
-        component,
-        element,
-      };
+    } else if (data) {
+      if ((data as any).name && (data as any).level) {
+        draggedTargetRef.current = {
+          component: data as ToCComponent,
+          element,
+        };
+      } else if (isPromise(data)) {
+        (data as Promise<TemplateDetailResponseDTO | null>).then(
+          (templateDetail) => {
+            if (templateDetail) {
+              const component = getComponentOfNodeAST(templateDetail.view);
+              if (component) {
+                draggedTargetRef.current = {
+                  nodeAST: data as Promise<TemplateDetailResponseDTO | null>,
+                  component,
+                  element,
+                };
+              }
+            }
+          },
+        );
+      }
     }
   },
   []);
@@ -329,44 +368,50 @@ export const useEditorInteractive = (update: any) => {
   const onDrop = useCallback(function (
     this: HTMLElement,
     event: Event,
-    selfId?: number,
+    dropId?: number | null,
   ) {
     event.stopPropagation();
     event.preventDefault();
     const element = this;
+    dropId = isExist(dropId) ? dropId : getLuBanIdFromElement(element);
     if (
+      typeof dropId === 'number' &&
       draggedTargetRef.current &&
       draggedTargetRef.current.element !== element
     ) {
-      if (selfId) {
-        const draggedNodeAST = draggedTargetRef.current.nodeAST;
-        if (draggedNodeAST) {
-          const targetComponent = getComponentOfNodeAST(draggedNodeAST.id);
-          if (targetComponent) {
-            moveComponent(draggedNodeAST, selfId);
-            message.success(`成功移动【${targetComponent.name}】组件`, 2);
-          }
-        } else {
-          addComponentFromInitial(draggedTargetRef.current.component, selfId);
-        }
-        draggedTargetRef.current = null;
-        return;
+      const draggedNodeAST = draggedTargetRef.current.nodeAST;
+      if (draggedNodeAST && !isPromise(draggedNodeAST)) {
+        moveComponent(draggedNodeAST as NodeAST, dropId);
+        openSpecifyEditorPanel((draggedNodeAST as NodeAST).id);
+      } else if (draggedNodeAST && isPromise(draggedNodeAST)) {
+        (draggedNodeAST as Promise<TemplateDetailResponseDTO | null>).then(
+          (templateDetail) => {
+            if (templateDetail) {
+              const targetComponent = getComponentOfNodeAST(
+                templateDetail.view,
+              );
+              if (targetComponent) {
+                addComponentFromTemplate(templateDetail, dropId as number);
+                const dropNodeAST = findNodeASTById(dropId as number);
+                if (dropNodeAST) {
+                  const dropNodeASTChildren =
+                    findChildrenOfNodeAST(dropNodeAST);
+                  if (dropNodeASTChildren) {
+                    const lastChild =
+                      dropNodeASTChildren[dropNodeASTChildren.length - 1];
+                    if (lastChild) {
+                      openSpecifyEditorPanel(lastChild.id);
+                    }
+                  }
+                }
+              }
+            }
+          },
+        );
+      } else {
+        addComponentFromInitial(draggedTargetRef.current.component, dropId);
       }
-
-      const id = getLuBanIdFromElement(element);
-      if (id !== null) {
-        const draggedNodeAST = draggedTargetRef.current.nodeAST;
-        if (draggedNodeAST) {
-          const targetComponent = getComponentOfNodeAST(draggedNodeAST.id);
-          if (targetComponent) {
-            moveComponent(draggedNodeAST, id);
-            message.success(`成功移动【${targetComponent.name}】组件`, 2);
-          }
-        } else {
-          addComponentFromInitial(draggedTargetRef.current.component, id);
-        }
-        draggedTargetRef.current = null;
-      }
+      draggedTargetRef.current = null;
     }
   },
   []);
@@ -393,8 +438,8 @@ export const useEditorInteractive = (update: any) => {
     const id = getLuBanIdFromElement(element);
     if (id && prevOpenedIdRef.current !== id) {
       unHighLightComponent(element);
+      hiddenShortCutsButtons(element);
     }
-    hiddenShortCutsButtons(element);
   }, []);
 
   useEffect(() => {
@@ -405,7 +450,6 @@ export const useEditorInteractive = (update: any) => {
     (componentsWrapperElements as NodeListOf<HTMLElement>).forEach(
       (element: HTMLElement, index) => {
         if (index === 0) {
-          element.style.minWidth = '375px';
           element.style.minHeight = '90vh';
         } else if (element.tagName !== 'IMG') {
           const { width, height } = element.getBoundingClientRect();
@@ -436,6 +480,7 @@ export const useEditorInteractive = (update: any) => {
       if (element) {
         prevOpenedIdRef.current = currentId;
         highLightComponent(element);
+        showShortCutsButtons(element);
       }
     }
     return () => {
@@ -464,6 +509,7 @@ export const useEditorInteractive = (update: any) => {
           const element = getElementByLuBanId(id) as HTMLElement;
           if (element) {
             unHighLightComponent(element);
+            hiddenShortCutsButtons(element);
           }
         }
       }
@@ -471,6 +517,7 @@ export const useEditorInteractive = (update: any) => {
       if (element) {
         prevOpenedIdRef.current = currentId;
         highLightComponent(element);
+        showShortCutsButtons(element);
       }
     } else if (prevOpenedIdRef.current !== null) {
       const id = prevOpenedIdRef.current;
@@ -478,6 +525,7 @@ export const useEditorInteractive = (update: any) => {
       const element = getElementByLuBanId(id) as HTMLElement;
       if (element) {
         unHighLightComponent(element);
+        hiddenShortCutsButtons(element);
       }
     }
   }, [currentChooseComponent]);

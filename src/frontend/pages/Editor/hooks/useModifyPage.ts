@@ -8,7 +8,8 @@ import {
   addConfigToMap,
   addNodeASTToMap,
   createUniqueId,
-  prepareNodeASTs,
+  getComponentOfNodeAST,
+  prepareNodeAST,
   removeConfigFromMap,
   removeNodeASTFromMap,
   setNodeASTMap,
@@ -17,25 +18,37 @@ import {
 } from '../utils';
 import { NodeAST } from '@/frontend/types';
 import { findPathById, iterateNodeAST } from '../utils/operateNodeAST';
+import { TemplateDetailResponseDTO } from '@/backend/service/templateService/types';
 
 export const useModifyPage = () => {
-  const addComponentFromExist = useCallback(
-    (nodeAST: NodeAST, config: any, targetId?: number) => {
-      const { addNodeAST: addNodeInStore, pageModel } =
-        useStore.getState().editor;
-      nodeAST = {
-        ...nodeAST,
-        parent: targetId !== undefined ? targetId : pageModel.view.id,
-      };
-      // 在store中添加
-      addNodeInStore(nodeAST, targetId);
-      // 在高性能nodeAST数据结构中添加
-      addNodeASTToMap(nodeAST);
-      // 在nodeAST配置缓存添加
-      addConfigToMap(nodeAST.id, config);
-    },
-    [],
-  );
+  // const addComponentFromExist = useCallback(
+  //   (nodeAST: NodeAST, config: any, targetId?: number) => {
+  //     const {
+  //       addNodeAST: addNodeInStore,
+  //       pageModel,
+  //       setCurrentChooseComponent,
+  //     } = useStore.getState().editor;
+  //     nodeAST = {
+  //       ...nodeAST,
+  //       parent: targetId !== undefined ? targetId : pageModel.view.id,
+  //     };
+  //     // 在store中添加
+  //     addNodeInStore(nodeAST, targetId);
+  //     // 在高性能nodeAST数据结构中添加
+  //     addNodeASTToMap(nodeAST);
+  //     // 在nodeAST配置缓存添加
+  //     addConfigToMap(nodeAST.id, config);
+  //     const component = getComponentOfNodeAST(nodeAST);
+  //     if (component) {
+  //       // 打开对应的配置面板
+  //       setCurrentChooseComponent({
+  //         component: { ...component, id: nodeAST.id },
+  //         config,
+  //       });
+  //     }
+  //   },
+  //   [],
+  // );
 
   const addComponentFromInitial = useCallback(
     (data: ToCComponent, targetId?: number) => {
@@ -75,16 +88,29 @@ export const useModifyPage = () => {
   );
 
   const addComponentFromTemplate = useCallback(
-    (view: NodeAST, config: Record<number, any>, target?: number) => {
-      const { addNodeAST: addNodeInStore, pageModel } =
-        useStore.getState().editor;
-      const templateNodeASTs = prepareNodeASTs(
+    (templateDetail: TemplateDetailResponseDTO, targetId?: number) => {
+      const { view, config, name } = templateDetail;
+      const {
+        addNodeAST: addNodeInStore,
+        pageModel,
+        setCurrentChooseComponent,
+      } = useStore.getState().editor;
+      const { view: templateNodeAST, config: newConfig } = prepareNodeAST(
         view,
         config,
-        target !== undefined ? target : pageModel.view.id,
+        targetId !== undefined ? targetId : pageModel.view.id,
       );
-      addNodeInStore(cloneDeep(templateNodeASTs));
-      message.success('成功添加模板', 2);
+      const clonedTemplateNodeAST = cloneDeep(templateNodeAST);
+      addNodeInStore(clonedTemplateNodeAST, targetId);
+      message.success(`成功使用【${name}】模板`, 2);
+      const component = getComponentOfNodeAST(clonedTemplateNodeAST);
+      if (component) {
+        // 打开对应的配置面板
+        setCurrentChooseComponent({
+          component: { ...component, id: clonedTemplateNodeAST.id },
+          config: newConfig[clonedTemplateNodeAST.id],
+        });
+      }
     },
     [],
   );
@@ -135,6 +161,10 @@ export const useModifyPage = () => {
     removeNodeASTInStore(newNodeAST.id);
     addNodeASTInStore(newNodeAST, targetId);
     setNodeASTMap(newNodeAST.id, newNodeAST);
+    const targetComponent = getComponentOfNodeAST(nodeAST);
+    if (targetComponent) {
+      message.success(`成功移动【${targetComponent.name}】组件`, 2);
+    }
   }, []);
 
   const copyComponentToParent = useCallback((id: number) => {
@@ -143,7 +173,7 @@ export const useModifyPage = () => {
   }, []);
 
   return {
-    addComponentFromExist,
+    // addComponentFromExist,
     addComponentFromInitial,
     addComponentFromTemplate,
     updateComponent,

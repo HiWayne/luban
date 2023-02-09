@@ -49,8 +49,7 @@ export interface ToCComponent {
   emptyTag?: boolean;
   name: string;
   type:
-    | 'BlockContainer'
-    | 'InlineContainer'
+    | 'BasicContainer'
     | 'FlexContainer'
     | 'GridContainer'
     | 'ScrollList'

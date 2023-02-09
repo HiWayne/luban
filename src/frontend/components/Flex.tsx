@@ -12,6 +12,7 @@ interface FlexProps {
   children?: JSX.Element | string | null | (JSX.Element | string | null)[];
   style?: CSSProperties;
   onClick?: MouseEventHandler;
+  ref?: any;
 }
 
 export const Flex = styled<FC<FlexProps>>(

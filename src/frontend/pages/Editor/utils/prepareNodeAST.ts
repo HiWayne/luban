@@ -19,22 +19,23 @@ export const createResetId = () => {
   };
 };
 
-export const prepareNodeASTs = (
+export const prepareNodeAST = (
   view: NodeAST,
   config: Record<number, any>,
   targetId: number,
 ) => {
   const resetId = createResetId();
+  const newConfig: Record<number, any> = {};
 
   if (view) {
     iterateNodeAST(view, (nodeAST) => {
       const oldId = nodeAST.id;
-      resetId(nodeAST, targetId);
+      const { newId } = resetId(nodeAST, targetId);
       addNodeASTToMap(nodeAST);
-      console.log(oldId, nodeAST.id, view);
       addConfigToMap(nodeAST.id, config[oldId]);
+      newConfig[newId] = config[oldId];
     });
   }
 
-  return view;
+  return { view, config: newConfig };
 };

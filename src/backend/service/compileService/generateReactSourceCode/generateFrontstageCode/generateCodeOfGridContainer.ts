@@ -9,7 +9,6 @@ import {
 } from '../utils';
 import {
   commonContainerConfigs,
-  layoutConfig,
   listDataConfig,
   renderItemConfig,
   ToCComponent,
@@ -177,13 +176,10 @@ export const generateCodeOfGridContainer = (
   const componentCall = `<${componentName}${createIdAttrInDev(
     context.development,
     id,
-  )}${generateCodeOfProp(
-    'data',
-    data,
-  )}${generateCodeOfProp('layout', layout)}${generateCodeOfProp(
-    'columns',
-    columns,
-  )}${generateCodeOfProp(
+  )}${generateCodeOfProp('data', data)}${generateCodeOfProp(
+    'layout',
+    layout,
+  )}${generateCodeOfProp('columns', columns)}${generateCodeOfProp(
     'verticalSpace',
     spaceObject.verticalSpace,
   )}${generateCodeOfProp(
@@ -223,7 +219,6 @@ generateCodeOfGridContainer.plugin = {
   },
   configs: [
     listDataConfig,
-    layoutConfig,
     {
       name: '列数',
       description: '网格有多少列',

@@ -30,7 +30,7 @@ export const generateCodeOfReactMpaInPc = async (
         <head>
           <meta charset="UTF-8" />
           <link rel="icon" type="image/svg+xml" href="${meta.icon}" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
           <title>${meta.title}</title>
         </head>
         <body>

@@ -113,6 +113,7 @@ export const request = <T = any>(
                         : headers,
                     }
                   : { headers },
+                config,
               );
             } else {
               if (errorNotify) {

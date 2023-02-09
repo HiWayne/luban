@@ -1,5 +1,5 @@
 const ToBEditor = () => {
-  return null;
+  return <div>ToB</div>;
 };
 
 export default ToBEditor;

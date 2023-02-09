@@ -3,7 +3,7 @@ import { NodeAST } from './types/frontstage';
 
 export const treeDemo: NodeAST = {
   id: 1,
-  type: 'BlockContainer',
+  type: 'BasicContainer',
   props: {
     style: {
       position: 'relative',
@@ -20,7 +20,7 @@ export const treeDemo: NodeAST = {
     },
     {
       id: 16,
-      type: 'BlockContainer',
+      type: 'BasicContainer',
       props: {
         padding: '74px 8px 71px 8px',
         backgroundColor: 'rgb(213, 52, 45)',
@@ -31,8 +31,9 @@ export const treeDemo: NodeAST = {
       children: [
         {
           id: 14,
-          type: 'InlineContainer',
+          type: 'BasicContainer',
           props: {
+            layout: 'inline',
             width: 210,
             height: 52,
             borderRadius: 16,
@@ -61,7 +62,7 @@ export const treeDemo: NodeAST = {
         },
         {
           id: 3,
-          type: 'BlockContainer',
+          type: 'BasicContainer',
           props: {
             padding: '50px 0 22px 2px',
             borderRadius: 16,
@@ -90,8 +91,9 @@ export const treeDemo: NodeAST = {
                     children: [
                       {
                         id: 6,
-                        type: 'InlineContainer',
+                        type: 'BasicContainer',
                         props: {
+                          layout: 'inline',
                           style: {
                             position: 'relative',
                           },
@@ -166,8 +168,9 @@ export const treeDemo: NodeAST = {
             },
             {
               id: 12,
-              type: 'InlineContainer',
+              type: 'BasicContainer',
               props: {
+                layout: 'inline',
                 width: 237,
                 height: 60,
                 backgroundImage:
@@ -203,7 +206,7 @@ export const treeDemo: NodeAST = {
     },
     {
       id: 17,
-      type: 'BlockContainer',
+      type: 'BasicContainer',
       props: {
         padding: '51px 0 0 0',
         style: {
@@ -213,8 +216,9 @@ export const treeDemo: NodeAST = {
       children: [
         {
           id: 56,
-          type: 'InlineContainer',
+          type: 'BasicContainer',
           props: {
+            layout: 'inline',
             width: 210,
             height: 52,
             borderRadius: 16,
@@ -243,7 +247,7 @@ export const treeDemo: NodeAST = {
         },
         {
           id: 18,
-          type: 'BlockContainer',
+          type: 'BasicContainer',
           props: {
             padding: '0 0 0 20px',
           },
@@ -292,8 +296,9 @@ export const treeDemo: NodeAST = {
                 },
                 {
                   id: 23,
-                  type: 'InlineContainer',
+                  type: 'BasicContainer',
                   props: {
+                    layout: 'inline',
                     width: 76,
                     height: 32,
                     borderRadius: 18,

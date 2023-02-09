@@ -12,8 +12,8 @@ import {
 import { UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getParams } from '@duitang/dt-base';
-import { DtIcon, Loading } from '@duitang/dt-react-mobile';
-import { Flex } from '@/frontend/components';
+import { DtIcon } from '@duitang/dt-react-mobile';
+import { Flex, Loading } from '@/frontend/components';
 import { useDeleteUserApi, useQueryUserApi, useUpdateUserApi } from '../api';
 import { UploadImageConfig } from '../../Editor/components/configComponents/UploadImageConfig';
 import { useRegister } from '../hooks';
@@ -143,8 +143,14 @@ const UserUpdater = ({
 
 const Profile = () => {
   const query = getParams() as any;
-  const { user, queriedUser, loading, queryOwnUser, queryUserById } =
-    useQueryUserApi();
+  const {
+    user,
+    queriedUser,
+    ownLoading,
+    queryLoading,
+    queryOwnUser,
+    queryUserById,
+  } = useQueryUserApi();
   const { updateUser: fetchUpdateUserApi } = useUpdateUserApi();
   const { deleteUser: fetchDeleteUserApi } = useDeleteUserApi();
   const [show, setShow] = useState(false);
@@ -209,7 +215,7 @@ const Profile = () => {
     }
   }, [query?.id]);
 
-  return !loading ? (
+  return (isSelf && !ownLoading) || (!isSelf && !queryLoading) ? (
     <>
       <Flex direction="column" justifyContent="flex-start" alignItems="center">
         {userData ? (
@@ -250,7 +256,7 @@ const Profile = () => {
       </Modal>
     </>
   ) : (
-    <Loading type="ring" />
+    <Loading size="large" />
   );
 };
 
