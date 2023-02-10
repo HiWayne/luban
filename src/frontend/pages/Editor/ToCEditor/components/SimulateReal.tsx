@@ -1,5 +1,5 @@
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
-import { Button, message, Modal, Spin } from 'antd';
+import { Button, message, Modal } from 'antd';
 import { PlayCircleOutlined } from '@ant-design/icons';
 import { loadMicroApp, MicroApp } from 'qiankun';
 import { OutputPageArea } from './OutputPageArea';
@@ -7,7 +7,7 @@ import useStore from '@/frontend/store';
 import { PageModel } from '@/backend/types';
 import { request } from '@/frontend/utils';
 import { KEY } from '..';
-import { Loading } from '@/frontend/components';
+import { Flex, Loading } from '@/frontend/components';
 
 export const SimulateReal = () => {
   const [open, setOpen] = useState(false);
@@ -86,10 +86,11 @@ export const SimulateReal = () => {
         style={{
           top: 'calc(5vh - 20px)',
           paddingBottom: 0,
-          textAlign: 'center',
         }}>
         {!loading ? (
-          <OutputPageArea mode="production" />
+          <Flex justifyContent="center" alignItems="center">
+            <OutputPageArea mode="production" />
+          </Flex>
         ) : (
           <Loading size="large" />
         )}

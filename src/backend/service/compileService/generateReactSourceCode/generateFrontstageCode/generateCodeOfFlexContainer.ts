@@ -8,6 +8,7 @@ import {
   createIdAttrInDev,
 } from '../utils';
 import {
+  actionConfig,
   commonContainerConfigs,
   ToCComponent,
 } from './toCComponentsPluginsConfig';
@@ -68,11 +69,17 @@ export const generateCodeOfFlexContainer = (
     ...(style || {}),
   };
 
+  Reflect.ownKeys(styleObject).forEach((styleKey: any) => {
+    if ((styleObject as any)[styleKey] === undefined) {
+      delete (styleObject as any)[styleKey];
+    }
+  });
+
   const onClickCode =
     !context.development && action
       ? createBuiltInTypeCode(
           'function',
-          `async () => {${generateCodeOfAction(action)}}`,
+          `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
         )
       : undefined;
 
@@ -199,6 +206,7 @@ generateCodeOfFlexContainer.plugin = {
         ],
       },
     },
+    actionConfig,
     ...commonContainerConfigs,
   ],
 } as ToCComponent;

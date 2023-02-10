@@ -86,7 +86,7 @@ export const generateCodeOfText = (
     !context.development && action
       ? createBuiltInTypeCode(
           'function',
-          `async () => {${generateCodeOfAction(action)}}`,
+          `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
         )
       : undefined;
 
@@ -160,6 +160,7 @@ generateCodeOfText.plugin = {
         text: '文字文字文字',
       },
     },
+    actionConfig,
     marginConfig,
     paddingConfig,
     widthConfig,

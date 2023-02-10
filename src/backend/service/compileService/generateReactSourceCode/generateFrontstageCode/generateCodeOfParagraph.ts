@@ -7,6 +7,7 @@ import {
   isVariableName,
 } from '../utils';
 import {
+  actionConfig,
   commonTextConfig,
   heightConfig,
   marginConfig,
@@ -133,7 +134,8 @@ generateCodeOfParagraph.plugin = {
   sort: 7,
   name: '段落',
   type: 'Paragraph',
-  description: '一段文字，可以由多个文字组件组成，每个文字组件可以单独设置样式。',
+  description:
+    '一段文字，可以由多个文字组件组成，每个文字组件可以单独设置样式。',
   defaultAST: {
     type: 'Paragraph',
     props: {
@@ -152,6 +154,7 @@ generateCodeOfParagraph.plugin = {
       required: true,
       propName: 'texts',
     },
+    actionConfig,
     marginConfig,
     paddingConfig,
     widthConfig,

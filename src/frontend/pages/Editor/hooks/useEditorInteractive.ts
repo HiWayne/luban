@@ -20,6 +20,13 @@ import { ToCComponent } from '@/backend/service/compileService/generateReactSour
 import { NodeAST } from '@/frontend/types';
 import { useModifyPage } from './useModifyPage';
 import { TemplateDetailResponseDTO } from '@/backend/service/templateService/types';
+import {
+  Action,
+  ActionType,
+  FetchData,
+  InteractData,
+  NavigateData,
+} from '@/backend/types';
 
 export const useEditorInteractive = (update: any) => {
   const { currentChooseComponent, setCurrentChooseComponent } = useStore(
@@ -79,6 +86,14 @@ export const useEditorInteractive = (update: any) => {
     const div = document.createElement('div');
     div.className = 'parent-selector';
     div.innerHTML = '选中父组件';
+    return div;
+  }, []);
+
+  const createActionTip = useCallback((innerHTML: string) => {
+    const div = document.createElement('div');
+    div.id = 'editor-action-tip';
+    div.className = 'action-tip';
+    div.innerHTML = innerHTML;
     return div;
   }, []);
 
@@ -425,11 +440,84 @@ export const useEditorInteractive = (update: any) => {
     }
   }, []);
 
+  const showActionTip = useCallback(
+    (element: HTMLElement, initialElement = element) => {
+      const actionTipElement = document.querySelector('#editor-action-tip');
+      if (actionTipElement) {
+        return;
+      }
+      const id = getLuBanIdFromElement(element);
+      if (id) {
+        const nodeAST = findNodeASTById(id);
+        if (nodeAST) {
+          const action: Action | undefined = (nodeAST.props as any)?.action;
+          if (action && action.type !== 'PaginationStartCompute') {
+            const actionTypeMap: Record<
+              Exclude<ActionType, 'PaginationStartCompute'>,
+              string
+            > = {
+              Navigate: '跳转',
+              Fetch: '请求',
+              Interact: '交互',
+            };
+            const interactModeMap: Record<'Cover' | 'Increase', string> = {
+              Cover: '覆盖',
+              Increase: '追加',
+            };
+            let innerHTML = '';
+            switch (action.type) {
+              case 'Navigate':
+                innerHTML = `点击触发:【${actionTypeMap[action.type]}】<br>【${
+                  (action.data as NavigateData).url
+                }】`;
+                break;
+              case 'Fetch':
+                innerHTML = `点击触发:【${actionTypeMap[action.type]}】<br>【${
+                  (action.data as FetchData).method
+                }】【${(action.data as FetchData).url}】`;
+                break;
+              case 'Interact':
+                innerHTML = `点击触发【${actionTypeMap[action.type]}】<br>对【${
+                  (action.data as InteractData).setState
+                }】变量【${
+                  interactModeMap[(action.data as InteractData).mode]
+                }】`;
+                break;
+              default:
+                break;
+            }
+            const actionTip = createActionTip(innerHTML);
+            initialElement.appendChild(actionTip);
+          } else {
+            const parentId = nodeAST.parent;
+            if (parentId !== null) {
+              const parentElement = getElementByLuBanId(
+                parentId,
+              ) as HTMLElement | null;
+              if (parentElement) {
+                showActionTip(parentElement, element);
+              }
+            }
+          }
+        }
+      }
+    },
+    [],
+  );
+
+  const hiddenActionTip = useCallback(() => {
+    const actionTipElement = document.querySelector('#editor-action-tip');
+    if (actionTipElement) {
+      actionTipElement.remove();
+    }
+  }, []);
+
   const onMouseOver = useCallback(function (this: HTMLElement, event: Event) {
     event.stopPropagation();
     const element = this;
     highLightComponent(element);
     showShortCutsButtons(element);
+    showActionTip(element);
   }, []);
 
   const onMouseOut = useCallback(function (this: HTMLElement, event: Event) {
@@ -439,6 +527,7 @@ export const useEditorInteractive = (update: any) => {
     if (id && prevOpenedIdRef.current !== id) {
       unHighLightComponent(element);
       hiddenShortCutsButtons(element);
+      hiddenActionTip();
     }
   }, []);
 

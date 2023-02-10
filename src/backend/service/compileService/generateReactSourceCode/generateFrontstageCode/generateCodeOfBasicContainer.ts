@@ -8,6 +8,7 @@ import {
   createIdAttrInDev,
 } from '../utils';
 import {
+  actionConfig,
   commonContainerConfigs,
   ToCComponent,
 } from './toCComponentsPluginsConfig';
@@ -37,7 +38,7 @@ export const generateCodeOfBasicContainer = (
 
   const componentName = 'BasicContainer';
 
-  const BasicContainerStyle = {
+  const styleObject = {
     width,
     height,
     margin,
@@ -53,9 +54,9 @@ export const generateCodeOfBasicContainer = (
     ...(style || {}),
   };
 
-  Reflect.ownKeys(BasicContainerStyle).forEach((styleKey: any) => {
-    if ((BasicContainerStyle as any)[styleKey] === undefined) {
-      delete (BasicContainerStyle as any)[styleKey];
+  Reflect.ownKeys(styleObject).forEach((styleKey: any) => {
+    if ((styleObject as any)[styleKey] === undefined) {
+      delete (styleObject as any)[styleKey];
     }
   });
 
@@ -67,7 +68,7 @@ export const generateCodeOfBasicContainer = (
     !context.development && action
       ? createBuiltInTypeCode(
           'function',
-          `async () => {${generateCodeOfAction(action)}}`,
+          `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
         )
       : undefined;
 
@@ -76,7 +77,7 @@ export const generateCodeOfBasicContainer = (
     id,
   )}${generateCodeOfProp('key', key)}${generateCodeOfProp(
     'style',
-    BasicContainerStyle,
+    styleObject,
   )}${generateCodeOfProp('onClick', onClickCode)}>${
     children || ''
   }</${componentName}>`;
@@ -100,5 +101,8 @@ generateCodeOfBasicContainer.plugin = {
     props: {},
     children: [],
   },
-  configs: [...commonContainerConfigs],
+  configs: [
+    actionConfig,
+    ...commonContainerConfigs,
+  ],
 } as ToCComponent;
