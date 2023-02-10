@@ -70,11 +70,14 @@ export const styleConfig: Config = {
 };
 
 export const actionConfig: Config = {
-  name: '交互行为',
+  name: '点击行为',
   description:
-    '定义该组件交互时该做什么。比如你希望一个文字组件点击后跳转到某个页面、一个图片组件点击后查看大图等。复杂逻辑的配置需要了解前端框架的状态机制，建议由有前端开发经验的人员配置。',
+    '定义点击该组件时该做什么。比如你希望点击图片跳转到某个页面、点击按钮发起请求等。复杂逻辑的配置需要了解前端框架的状态机制，建议由有前端开发经验的人员配置。',
   required: false,
   propName: 'action',
+  formSchema: {
+    type: 'action',
+  },
 };
 
 export const layoutConfig: Config = {

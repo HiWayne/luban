@@ -69,8 +69,14 @@ export interface NavigateData {
   method?: '_blank' | 'self';
 }
 
+export type ActionType =
+  | 'Fetch'
+  | 'Interact'
+  | 'PaginationStartCompute'
+  | 'Navigate';
+
 export interface Action {
-  type: 'Fetch' | 'Interact' | 'PaginationStartCompute' | 'Navigate';
+  type: ActionType;
   data: FetchData | InteractData | PaginationStartComputeData | NavigateData;
   output?: VariableName;
   receive?: VariableName | number | string;

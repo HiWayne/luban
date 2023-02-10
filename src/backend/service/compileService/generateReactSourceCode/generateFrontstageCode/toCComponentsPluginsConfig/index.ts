@@ -20,7 +20,8 @@ export type FormSchemaType =
   | 'custom-style'
   | 'image-src'
   | 'text-content'
-  | 'bg-size';
+  | 'bg-size'
+  | 'action';
 
 export interface FormSchema {
   type: FormSchemaType;

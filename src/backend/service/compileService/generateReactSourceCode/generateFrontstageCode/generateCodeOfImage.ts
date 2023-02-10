@@ -141,7 +141,7 @@ export const generateCodeOfImage = (
     !context.development && action
       ? createBuiltInTypeCode(
           'function',
-          `async () => {${generateCodeOfAction(action)}}`,
+          `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
         )
       : undefined;
 
@@ -191,6 +191,7 @@ generateCodeOfImage.plugin = {
         type: 'image-src',
       },
     },
+    actionConfig,
     { ...layoutConfig, defaultConfig: 'inline' },
     widthConfig,
     heightConfig,

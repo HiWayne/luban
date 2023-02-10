@@ -8,6 +8,7 @@ import {
   createIdAttrInDev,
 } from '../utils';
 import {
+  actionConfig,
   commonContainerConfigs,
   listDataConfig,
   renderItemConfig,
@@ -165,11 +166,17 @@ export const generateCodeOfGridContainer = (
     ...(style || {}),
   };
 
+  Reflect.ownKeys(styleObject).forEach((styleKey: any) => {
+    if ((styleObject as any)[styleKey] === undefined) {
+      delete (styleObject as any)[styleKey];
+    }
+  });
+
   const onClickCode =
     !context.development && action
       ? createBuiltInTypeCode(
           'function',
-          `async () => {${generateCodeOfAction(action)}}`,
+          `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
         )
       : undefined;
 
@@ -238,6 +245,7 @@ generateCodeOfGridContainer.plugin = {
       required: false,
       propName: 'justifyContent',
     },
+    actionConfig,
     ...renderItemConfig,
     ...commonContainerConfigs,
   ],

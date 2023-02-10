@@ -25,7 +25,7 @@ export const generateCodeOfButton = (nodeAST: NodeAST, id: number) => {
 
   const onClickCode = {
     _builtInType: 'function',
-    code: `async () => {${generateCodeOfAction(action)}}`,
+    code: `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
   };
 
   const componentName = `Button_${id}`;

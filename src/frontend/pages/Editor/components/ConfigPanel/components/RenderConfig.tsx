@@ -31,6 +31,10 @@ import {
   BgSizeConfig,
   BgSizeStyleConfig,
 } from '../../configComponents/BgSizeConfig';
+import {
+  ActionConfig,
+  ActionPropConfig,
+} from '../../configComponents/ActionConfig';
 
 export const RenderConfig: FC<{
   data: ToCComponent & { id: number };
@@ -471,6 +475,25 @@ export const RenderConfig: FC<{
                   id,
                   { [propName]: changeData.style },
                   { [propName]: changeData.styleConfig },
+                );
+              } else {
+                updateNodeASTWithDebounce(id, deleteProp, deleteProp);
+              }
+            }}
+          />
+        );
+        break;
+      case 'action':
+        formItemContent = (
+          <ActionConfig
+            key={id}
+            defaultActions={initialConfig[propName] as ActionPropConfig}
+            onChange={(changeData) => {
+              if (changeData) {
+                updateNodeASTWithDebounce(
+                  id,
+                  { [propName]: changeData.prop },
+                  { [propName]: changeData.propConfig },
                 );
               } else {
                 updateNodeASTWithDebounce(id, deleteProp, deleteProp);
