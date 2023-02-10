@@ -14,11 +14,11 @@ import {
   marginConfig,
   paddingConfig,
   styleConfig,
-  ToCComponent,
+  ToCComponentMeta,
   widthConfig,
 } from './toCComponentsPluginsConfig';
 
-export const generateCodeOfText = (
+export const generateCodeOfTextPlugin = (
   nodeAST: NodeAST,
   id: number,
   context: Context,
@@ -86,7 +86,9 @@ export const generateCodeOfText = (
     !context.development && action
       ? createBuiltInTypeCode(
           'function',
-          `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
+          `async (event) => {event.stopPropagation();${generateCodeOfAction(
+            action,
+          )}}`,
         )
       : undefined;
 
@@ -129,7 +131,7 @@ export const generateCodeOfText = (
   });
 };
 
-generateCodeOfText.plugin = {
+generateCodeOfTextPlugin.meta = {
   level: 1,
   sort: 6,
   leaf: true,
@@ -185,7 +187,6 @@ generateCodeOfText.plugin = {
       required: false,
       propName: 'ellipsis',
     },
-    actionConfig,
     styleConfig,
   ],
-} as ToCComponent;
+} as ToCComponentMeta;

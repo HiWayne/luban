@@ -6,10 +6,10 @@ import {
   remove,
   update,
 } from '../pages/Editor/utils';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import { NodeAST } from '../types';
 
-export interface CurrentComponent extends ToCComponent {
+export interface CurrentComponent extends ToCComponentMeta {
   id: number;
 }
 

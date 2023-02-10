@@ -12,10 +12,10 @@ import {
   commonContainerConfigs,
   listDataConfig,
   renderItemConfig,
-  ToCComponent,
+  ToCComponentMeta,
 } from './toCComponentsPluginsConfig';
 
-export const generateCodeOfGridContainer = (
+export const generateCodeOfGridContainerPlugin = (
   nodeAST: NodeAST,
   id: number,
   children: string | undefined,
@@ -207,7 +207,7 @@ export const generateCodeOfGridContainer = (
   });
 };
 
-generateCodeOfGridContainer.plugin = {
+generateCodeOfGridContainerPlugin.meta = {
   level: 1,
   sort: 3,
   name: '网格布局容器',
@@ -249,4 +249,4 @@ generateCodeOfGridContainer.plugin = {
     ...renderItemConfig,
     ...commonContainerConfigs,
   ],
-} as ToCComponent;
+} as ToCComponentMeta;

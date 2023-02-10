@@ -130,6 +130,11 @@ export const ActionConfig: FC<ActionConfigProps> = ({
         prop: actionProp,
         propConfig: actions,
       });
+    } else {
+      onChange({
+        prop: undefined,
+        propConfig: actions,
+      });
     }
   }, [actions]);
 

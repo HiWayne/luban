@@ -78,7 +78,7 @@ export const SimulateReal = () => {
         模拟真实环境
       </Button>
       <Modal
-        width={500}
+        width={600}
         open={open}
         onCancel={closeModal}
         closable={false}
@@ -86,6 +86,7 @@ export const SimulateReal = () => {
         style={{
           top: 'calc(5vh - 20px)',
           paddingBottom: 0,
+          zIndex: 999,
         }}>
         {!loading ? (
           <Flex justifyContent="center" alignItems="center">

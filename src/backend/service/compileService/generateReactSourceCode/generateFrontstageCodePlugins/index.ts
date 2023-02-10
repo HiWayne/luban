@@ -1,14 +1,14 @@
-import { generateCodeOfCondition } from '../generateBackstageCode/generateCodeOfCondition';
+import { generateCodeOfCondition } from '../generateBackstageCodePlugins/generateCodeOfCondition';
 import type { Context, Declarations } from '..';
 import { NodeAST } from '@/backend/types/frontstage';
 import {
   generateCodeOfScrollList,
-  generateCodeOfFlexContainer,
-  generateCodeOfGridContainer,
-  generateCodeOfImage,
-  generateCodeOfText,
-  generateCodeOfParagraph,
-  generateCodeOfBasicContainer,
+  generateCodeOfFlexContainerPlugin,
+  generateCodeOfGridContainerPlugin,
+  generateCodeOfImagePlugin,
+  generateCodeOfTextPlugin,
+  generateCodeOfParagraphPlugin,
+  generateCodeOfBasicContainerPlugin,
 } from './plugins';
 
 export const generateCodeByNodeAST = (
@@ -38,13 +38,13 @@ export const generateCodeByNodeAST = (
       );
       break;
     case 'BasicContainer':
-      output = generateCodeOfBasicContainer(nodeAST, id, children, context);
+      output = generateCodeOfBasicContainerPlugin(nodeAST, id, children, context);
       break;
     case 'FlexContainer':
-      output = generateCodeOfFlexContainer(nodeAST, id, children, context);
+      output = generateCodeOfFlexContainerPlugin(nodeAST, id, children, context);
       break;
     case 'GridContainer':
-      output = generateCodeOfGridContainer(
+      output = generateCodeOfGridContainerPlugin(
         nodeAST,
         id,
         children,
@@ -53,13 +53,13 @@ export const generateCodeByNodeAST = (
       );
       break;
     case 'Image':
-      output = generateCodeOfImage(nodeAST, id, context);
+      output = generateCodeOfImagePlugin(nodeAST, id, context);
       break;
     case 'Text':
-      output = generateCodeOfText(nodeAST, id, context);
+      output = generateCodeOfTextPlugin(nodeAST, id, context);
       break;
     case 'Paragraph':
-      output = generateCodeOfParagraph(nodeAST, id, declarations, context);
+      output = generateCodeOfParagraphPlugin(nodeAST, id, declarations, context);
       break;
     default:
       break;

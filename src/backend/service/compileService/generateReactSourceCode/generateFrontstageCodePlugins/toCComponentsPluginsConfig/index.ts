@@ -40,7 +40,7 @@ export interface Config {
   defaultConfig?: any;
 }
 
-export interface ToCComponent {
+export interface ToCComponentMeta {
   // 组件等级，1-基础组件、2-复合组件
   level: 1 | 2;
   sort: number;

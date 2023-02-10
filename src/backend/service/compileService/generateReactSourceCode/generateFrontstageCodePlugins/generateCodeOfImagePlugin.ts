@@ -14,11 +14,11 @@ import {
   layoutConfig,
   marginConfig,
   styleConfig,
-  ToCComponent,
+  ToCComponentMeta,
   widthConfig,
 } from './toCComponentsPluginsConfig';
 
-export const generateCodeOfImage = (
+export const generateCodeOfImagePlugin = (
   nodeAST: NodeAST,
   id: number,
   context: Context,
@@ -141,7 +141,9 @@ export const generateCodeOfImage = (
     !context.development && action
       ? createBuiltInTypeCode(
           'function',
-          `async (event) => {event.stopPropagation();${generateCodeOfAction(action)}}`,
+          `async (event) => {event.stopPropagation();${generateCodeOfAction(
+            action,
+          )}}`,
         )
       : undefined;
 
@@ -163,7 +165,7 @@ export const generateCodeOfImage = (
   });
 };
 
-generateCodeOfImage.plugin = {
+generateCodeOfImagePlugin.meta = {
   level: 1,
   sort: 5,
   leaf: true,
@@ -203,27 +205,37 @@ generateCodeOfImage.plugin = {
     },
     borderRadiusConfig,
     {
-      name: '是否可保存',
-      description: '是否可以长按保存',
-      required: false,
-      propName: 'saveable',
-    },
-    marginConfig,
-    {
-      name: '实际图片自适应大小',
+      name: '实际图片大小',
       description:
-        '若不设置组件宽高或只设置宽度，实际图片会和组件宽度一致，高度按原始比例撑开组件。若组件宽高都设置，但实际图片宽高比例与组件不一致，图片就会变形。可以通过这个配置来选择图片展示方式。举例："cover"-图片尽可能小的以原始比例填满组件（图片一定能填满组件，但可能显示不完整）、"contain"-图片尽可能大的（但不超出组件）以原始比例完整显示（图片一定能显示完整，但可能填不满组件）。',
+        '若不设置组件宽高或只设置组件宽度，实际图片的宽度等于组件宽度，高度按原始比例撑开组件。若组件宽高都设置，图片会按组件宽高展示，若实际图片宽高比例与组件不一致，图片就会变形。可以通过这个配置来选择图片大小的展示方式。举例："cover"-图片尽可能小的以原始比例填满组件（图片一定能填满组件，但可能显示不完整）、"contain"-图片尽可能大的（但不超出组件）以原始比例完整显示（图片一定能显示完整，但可能填不满组件）。',
       required: false,
       propName: 'objectFit',
+      formSchema: {
+        type: 'select',
+        options: [
+          { label: '铺满', value: 'cover' },
+          { label: '完整展示', value: 'contain' },
+        ],
+      },
     },
     {
-      name: '实际图片位置',
+      name: '图片位置',
       description:
         '若实际图片比例与组件宽高比例不一致，且设置了实际图片自适应大小，图片可能为了保持原始比例而小于组件的大小展示。这时可以设置图片在组件中的位置（默认靠左上）。举例："center"-上下左右居中、"center left"-上下方向居中，左右方向靠左、"top right"-上下方向靠上，左右方向靠右。',
       required: false,
       propName: 'objectPosition',
     },
-    actionConfig,
+    {
+      name: '是否可保存',
+      description: '是否可以长按保存',
+      required: false,
+      propName: 'saveable',
+      formSchema: {
+        type: 'switch',
+      },
+      defaultConfig: true,
+    },
+    marginConfig,
     styleConfig,
   ],
-} as ToCComponent;
+} as ToCComponentMeta;

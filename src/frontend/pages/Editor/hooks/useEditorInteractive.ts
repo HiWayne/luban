@@ -16,7 +16,7 @@ import {
   findChildrenOfNodeAST,
 } from '../utils';
 import useStore from '@/frontend/store';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import { NodeAST } from '@/frontend/types';
 import { useModifyPage } from './useModifyPage';
 import { TemplateDetailResponseDTO } from '@/backend/service/templateService/types';
@@ -38,7 +38,7 @@ export const useEditorInteractive = (update: any) => {
   );
   const draggedTargetRef: MutableRefObject<{
     nodeAST?: NodeAST | Promise<TemplateDetailResponseDTO | null>;
-    component: ToCComponent;
+    component: ToCComponentMeta;
     element: Element;
   } | null> = useRef(null);
   const prevOpenedIdRef = useRef<number | null>(null);
@@ -146,7 +146,7 @@ export const useEditorInteractive = (update: any) => {
   }, []);
 
   const appendComponentNameTag = useCallback(
-    (targetElement: HTMLElement, targetComponent: ToCComponent) => {
+    (targetElement: HTMLElement, targetComponent: ToCComponentMeta) => {
       const nameTag = createComponentNameTag(targetComponent.name);
       targetElement.appendChild(nameTag);
     },
@@ -154,7 +154,7 @@ export const useEditorInteractive = (update: any) => {
   );
 
   const appendShortcutsButtons = useCallback(
-    (targetElement: HTMLElement, targetComponent: ToCComponent) => {
+    (targetElement: HTMLElement, targetComponent: ToCComponentMeta) => {
       const id = getLuBanIdFromElement(targetElement);
       if (id !== null) {
         const nodeAST = findNodeASTById(id);
@@ -298,7 +298,7 @@ export const useEditorInteractive = (update: any) => {
   const onDragStart = useCallback(function (
     this: HTMLElement,
     event: DragEvent,
-    data?: ToCComponent | Promise<TemplateDetailResponseDTO | null>,
+    data?: ToCComponentMeta | Promise<TemplateDetailResponseDTO | null>,
   ) {
     event.stopPropagation();
     const element = this;
@@ -324,7 +324,7 @@ export const useEditorInteractive = (update: any) => {
     } else if (data) {
       if ((data as any).name && (data as any).level) {
         draggedTargetRef.current = {
-          component: data as ToCComponent,
+          component: data as ToCComponentMeta,
           element,
         };
       } else if (isPromise(data)) {

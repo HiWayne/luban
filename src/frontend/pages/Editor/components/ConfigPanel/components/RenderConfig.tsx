@@ -18,7 +18,7 @@ import {
 import { VariableSelect } from '../../configComponents/VariableSelect';
 import { UploadImageConfig } from '../../configComponents/UploadImageConfig';
 import { useModifyPage } from '../../../hooks';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import {
   ImageSrcConfig,
   ImageSrcStyleConfig,
@@ -37,7 +37,7 @@ import {
 } from '../../configComponents/ActionConfig';
 
 export const RenderConfig: FC<{
-  data: ToCComponent & { id: number };
+  data: ToCComponentMeta & { id: number };
   initialConfig: any;
   index: number;
 }> = ({ data, initialConfig, index }) => {
