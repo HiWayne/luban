@@ -52,8 +52,12 @@ export const OutputPageArea = styled(
     useEffect(() => {
       if (containerRef.current) {
         const height = getComputedStyle(containerRef.current).height;
-        const width = `${(parseFloat(height) * 0.462085308).toFixed(1)}px`;
+        const width = `${(parseFloat(height) * 0.461538462).toFixed(1)}px`;
         containerRef.current.style.width = width;
+        const html = document.querySelector('html');
+        if (html && !html.style.fontSize) {
+          html.style.fontSize = `${(1 / 375) * parseFloat(width)}px`;
+        }
       }
     });
 
@@ -69,7 +73,6 @@ export const OutputPageArea = styled(
         <div
           ref={containerRef}
           id={`lubanAppContainer-${mode}`}
-          style={{}}
           key="container"
         />
       </div>
@@ -80,7 +83,7 @@ export const OutputPageArea = styled(
   position: relative;
   padding: 4px;
   border: 1px solid rgb(1, 1, 1);
-  border-radius: 26px;
+  border-radius: 38px;
   background: rgb(245, 245, 249);
 
   & > .border1 {
@@ -90,7 +93,7 @@ export const OutputPageArea = styled(
     width: 100%;
     height: 100%;
     border: 1px solid rgb(133, 133, 130);
-    border-radius: 26px;
+    border-radius: 38px;
     box-sizing: border-box;
     z-index: 1;
   }
@@ -102,7 +105,7 @@ export const OutputPageArea = styled(
     width: calc(100% - 2px);
     height: calc(100% - 2px);
     border: 2px solid rgb(227, 228, 225);
-    border-radius: 26px;
+    border-radius: 38px;
     box-sizing: border-box;
     z-index: 1;
   }
@@ -114,17 +117,16 @@ export const OutputPageArea = styled(
     width: calc(100% - 6px);
     height: calc(100% - 6px);
     border: 1px solid rgb(133, 133, 130);
-    border-radius: 26px;
+    border-radius: 38px;
     box-sizing: border-box;
     z-index: 1;
   }
 
   #lubanAppContainer-${(props) => props.mode} {
     position: relative;
-    height: ${(props) =>
-      props.mode === 'development' ? `calc(90vh + 2px)` : `650px`};
+    height: calc(90vh + 2px);
     border: 12px solid rgb(0, 0, 4);
-    border-radius: 24px;
+    border-radius: 36px;
     box-sizing: border-box;
     overflow: auto;
     z-index: 2;

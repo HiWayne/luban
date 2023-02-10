@@ -92,13 +92,13 @@ npm run test
 
 后端代码在`/src/backend/*`，主要负责将后台发送过来的页面配置编译成前端代码（浏览器可直接运行的 html、js）
 
-低代码搭建的页面中的最小粒度是 UI 模块（在配置中可以看作一个节点(node)），UI 模块都有 type 属性，不同 type 代表不同的 UI 模块，用以呈现各种特定外观、功能、交互的 UI 。后端编译服务也是以 UI 模块为粒度实现的，每个 UI 模块都有一个与之对应的编译函数，负责将 nodeAST（**一个表示 UI 和逻辑的 DSL(领域特定语言/配置)亦可把它看作 AST(抽象语法树)**）编译成 react 组件代码。toC 页面的编译函数在`/backend/generateReactSourceCode/generateFrontstageCode/*`，toB 页面的编译函数在`/backend/generateReactSourceCode/generateBackstageCode/*`。
+低代码搭建的页面中的最小粒度是 UI 模块（在配置中可以看作一个节点(node)），UI 模块都有 type 属性，不同 type 代表不同的 UI 模块，用以呈现各种特定外观、功能、交互的 UI 。后端编译服务也是以 UI 模块为粒度实现的，每个 UI 模块都有一个与之对应的编译插件，负责将 nodeAST（**一个表示 UI 和逻辑的 DSL(领域特定语言/配置)亦可把它看作 AST(抽象语法树)**）编译成 react 组件代码，编译核心只是负责将不同的 nodeAST 交给对应的插件编译。toC 页面的编译插件在`/backend/generateReactSourceCode/generateFrontstageCodePlugins/*`，toB 页面的编译函数在`/backend/generateReactSourceCode/generateBackstageCodePlugins/*`。
 
-如需新增 UI 模块，在`/backend/generateReactSourceCode/generateFrontstageCode/*`或`/backend/generateReactSourceCode/generateBackstageCode/*`新增对应的编译函数即可（还需在同目录的 index.ts 的 switch case 中使用它）。
+如需新增 UI 模块，在`/backend/generateReactSourceCode/generateFrontstageCodePlugins/*`或`/backend/generateReactSourceCode/generateBackstageCodePlugins/*`中新增对应的编译插件即可（还需在同目录的 index.ts 的 switch case 中使用它），从而实现了编译核心逻辑和新增业务之间的解耦。
 
-新增 UI 模块同时也需要新增对应的 props 类型，类型文件在`/backend/types/backstage/index.ts`和`/backend/types/frontstage/index.ts`里
+UI 模块的类型文件在`/backend/types/backstage/index.ts`和`/backend/types/frontstage/index.ts`里
 
-### 下面将举例编译函数的各种写法及用处
+### 如何编写编译插件？
 
 假设没有配置任何 nodeAST 时编译结果是如下这样的
 
@@ -115,23 +115,23 @@ const App = () => {
 createRoot(document.getElementById('root')).render(<App />);
 ```
 
-让我们看看编译函数不同的写法对编译结果有什么影响：
+让我们看看编译插件不同的写法对编译结果有什么影响：
 
 ### 0. 必须写法（主要和编辑环境下的特殊处理相关）。
 
 ```js
 /**
- * 每个编译函数至少需要接受这三个参数（来自同目录下的index.ts，去看了就知道）
+ * 每个编译插件至少需要接受这三个参数（参数来自同目录下的index.ts，即编译核心）
  * nodeAST-该UI节点的ast、id-唯一id、context-上下文信息，里面有用的是development-是否是开发(编辑)环境
  */
-const generateCodeOfXxx = (nodeAST, id, context) => {
+const generateCodeOfXxxPlugin = (nodeAST, id, context) => {
   // 必须一：
   /**
    * context的作用除了给 astToReactNodeCodeOfFrontstage 提供参数（这个后面会讲到），另一个必须的作用是：
    * 开发环境或者叫编辑环境，是低代码后台编辑页面时所在的环境
    * 这种环境下，UI本身应该不能交互，否则会和低代码后台的交互（比如拖拽、点击）冲突
    * 所以需要根据context.development决定是否不编译交互相关的代码
-   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBasicContainer.ts 里的onClickCode
+   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBasicContainerPlugin.ts 里的onClickCode
    */
   // 必须二：
   /**
@@ -139,7 +139,7 @@ const generateCodeOfXxx = (nodeAST, id, context) => {
    * 低代码后台在配置页面时，可以通过点击某个页面UI，唤起它的配置面板，或者可以拖拽某个UI和其他调换位置等操作
    * 但是低代码后台是不知道预览页面里的UI和组件模块的对应关系的
    * 所以需要编译时，在development环境下，给组件的最外层元素加上特殊的id，用来标记这是一个组件模块。如果id=1，那就是<div id="luban_1"></div>
-   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBasicContainer.ts 里的createIdAttrInDev，它帮你封装好了根据context.development是否添加id属性的逻辑
+   * 例子可以看 /src/backend/generateReactSourceCode/generateFrontstageCode/generateCodeOfBasicContainerPlugin.ts 里的createIdAttrInDev，它帮你封装好了根据context.development是否添加id属性的逻辑
    */
 };
 ```
@@ -153,11 +153,11 @@ const generateCodeOfXxx = (nodeAST, id, context) => {
 ```js
 // generateCodeOfProp用来生成React中的 " prop=xxx" 代码(开头有空格)，自动根据不同类型的值生成合适的代码，如果值是undefined则返回空字符串
 import { generateCodeOfProp } from '../generateCodeOfProp';
-// createGenerateCodeFnReturn是用来生成generateCodeOfXxx系列函数返回值的工厂函数
+// createGenerateCodeFnReturn是用来生成generateCodeOfXxxPlugin系列插件返回值的工厂函数
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译图片组件1
-const generateCodeOfImage1 = (nodeAST, id, context) => {
+const generateCodeOfImage1Plugin = (nodeAST, id, context) => {
   const { props } = nodeAST;
   // 根据src等配置生成代码
   const { src } = props;
@@ -176,7 +176,7 @@ const generateCodeOfImage1 = (nodeAST, id, context) => {
 // 或者还有一种简化写法
 // 编译图片组件2
 // id是外部给的，保证唯一
-const generateCodeOfImage2 = (nodeAST, id, context) => {
+const generateCodeOfImage2Plugin = (nodeAST, id, context) => {
   const { props } = nodeAST;
   // 根据src等配置生成代码
   const { src } = props;
@@ -229,7 +229,7 @@ createRoot(document.getElementById('root')).render(<App />);
 
 写法一的特点是，组件会被声明并放在全局作用域
 
-当返回`componentName`(组件名称)、`componentDeclaration`(组件声明)、`componentCall`(组件在 App 中的调用) 或者 返回 `componentName`、`componentElement`(组件声明中 return 后面的代码) 时，组件声明(componentDeclaration)会放在全局(如果只有 componentElement，它会被包装成一个函数像 componentDeclaration 一样放在全局)，这样代码复用性会比较好，编译体积会更小。全局声明会根据同名 `componentName` 去重，如果 image 模块被多处使用，`componentDeclaration` 代码也不会被声明多次。简化版写法只是将 App 中的 reactElement 调用封装到组件里，并不会使代码更少，只是提升了可读性、编译函数写起来更方便，简化版写法的缺点是不支持组件有状态逻辑。
+当返回`componentName`(组件名称)、`componentDeclaration`(组件声明)、`componentCall`(组件在 App 中的调用) 或者 返回 `componentName`、`componentElement`(组件声明中 return 后面的代码) 时，组件声明(componentDeclaration)会放在全局(如果只有 componentElement，它会被包装成一个函数像 componentDeclaration 一样放在全局)，这样代码复用性会比较好，编译体积会更小。全局声明会根据同名 `componentName` 去重，如果 image 模块被多处使用，`componentDeclaration` 代码也不会被声明多次。简化版写法只是将 App 中的 reactElement 调用封装到组件里，并不会使代码更少，只是提升了可读性、编译插件写起来更方便，简化版写法的缺点是不支持组件有状态逻辑。
 
 其实比较简单的组件并不需要写法一，因为：
 
@@ -255,11 +255,11 @@ const Image = ({src}) => <img src={src} />
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
 import { generateCodeOfProp } from '../generateCodeOfProp';
-// createGenerateCodeFnReturn是用来生成generateCodeOfXxx系列函数返回值的工厂函数
+// createGenerateCodeFnReturn是用来生成generateCodeOfXxxPlugin系列插件返回值的工厂函数
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译a标签组件
-const generateCodeOfA = (nodeAST, id, context) => {
+const generateCodeOfAPlugin = (nodeAST, id, context) => {
   const { props } = nodeAST;
   // 根据href等配置生成代码，text是a标签的文本
   const { href, target, text } = props;
@@ -308,11 +308,11 @@ canHoist: false 代表不可以提升到全局声明，于是它只会在 App �
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
 import { generateCodeOfProp } from '../generateCodeOfProp';
-// createGenerateCodeFnReturn是用来生成generateCodeOfXxx系列函数返回值的工厂函数
+// createGenerateCodeFnReturn是用来生成generateCodeOfXxxPlugin系列插件返回值的工厂函数
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译BasicContainer组件
-const generateCodeOfBasicContainer = (nodeAST, id, children, context) => {
+const generateCodeOfBasicContainerPlugin = (nodeAST, id, children, context) => {
   // 因为是简单组件，所以用写法二，将来直接在App里调用reactElement就行（<xxx></xxx>）
   const componentCall = `<div>${children}</div>`;
 
@@ -330,11 +330,11 @@ const generateCodeOfBasicContainer = (nodeAST, id, children, context) => {
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
 import { generateCodeOfProp } from '../generateCodeOfProp';
-// createGenerateCodeFnReturn是用来生成generateCodeOfXxx系列函数返回值的工厂函数
+// createGenerateCodeFnReturn是用来生成generateCodeOfXxxPlugin系列插件返回值的工厂函数
 import { createGenerateCodeFnReturn } from '../utils';
 
 // 编译BasicContainer组件
-const generateCodeOfBasicContainer = (nodeAST, id, context) => {
+const generateCodeOfBasicContainerPlugin = (nodeAST, id, context) => {
   const componentName = 'BasicContainer';
   const componentElement = `<div>{children}</div>`;
 
@@ -345,7 +345,7 @@ const generateCodeOfBasicContainer = (nodeAST, id, context) => {
 };
 ```
 
-`componentElement`会被自动封装成`const BasicContainer = ({children}) => (<div>{children}</div>)`函数，相当于自动帮你写好了`componentDeclaration`。
+`componentElement`的值会被自动封装成`const BasicContainer = ({children}) => (<div>{children}</div>)`函数声明，相当于自动帮你写好了`componentDeclaration`。
 
 如果你不想有组件声明，加上`canHoist: false`, `{children}`会自动被外部替换成 children nodeAST 节点编译出来的 reactElement 调用代码（`<xxx></xxx>`），直接在 App 里调用。
 
@@ -380,13 +380,13 @@ const generateCodeOfBasicContainer = (nodeAST, id, context) => {
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
 import { generateCodeOfProp } from '../generateCodeOfProp';
-// createGenerateCodeFnReturn是用来生成generateCodeOfXxx系列函数返回值的工厂函数
+// createGenerateCodeFnReturn是用来生成generateCodeOfXxxPlugin系列插件返回值的工厂函数
 import { createGenerateCodeFnReturn } from '../utils';
-// 这个是将ast编译成react代码的函数(toc适用)，重点就是这个函数
+// 这个是将ast编译成react代码的函数(toc的)
 import { astToReactNodeCodeOfFrontstage } from '../index';
 
 // 编译List
-const generateCodeOfList = (nodeAST, id, declarations, context) => {
+const generateCodeOfListPlugin = (nodeAST, id, declarations, context) => {
   const { props } = nodeAST;
   const { data, renderItem } = props;
 
@@ -411,9 +411,101 @@ const generateCodeOfList = (nodeAST, id, declarations, context) => {
 
 最终 componentCall 的结果就是类似`<div>{component_scope_variable_list.map((iterate_scope_variable_item) => (<span>{iterate_scope_variable_item.text}</span>))}</div>`这样的了
 
+### 编译插件和前端编辑器配置面板如何关联起来
+
+我们新写的编译插件，是需要前端有对应的配置的，总不能每次新写一个 UI，都去前端写一个新的表单配置，需要有一个解耦的方式，让前端不关心这个 UI 该如何配置。写完插件，前端编辑器自动就有了相关的配置。
+
+假设你写了一个叫 `generateCodeOfWaterfallPlugin` 的编译插件
+
+```ts
+const generateCodeOfWaterfallPlugin = () => {
+  // ...
+};
+
+// 你需要给插件一个meta（元数据）属性，用来描述这个组件配置的UI
+generateCodeOfWaterfallPlugin.meta: Meta = {
+  // ...
+};
+
+interface Meta {
+  // 组件等级，1-基础组件、2-复合组件
+  level: 1 | 2;
+  // 组件在面板里的顺序
+  sort: number;
+  // 是否还能有子组件
+  leaf?: boolean;
+  // 组件渲染出的html元素是否是空标签（不能有子元素，如img、hr）
+  emptyTag?: boolean;
+  // 组件名称
+  name: string;
+  type:
+    | 'BasicContainer'
+    | 'FlexContainer'
+    | 'GridContainer'
+    | 'ScrollList'
+    | 'Image'
+    | 'Text'
+    | 'Paragraph';
+  // 组件说明，用来解释这个组件的作用
+  description: string;
+  // 使用这个组件时，初始的NodeAST是什么
+  defaultAST: Omit<NodeAST, 'id' | 'parent'>;
+  // 组件对应的配置面板该如何在前端渲染，一个Config代表一行配置
+  configs: Config[];
+}
+
+interface Config {
+  // 该行配置名称
+  name: string;
+  // 该行配置的说明，解释这个配置的作用
+  description: string;
+  // 配置表单的UI描述
+  formSchema?: FormSchema;
+  // 当表单很复杂时，支持使用自定义组件
+  FormComponent?: FC;
+  // 配置是否必须
+  required: boolean;
+  // 配置被修改时对应修改NodeAST的prop字段名
+  propName: string;
+  // 默认配置值
+  defaultConfig?: any;
+}
+
+// 配置表单的UI描述
+interface FormSchema {
+  // 表单类型（其中有很多自定义表单，如果你的需求超出已有的，可以继续新增）
+  type:
+    | 'input'
+    | 'textarea'
+    | 'radio'
+    | 'checkbox'
+    | 'select'
+    | 'switch'
+    | 'image-upload'
+    | 'color-picker'
+    | 'css-length'
+    | 'variable-select'
+    | 'css-margin'
+    | 'css-padding'
+    | 'css-border-radius'
+    | 'custom-style'
+    | 'image-src'
+    | 'text-content'
+    | 'bg-size'
+    | 'action';
+  // 如果是select、checkbox之类的表单，需要自定义options选项
+  options?: { label: string; value: any }[];
+  placeholder?: string;
+  // 直接传给表单组件的props
+  props?: Record<string, any>;
+}
+```
+
+具体代码可以参考已经写好的插件。
+
 ### 总结
 
-其实只要明确了`componentName`、`componentDeclaration`、`componentCall`、`componentElement`的含义，写几个例子实验一下结果，同时理清楚`编译`和`运行时`代码的区别，那么面对新模块开发起来就基本没什么问题了。
+其实只要明确了`componentName`、`componentDeclaration`、`componentCall`、`componentElement`、`meta`的含义，写几个例子实验一下结果，同时想清楚`编译`和`运行时`代码的区别，那么面对新模块开发起来就基本没什么问题了。
 
 ### 增删依赖
 
@@ -465,12 +557,16 @@ const editorRoutes: RouteType[] = [
 
 1. 该低代码平台前后端的原理是什么，开发遇到的问题有哪些？
 
-生成的页面是由配置产生的。配置的核心部分是 view 字段，它是由 nodeAST（一个最小粒度的、能表示 UI 与逻辑的抽象语法节点）嵌套组成的树，每个 nodeAST 会在后端经过与其 type 对应的编译函数产出 react 组件代码及其调用代码。整个树从 root 节点开始，被递归编译成完整的 react 应用代码，编译过程中还有一些优化细节（如组件复用等）。由于生成的只是 react 源码（这部分美化后可以用于代码预览、人工二次编辑），所以还需要编译、构建、压缩成浏览器可执行的代码。由于后端的最终产物是个完整的应用(SPA: html+js)，所以低代码平台页面通过前端微服务的方式整合到主应用里用于可视化编辑的实时预览。低代码平台可视化编辑时，需要有拖拽调换位置、点击 UI 展示对应配置等交互，然而最终产物(html)已经与原始的 nodeAST 失去了关联。为了解决这一点，在编辑模式时，低代码平台页面每次添加 UI 时都会生成一个唯一 id（也就是 nodeAST 里的 id），后端编译函数会给 nodeAST 对应组件代码的最外层的 html 元素加上这个 id。低代码平台配置页本地也通过 id 存储了相关数据，于是低代码平台配置页面可以通过这个 html id 知道当前选中的是什么组件、什么 nodeAST，以及它的当前配置，从而可以进行可视化编辑交互。
+生成的页面是由配置产生的。配置的核心部分是 view 字段，它是由 nodeAST（一个最小粒度的、能表示 UI 与逻辑的抽象语法节点）嵌套组成的树，nodeAST 树会交给编译核心，每个 nodeAST 会在经过与其 type 对应的编译插件产出 react 代码。整个树从 root 节点开始，被递归编译成完整的 react 应用代码，编译过程中还有一些优化细节（如组件复用等）。由于生成的只是 react 源码（这部分美化后可以用于代码预览、人工二次编辑），所以还需要编译、构建、压缩成浏览器可执行的代码。由于后端的最终产物是个完整的应用(SPA: html+js)，所以低代码平台页面通过前端微服务的方式整合到主应用里用于可视化编辑的实时预览。低代码平台可视化编辑时，需要有拖拽调换位置、点击 UI 展示对应配置等交互，然而最终产物(html)已经与原始的 nodeAST 失去了关联。为了解决这一点，在编辑模式时，低代码平台页面每次添加 UI 时都会生成一个唯一 id（也就是 nodeAST 里的 id），后端编译插件会给 nodeAST 对应组件代码的最外层的 html 元素加上这个 id。低代码平台配置页本地也通过 id 存储了相关数据，于是低代码平台配置页面可以通过这个 html id 知道当前选中的是什么组件、什么 nodeAST，以及它的当前配置，从而可以进行可视化编辑交互。
 
-2. `npm run dev` 后出现 `Vite Error, /node_modules/...... optimized info should be defined` 的错误怎么办？
+2. 如果平台已有组件不能满足需求怎么办？每次新增组件，在前端编辑器里可能都需要一套独特的配置面板，维护起来会不会很麻烦？
+
+如果平台已有的 UI 组件不能满足需求，需要新增。编译系统在设计时抽象出了【编译插件】这个概念，编译核心与编译插件解耦，只需要新写一个编译插件即可。至于前端编辑器里的配置面板，新的 UI 组件确实可能带来一套完全不同的配置表单，但不需要额外新写。编辑器的渲染核心也已经为需求变化做了解耦，只需给编译插件定义 meta（元数据），即可自动在前端生成新的配置面板。（插件的写法以及 meta 的类型已经在上文【开发文档】中介绍了）
+
+3. `npm run dev` 后出现 `Vite Error, /node_modules/...... optimized info should be defined` 的错误怎么办？
 
 可能是因为新安装了依赖，`node_modules/.vite` 里没有缓存，试试 `sh node_modules/.bin/vite --force`。具体原因详见 vite 的 [dep-pre-bundling](https://vitejs.dev/guide/dep-pre-bundling.html)。
 
-3. 为什么 `.gitignore` 要忽略 `__snapshots__`？
+4. 为什么 `.gitignore` 要忽略 `__snapshots__`？
 
 因为不同机器 `styled-components` 生成的 className 哈希不同，导致单测的`toMatchSnapshot`误报

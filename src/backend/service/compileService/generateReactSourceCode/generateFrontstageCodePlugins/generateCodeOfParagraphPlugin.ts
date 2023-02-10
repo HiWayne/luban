@@ -12,11 +12,11 @@ import {
   heightConfig,
   marginConfig,
   paddingConfig,
-  ToCComponent,
+  ToCComponentMeta,
   widthConfig,
 } from './toCComponentsPluginsConfig';
 
-export const generateCodeOfParagraph = (
+export const generateCodeOfParagraphPlugin = (
   nodeAST: NodeAST,
   id: number,
   declarations: Declarations,
@@ -129,7 +129,7 @@ export const generateCodeOfParagraph = (
   });
 };
 
-generateCodeOfParagraph.plugin = {
+generateCodeOfParagraphPlugin.meta = {
   level: 1,
   sort: 7,
   name: '段落',
@@ -175,4 +175,4 @@ generateCodeOfParagraph.plugin = {
       propName: 'ellipsis',
     },
   ],
-} as ToCComponent;
+} as ToCComponentMeta;

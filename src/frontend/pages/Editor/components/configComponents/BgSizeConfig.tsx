@@ -118,6 +118,7 @@ export const BgSizeConfig: FC<BgSizeConfigProps> = ({
         key: TAB_KEYS[0].value,
         children: (
           <Select
+            size="small"
             defaultValue={simpleSize}
             options={options}
             onChange={setSimpleSize}
@@ -149,7 +150,7 @@ export const BgSizeConfig: FC<BgSizeConfigProps> = ({
         ),
       },
     ],
-    [],
+    [customWidth, customWidthUnit, customHeight, customHeightUnit],
   );
 
   return (

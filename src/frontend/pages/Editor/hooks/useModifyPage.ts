@@ -3,7 +3,7 @@ import { cloneDeep } from 'lodash-es';
 import { message } from 'antd';
 import { isExist } from '@duitang/dt-base';
 import useStore from '@/frontend/store';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import {
   addConfigToMap,
   addNodeASTToMap,
@@ -51,7 +51,7 @@ export const useModifyPage = () => {
   // );
 
   const addComponentFromInitial = useCallback(
-    (data: ToCComponent, targetId?: number) => {
+    (data: ToCComponentMeta, targetId?: number) => {
       message.success(`成功添加【${data.name}】组件`, 2);
       const id = createUniqueId();
       const {

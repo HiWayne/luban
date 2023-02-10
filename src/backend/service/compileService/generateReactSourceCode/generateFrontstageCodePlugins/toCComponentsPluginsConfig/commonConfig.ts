@@ -178,7 +178,7 @@ export const fontSizeConfig: Config = {
   },
   defaultConfig: {
     value: 14,
-    unit: 'px',
+    unit: 'rem',
   },
 };
 
@@ -238,7 +238,6 @@ export const textDecorationConfig: Config = {
       },
     ],
   },
-  defaultConfig: '',
 };
 
 export const textAlignConfig: Config = {
@@ -264,7 +263,6 @@ export const textAlignConfig: Config = {
       },
     ],
   },
-  defaultConfig: 'left',
 };
 
 export const commonTextConfig = [

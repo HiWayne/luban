@@ -80,7 +80,7 @@ export const ValueWithUnit: FC<ValueWithUnitProps> = ({
       />
       <Select
         size="small"
-        style={{ width: '60px' }}
+        style={{ width: '80px' }}
         value={unitValue}
         onChange={setUnitValue}
         options={unitOptions}

@@ -1,7 +1,7 @@
 import { FC, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { InboxOutlined } from '@ant-design/icons';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import { useEditorInteractive } from '../../../hooks';
 
 const Dragger = styled.div`

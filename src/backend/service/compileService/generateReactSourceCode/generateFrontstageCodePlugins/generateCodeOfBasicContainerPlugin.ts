@@ -10,10 +10,10 @@ import {
 import {
   actionConfig,
   commonContainerConfigs,
-  ToCComponent,
+  ToCComponentMeta,
 } from './toCComponentsPluginsConfig';
 
-export const generateCodeOfBasicContainer = (
+export const generateCodeOfBasicContainerPlugin = (
   nodeAST: NodeAST,
   id: number,
   children: string | undefined,
@@ -89,7 +89,7 @@ export const generateCodeOfBasicContainer = (
   });
 };
 
-generateCodeOfBasicContainer.plugin = {
+generateCodeOfBasicContainerPlugin.meta = {
   level: 1,
   sort: 1,
   name: '普通容器',
@@ -105,4 +105,4 @@ generateCodeOfBasicContainer.plugin = {
     actionConfig,
     ...commonContainerConfigs,
   ],
-} as ToCComponent;
+} as ToCComponentMeta;

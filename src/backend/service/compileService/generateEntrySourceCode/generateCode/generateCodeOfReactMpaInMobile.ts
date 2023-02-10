@@ -26,12 +26,19 @@ export const generateCodeOfReactMpaInMobile = async (
     if (!isDeploy) {
       const htmlContent = `
       <!DOCTYPE html>
-      <html lang="en">
+      <html lang="en"${isDeploy ? '' : ` style="font-size: ${1 / 375}vw"`}>
         <head>
           <meta charset="UTF-8" />
           <link rel="icon" type="image/svg+xml" href="${meta.icon}" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
           <title>${meta.title}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-size: 0px;
+            }
+          </style>
         </head>
         <body>
           <div id="root"></div>

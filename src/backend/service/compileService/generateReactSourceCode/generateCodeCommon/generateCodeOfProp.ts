@@ -4,7 +4,7 @@ import {
   isBuiltInFunctionCode,
   isBuiltInVariableCode,
 } from '../utils';
-import { generateCodeOfValue } from '../generateBackstageCode/generateCodeOfLiteral';
+import { generateCodeOfValue } from '../generateBackstageCodePlugins/generateCodeOfLiteral';
 
 export const generateCodeOfProp = (propName: string, propValue?: any) =>
   propValue !== undefined

@@ -2,7 +2,7 @@ import { FC, useCallback, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import { useModifyPage } from '../hooks';
 import { Flex } from '@/frontend/components';
 
@@ -32,7 +32,7 @@ const Name = styled.div`
 // `
 
 interface ComponentItemProp {
-  data: ToCComponent;
+  data: ToCComponentMeta;
   onDragStart: any;
   onDragOver: any;
   onDragEnd: any;

@@ -13,8 +13,8 @@ import shallow from 'zustand/shallow';
 import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
 import { Flex } from '@/frontend/components';
-import * as compileFunctions from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/plugins';
-import type { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import * as compileFunctions from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/plugins';
+import type { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import { ConfigPanel, TemplateConfig } from '../components';
 import {
   BasicComponents,
@@ -38,7 +38,7 @@ import { OutputPageArea } from './components/OutputPageArea';
 import { DragContext } from './DragProvider';
 
 export const toCComponents = Object.values(compileFunctions)
-  .map((compileFunction) => (compileFunction as any).plugin as ToCComponent)
+  .map((compileFunction) => (compileFunction as any).meta as ToCComponentMeta)
   .sort((a, b) => a.sort - b.sort);
 
 export const KEY = 'lubanApp';

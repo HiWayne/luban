@@ -11,7 +11,7 @@ import {
   heightConfig,
   listDataConfig,
   renderItemConfig,
-  ToCComponent,
+  ToCComponentMeta,
 } from './toCComponentsPluginsConfig';
 
 export const generateCodeOfScrollList = (
@@ -97,8 +97,12 @@ export const generateCodeOfScrollList = (
   const componentName = `ScrollListComponent`;
 
   const componentDeclaration = `const NoScrollBarWrapper = styled.div\`
-    &:-webkit-scrollbar {
+    overflow: auto;
+    &::-webkit-scrollbar {
       display: none;
+      width: 0;
+      height: 0;
+      color: transparent;
     }
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -146,7 +150,7 @@ export const generateCodeOfScrollList = (
   });
 };
 
-generateCodeOfScrollList.plugin = {
+generateCodeOfScrollList.meta = {
   level: 1,
   sort: 4,
   name: '水平滚动容器',
@@ -229,4 +233,4 @@ generateCodeOfScrollList.plugin = {
       propName: 'rowKey',
     },
   ],
-} as ToCComponent;
+} as ToCComponentMeta;

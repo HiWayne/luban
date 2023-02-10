@@ -3,12 +3,12 @@ import { NodeAST as NodeASTOfFrontstage } from '../../../types/frontstage';
 import {
   generateCodeByNodeAST as generateCodeByNodeASTOfBackstage,
   generateCodeOfReactLogics,
-} from './generateBackstageCode';
-import { generateCodeByNodeAST as generateCodeByNodeASTOfFrontstage } from './generateFrontstageCode';
+} from './generateBackstageCodePlugins';
+import { generateCodeByNodeAST as generateCodeByNodeASTOfFrontstage } from './generateFrontstageCodePlugins';
 import {
   generateCommonCodeOfBackstage,
   generateCommonCodeOfFrontstage,
-} from './generateBackstageCode/generateCommonCode';
+} from './generateBackstageCodePlugins/generateCommonCode';
 import { createComponentName } from './utils';
 import { LogicAST, PageModel } from '../../../types';
 

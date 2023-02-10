@@ -10,10 +10,10 @@ import {
 import {
   actionConfig,
   commonContainerConfigs,
-  ToCComponent,
+  ToCComponentMeta,
 } from './toCComponentsPluginsConfig';
 
-export const generateCodeOfFlexContainer = (
+export const generateCodeOfFlexContainerPlugin = (
   nodeAST: NodeAST,
   id: number,
   children: string | undefined,
@@ -104,7 +104,7 @@ export const generateCodeOfFlexContainer = (
   });
 };
 
-generateCodeOfFlexContainer.plugin = {
+generateCodeOfFlexContainerPlugin.meta = {
   level: 1,
   sort: 2,
   name: 'Flex布局容器',
@@ -209,4 +209,4 @@ generateCodeOfFlexContainer.plugin = {
     actionConfig,
     ...commonContainerConfigs,
   ],
-} as ToCComponent;
+} as ToCComponentMeta;

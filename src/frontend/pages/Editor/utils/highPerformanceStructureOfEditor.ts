@@ -3,7 +3,7 @@ import { message } from 'antd';
 import { NodeAST } from '@/frontend/types';
 import { iterateNodeAST, remove } from './operateNodeAST';
 import { createResetId } from './prepareNodeAST';
-import { ToCComponent } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCode/toCComponentsPluginsConfig';
+import { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
 import { toCComponents } from '../ToCEditor';
 
 const nodeASTMap = new Map<number, NodeAST>();
@@ -122,7 +122,7 @@ export const getComponentOfNodeAST = (data: number | NodeAST) => {
   const nodeASTType =
     typeof data === 'number' ? findNodeASTById(data)?.type : data?.type;
   if (nodeASTType) {
-    const targetComponent: ToCComponent | undefined = toCComponents.find(
+    const targetComponent: ToCComponentMeta | undefined = toCComponents.find(
       (component) => component.type === nodeASTType,
     );
     return targetComponent || null;
