@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 export const usePagination = <T>(
   fetcher: (
     page: number,
-    prevResponse: any,
+    prevResponse?: any,
   ) => Promise<{ list: T[]; more: boolean; total: number }>,
 ) => {
   const [response, setResponse] = useState<{
@@ -14,7 +14,9 @@ export const usePagination = <T>(
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [more, setMore] = useState(true);
+  const [total, setTotal] = useState(0);
 
+  const pageRef = useRef(1);
   const loadingRef = useRef(false);
   const moreRef = useRef(true);
 
@@ -25,24 +27,41 @@ export const usePagination = <T>(
       }
       loadingRef.current = true;
       setLoading(true);
-      const data = await fetcher(page, params).finally(() => {
+      const data = await fetcher(pageRef.current, params).finally(() => {
         loadingRef.current = false;
         setLoading(false);
       });
+      pageRef.current += 1;
       setPage((c) => c + 1);
       setResponse(data);
+      if (data && data.total) {
+        setTotal(data.total);
+      }
       if (data && typeof data.more === 'boolean') {
         moreRef.current = data.more;
         setMore(data.more);
       }
     },
-    [page, fetcher, loading, more],
+    [fetcher],
   );
 
+  const reset = useCallback(() => {
+    setPage(1);
+    pageRef.current = 1;
+    setMore(true);
+    moreRef.current = true;
+    setLoading(false);
+    loadingRef.current = false;
+    setTotal(0);
+  }, []);
+
   return {
+    page,
     response,
     fetch,
+    total,
     loading,
     more,
+    reset,
   };
 };

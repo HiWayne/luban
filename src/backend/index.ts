@@ -60,6 +60,31 @@ import {
   verifyUserInfo,
 } from './service/userService/utils';
 import { searchUsersService } from './service/userService/searchUsersService';
+import {
+  verifyCategoryCreate,
+  verifyDeployChangeVersionParams,
+  verifyDeployParams,
+  verifyDeployRecordRequest,
+} from './service/deployService/utils';
+import {
+  deployService,
+  deployChangeVersionService,
+  getDeployCategoryListService,
+  deployCategoryCreateService,
+  deployCategoryDeleteService,
+  deployCategoryUpdateService,
+  getDeployRecordService,
+  getDeployDetailService,
+  deployCheckService,
+  deleteDeployedApplicationByVersion,
+  deployOfflineService,
+  deployOnlineService,
+} from './service/deployService';
+import {
+  CategoryRequestDTO,
+  ComputedDeployRequestDTO,
+  DeployRequestDTO,
+} from './service/deployService/types';
 
 const mongoClient = new MongoClient(mongoConfig.url);
 
@@ -86,9 +111,7 @@ try {
       try {
         const pageModel: PageModel = JSON.parse(req.body as string);
         if (pageModel) {
-          const mode = pageModel.meta.mode;
-          const { htmlPath } =
-            (await generateEntrySourceCode(mode, pageModel)) || {};
+          const { htmlPath } = (await generateEntrySourceCode(pageModel)) || {};
 
           reply.send({
             status: 1,
@@ -521,6 +544,324 @@ try {
       const { id } = await getUserIdFromHeaderService(req);
       const result = await deleteTemplateService(id);
       reply.send({ status: 1, data: result, message: '' });
+    });
+
+    app.post('/api/deploy/', async (req, reply) => {
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const user = await getUserService(id);
+        if (user) {
+          const body: DeployRequestDTO = JSON.parse(req.body as string);
+          if (body.pageModel && body.category) {
+            const { htmlContent, jsContent } = await generateEntrySourceCode(
+              body.pageModel,
+              body.category,
+            );
+            if (htmlContent && jsContent) {
+              const computedBody: ComputedDeployRequestDTO = {
+                category: body.category,
+                pageModel: body.pageModel,
+                desc: body.desc || '',
+                htmlContent,
+                jsContent,
+              };
+              try {
+                verifyDeployParams(computedBody);
+                const success = await deployService(computedBody, user);
+                if (success) {
+                  reply.send({ status: 1, data: true, message: '' });
+                } else {
+                  reply
+                    .status(500)
+                    .send({ status: 0, data: null, message: '发布失败' });
+                }
+              } catch (e) {
+                catchErrorReply(e, reply);
+              }
+            }
+          } else {
+            reply
+              .status(400)
+              .send({ status: 0, data: null, message: '缺少参数' });
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '用户不存在' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.post('/api/deploy/change/version/', async (req, reply) => {
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const user = await getUserService(id);
+        if (user) {
+          const body = JSON.parse(req.body as string);
+          try {
+            verifyDeployChangeVersionParams(body);
+            const success = await deployChangeVersionService(body, user);
+            if (success) {
+              reply.send({ status: 1, data: true, message: '' });
+            } else {
+              reply
+                .status(500)
+                .send({ status: 0, data: null, message: '发布失败' });
+            }
+          } catch (e) {
+            catchErrorReply(e, reply);
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '用户不存在' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.get('/api/deploy/list/', async (req, reply) => {
+      try {
+        const verifiedParams = verifyDeployRecordRequest(req.query);
+        if (verifiedParams) {
+          const data = await getDeployRecordService(verifiedParams);
+          reply.send({
+            status: 1,
+            data,
+            message: '',
+          });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.get('/api/deploy/detail/', async (req, reply) => {
+      try {
+        const id = (req.query as any)?.id;
+        if (id) {
+          const data = await getDeployDetailService(id);
+          reply.send({
+            status: 1,
+            data,
+            message: '',
+          });
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '缺少参数' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.delete('/api/deploy/delete/', async (req, reply) => {
+      try {
+        const body = JSON.parse(req.body as string);
+        if (
+          body &&
+          typeof body.id === 'string' &&
+          typeof body.version === 'number'
+        ) {
+          const { id } = await getUserIdFromHeaderService(req);
+          const user = await getUserService(id);
+          if (user) {
+            const result = await deleteDeployedApplicationByVersion(body, user);
+            if (result) {
+              reply.send({
+                status: 1,
+                data: true,
+                message: '',
+              });
+            }
+          } else {
+            reply
+              .status(400)
+              .send({ status: 0, data: null, message: '用户不存在' });
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '参数不正确' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.post('/api/deploy/online/', async (req, reply) => {
+      try {
+        const body = JSON.parse(req.body as string);
+        if (body && body.id) {
+          const { id } = await getUserIdFromHeaderService(req);
+          const user = await getUserService(id);
+          if (user) {
+            await deployOnlineService(body.id, user);
+            reply.send({ status: 1, data: true, message: '' });
+          } else {
+            reply
+              .status(400)
+              .send({ status: 0, data: null, message: '用户不存在' });
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '参数不正确' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.post('/api/deploy/offline/', async (req, reply) => {
+      try {
+        const body = JSON.parse(req.body as string);
+        if (body && body.id) {
+          const { id } = await getUserIdFromHeaderService(req);
+          const user = await getUserService(id);
+          if (user) {
+            await deployOfflineService(body.id, user);
+            reply.send({ status: 1, data: true, message: '' });
+          } else {
+            reply
+              .status(400)
+              .send({ status: 0, data: null, message: '用户不存在' });
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '参数不正确' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.get('/api/deploy/check/', async (req, reply) => {
+      try {
+        const { category, path } = req.query as any;
+        if (category && path) {
+          const result = await deployCheckService({ category, path });
+          reply.send({ status: 1, data: result, message: '' });
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '缺少参数' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.get('/api/category/list/', async (req, reply) => {
+      try {
+        const params: CategoryRequestDTO = {
+          start: 0,
+          limit: 25,
+        };
+        if (req.query) {
+          if (!(req.query as any)?.start) {
+            params.start = 0;
+          } else {
+            params.start = Number((req.query as any).start);
+          }
+          if (!(req.query as any)?.limit) {
+            params.limit = 25;
+          } else {
+            params.limit = Number((req.query as any).limit);
+          }
+        }
+        const data = await getDeployCategoryListService(params);
+        reply.send({ status: 1, data, message: '' });
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.post('/api/create/category/', async (req, reply) => {
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const user = await getUserService(id);
+        if (user) {
+          const body = JSON.parse(req.body as string);
+          try {
+            const verifiedBody = verifyCategoryCreate(body);
+            if (verifiedBody) {
+              await deployCategoryCreateService(verifiedBody, user);
+              reply.send({
+                status: 1,
+                data: true,
+                message: '',
+              });
+            }
+          } catch (e) {
+            catchErrorReply(e, reply);
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '用户不存在' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.put('/api/update/category/', async (req, reply) => {
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const user = await getUserService(id);
+        if (user) {
+          const body = JSON.parse(req.body as string);
+          try {
+            const verifiedBody = verifyCategoryCreate(body);
+            if (verifiedBody) {
+              await deployCategoryUpdateService(verifiedBody, user);
+              reply.send({
+                status: 1,
+                data: true,
+                message: '',
+              });
+            }
+          } catch (e) {
+            catchErrorReply(e, reply);
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '用户不存在' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
+    });
+
+    app.delete('/api/delete/category/', async (req, reply) => {
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const user = await getUserService(id);
+        if (user) {
+          const body = JSON.parse(req.body as string);
+          if (body && body.value) {
+            await deployCategoryDeleteService(body);
+            reply.send({
+              status: 1,
+              data: true,
+              message: '',
+            });
+          }
+        } else {
+          reply
+            .status(400)
+            .send({ status: 0, data: null, message: '用户不存在' });
+        }
+      } catch (e) {
+        catchErrorReply(e, reply);
+      }
     });
 
     app.listen({ port: 8000, host: '0.0.0.0' }, (error, address) => {

@@ -1,17 +1,12 @@
-import { lazy } from "react";
-import type { RouteType } from "../index";
+import { lazy } from 'react';
+import type { RouteType } from '../index';
 
-const LazyEditor = lazy(() => import("pages/Editor"));
-const LazyProfile = lazy(() => import('pages/User/Profile'));
+const LazyEditor = lazy(() => import('pages/Editor'));
 
 export const editorRoutes: RouteType[] = [
   {
-    path: "/editor",
+    path: '/editor',
     element: LazyEditor,
     permissions: [],
-  },
-  {
-    path: '/profile',
-    element: LazyProfile,
   },
 ];

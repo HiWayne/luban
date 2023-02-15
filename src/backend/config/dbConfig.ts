@@ -7,6 +7,7 @@ export const mongoConfig = {
   dbName: 'lowcode',
   templateCollectionName: 'templates',
   deployCollectionName: 'deploy',
+  deployCategoryCollectionName: 'deploy_category',
   userCollectionName: 'user',
   idCollectionName: 'id',
 };

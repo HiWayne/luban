@@ -6,7 +6,7 @@ import {
 } from 'react-router-dom';
 import RouterGuard from './RouterGuard';
 // 路由定义
-import { editorRoutes, homeRoutes, userRoutes } from './routes';
+import { editorRoutes, homeRoutes, userRoutes, deployRoutes } from './routes';
 import { Loading } from '../components';
 
 export interface RouteType {
@@ -21,6 +21,7 @@ export const routes: RouteType[] = [
   ...homeRoutes,
   ...editorRoutes,
   ...userRoutes,
+  ...deployRoutes,
 ];
 
 const renderNestRoute = (_routes: RouteType[]) => {

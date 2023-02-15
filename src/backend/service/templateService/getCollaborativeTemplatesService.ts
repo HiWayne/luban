@@ -1,8 +1,8 @@
+import escapeRegExp from 'lodash/escapeRegExp';
 import { isExist } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
 import { formatBriefData } from './getOwnTemplatesService';
 import { FormatGetOwnRequestDTO, TemplateEntity } from './types';
-import { escapeRegex } from '@/backend/utils';
 
 export const getCollaborativeTemplatesService = async (
   params: FormatGetOwnRequestDTO,
@@ -22,10 +22,10 @@ export const getCollaborativeTemplatesService = async (
     const conditions: any = {};
 
     if (isExist(name)) {
-      conditions.name = new RegExp(escapeRegex(name), 'i');
+      conditions.name = new RegExp(escapeRegExp(name), 'i');
     }
     if (isExist(desc)) {
-      conditions.desc = new RegExp(escapeRegex(desc), 'i');
+      conditions.desc = new RegExp(escapeRegExp(desc), 'i');
     }
     if (isExist(tags)) {
       conditions.tags = { $all: tags?.split(',') };
@@ -51,6 +51,7 @@ export const getCollaborativeTemplatesService = async (
           ...conditions,
           status: { $ne: 'delete' },
         })
+        .sort({ update_time: -1 })
         .skip(start)
         .limit(limit)
         .toArray(),

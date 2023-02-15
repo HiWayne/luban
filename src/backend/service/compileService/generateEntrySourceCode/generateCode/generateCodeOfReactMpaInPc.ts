@@ -3,15 +3,18 @@ import { normalizePageMeta } from '../utils';
 import { generateReactSourceCodeOfBackstage } from '@/backend/service/compileService/generateReactSourceCode';
 import { Mode, PageModel } from '@/backend/types';
 import { bundleSourceCode } from '../../bundleSourceCode';
-import { deployStaticService } from '@/backend/service/deployService';
+import { DEPLOY_TARGET } from '../../config';
+import { getDeployPath } from '@/backend/service/deployService/utils';
 
-const removeSlashOfEnd = (string: string) => string.replace(/\/$/, '');
+const removeSlashOfEnd = (string: string) =>
+  string.replace(/^\//, '').replace(/\/$/, '');
 
 const isOK = (value: any) => value === 'OK';
 
 export const generateCodeOfReactMpaInPc = async (
   mode: Mode,
   pageModel: PageModel | undefined,
+  category?: string,
 ) => {
   const isDeploy = mode === 'deploy';
   const isDevelopment = mode === 'development';
@@ -29,9 +32,9 @@ export const generateCodeOfReactMpaInPc = async (
       <html lang="en">
         <head>
           <meta charset="UTF-8" />
-          <link rel="icon" type="image/svg+xml" href="${meta.icon}" />
+          <link rel="icon" type="image/svg+xml" href="${meta.icon || ''}" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-          <title>${meta.title}</title>
+          <title>${meta.title || ''}</title>
         </head>
         <body>
           <div id="root"></div>
@@ -53,7 +56,7 @@ export const generateCodeOfReactMpaInPc = async (
       } else {
         throw new Error('服务器存储错误');
       }
-    } else {
+    } else if (category) {
       const pathOfPageMeta = removeSlashOfEnd(pageMeta.path);
 
       const htmlContent = `
@@ -61,13 +64,16 @@ export const generateCodeOfReactMpaInPc = async (
         <html lang="en">
           <head>
             <meta charset="UTF-8" />
-            <link rel="icon" type="image/svg+xml" href="${meta.icon}" />
+            <link rel="icon" type="image/svg+xml" href="${meta.icon || ''}" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-            <title>${meta.title}</title>
+            <title>${meta.title || ''}</title>
           </head>
           <body>
             <div id="root"></div>
-            <script src="${pathOfPageMeta}/${meta.key}.js"></script>
+            <script src="/${DEPLOY_TARGET}${getDeployPath(
+        category,
+        pathOfPageMeta,
+      )}/${meta.key}.js"></script>
           </body>
         </html>
         `;
@@ -83,16 +89,9 @@ export const generateCodeOfReactMpaInPc = async (
 
       const jsContent = outputFiles[0].text;
 
-      const result = await deployStaticService(
-        pageModel,
-        htmlContent,
-        jsContent,
-      );
-      if (result) {
-        return { htmlPath: pathOfPageMeta };
-      } else {
-        return Promise.reject('发布失败');
-      }
+      return { htmlContent, jsContent };
+    } else {
+      return Promise.reject('页面分类不能为空');
     }
   } else {
     return Promise.reject('页面数据不能为空');

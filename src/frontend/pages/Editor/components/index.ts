@@ -8,3 +8,5 @@ export * from './ComponentsSelectArea';
 export * from './ComponentItem';
 export * from './TemplateConfig';
 export * from './TemplateList';
+export * from './DeployCategorySelect';
+export * from './PathInput';
