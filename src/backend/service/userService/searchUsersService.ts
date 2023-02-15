@@ -1,5 +1,5 @@
+import escapeRegExp from 'lodash/escapeRegExp';
 import { mongoConfig } from '@/backend/config';
-import { escapeRegex } from '@/backend/utils';
 import { FormatSearchUsersRequestDTO, UserEntity } from './types';
 import { formatUserResponse } from './utils';
 
@@ -27,13 +27,15 @@ export const searchUsersService = async (body: FormatSearchUsersRequestDTO) => {
       conditions.id = { $in: body.ids };
     } else {
       if (body.name) {
-        conditions.name = new RegExp(escapeRegex(body.name), 'i');
+        conditions.name = new RegExp(escapeRegExp(body.name), 'i');
       }
       if (body.create_time_start) {
         conditions.create_time = { $gte: body.create_time_start };
       }
       if (body.create_time_end) {
-        conditions.create_time = { $lte: body.create_time_end };
+        conditions.create_time = conditions.create_time
+          ? { ...conditions.create_time, $lte: body.create_time_end }
+          : { $lte: body.create_time_end };
       }
     }
 

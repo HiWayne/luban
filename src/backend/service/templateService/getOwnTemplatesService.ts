@@ -1,9 +1,9 @@
 /// <reference types="mongodb" />
 
+import escapeRegExp from 'lodash/escapeRegExp';
 import { isExist } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
 import { FormatGetOwnRequestDTO, TemplateEntity } from './types';
-import { escapeRegex } from '@/backend/utils';
 
 export const formatBriefData = (data: TemplateEntity) => {
   if (data) {
@@ -57,10 +57,10 @@ export const getOwnTemplatesService = async (
     };
 
     if (isExist(name)) {
-      conditions.name = new RegExp(escapeRegex(name), 'i');
+      conditions.name = new RegExp(escapeRegExp(name), 'i');
     }
     if (isExist(desc)) {
-      conditions.desc = new RegExp(escapeRegex(desc), 'i');
+      conditions.desc = new RegExp(escapeRegExp(desc), 'i');
     }
     if (isExist(tags)) {
       conditions.tags = { $all: tags?.split(',') };
@@ -86,6 +86,7 @@ export const getOwnTemplatesService = async (
           ...conditions,
           status: { $ne: 'delete' },
         })
+        .sort({ update_time: -1 })
         .skip(start)
         .limit(limit)
         .toArray(),

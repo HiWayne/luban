@@ -1,2 +1,2 @@
 export * from './catchErrorReply';
-export * from './escapeRegex';
+export * from './clearDir';

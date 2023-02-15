@@ -15,6 +15,7 @@ specifiers:
   '@testing-library/user-event': ^14.4.3
   '@types/crypto-js': ^4.1.1
   '@types/jsonwebtoken': ^9.0.1
+  '@types/lodash': ^4.14.191
   '@types/lodash-es': ^4.17.6
   '@types/node': ^18.11.9
   '@types/node-rsa': ^1.1.1
@@ -51,6 +52,7 @@ specifiers:
   jsencrypt: ^3.3.1
   jsonwebtoken: ^9.0.0
   lint-staged: ^13.0.4
+  lodash: ^4.17.21
   lodash-es: ^4.17.21
   mongodb: ^4.13.0
   node-rsa: ^1.1.1
@@ -93,6 +95,7 @@ dependencies:
   immer: 9.0.16
   jsencrypt: 3.3.1
   jsonwebtoken: 9.0.0
+  lodash: 4.17.21
   lodash-es: 4.17.21
   mongodb: 4.13.0
   node-rsa: 1.1.1
@@ -123,6 +126,7 @@ devDependencies:
   '@testing-library/user-event': 14.4.3_aaq3sbffpfe3jnxzm2zngsddei
   '@types/crypto-js': 4.1.1
   '@types/jsonwebtoken': 9.0.1
+  '@types/lodash': 4.14.191
   '@types/lodash-es': 4.17.6
   '@types/node': 18.11.9
   '@types/node-rsa': 1.1.1

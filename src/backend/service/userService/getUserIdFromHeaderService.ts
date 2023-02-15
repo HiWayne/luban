@@ -10,7 +10,7 @@ export const getUserIdFromHeaderService = async (req: FastifyRequest) => {
     return { _id: userData._id, id: userData.id };
   } catch (e) {
     if (e instanceof Error) {
-      return Promise.reject(e);
+      return Promise.reject(e.message);
     } else {
       return Promise.reject(e);
     }

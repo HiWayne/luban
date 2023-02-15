@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { loadMicroApp, MicroApp } from 'qiankun';
 import { isExist } from '@duitang/dt-base';
-import { Button, Card, Form, Input, message, notification } from 'antd';
+import { Button, Card, Form, Input, message, Modal, notification } from 'antd';
 import shallow from 'zustand/shallow';
 import { getRandomString } from '@/backend/service/compileService/generateReactSourceCode/utils';
 import { PageModel } from '@/backend/types';
@@ -21,6 +21,8 @@ import {
   PreviewSourceCode,
   TemplateMarket,
   SimulateReal,
+  DeployConfig,
+  DeployData,
 } from './components';
 import useStore from '@/frontend/store';
 import { useCreateTemplateApi } from '../api';
@@ -36,6 +38,8 @@ import {
 import { NodeAST } from '@/frontend/types';
 import { OutputPageArea } from './components/OutputPageArea';
 import { DragContext } from './DragProvider';
+import { DeployRequestDTO } from '@/backend/service/deployService/types';
+import { getDeployPath } from '@/frontend/utils/getDeployPath';
 
 export const toCComponents = Object.values(compileFunctions)
   .map((compileFunction) => (compileFunction as any).meta as ToCComponentMeta)
@@ -57,9 +61,13 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
   const [sourceCode, setSourceCode] = useState('');
   const [templateConfigShow, setTemplateConfigShow] = useState(false);
   const [updateCount, setUpdateCount] = useState(0);
+  const [openDeploy, setOpenDeploy] = useState(false);
+  const [openDeploySuccess, setOpenDeploySuccess] = useState(false);
 
   const microAppRef: MutableRefObject<MicroApp | null> = useRef(null);
   const controllerRef: MutableRefObject<AbortController | null> = useRef(null);
+  const deployDataRef: MutableRefObject<DeployData | null> = useRef(null);
+  const pagePathRef = useRef('');
 
   const usedForPage = useMemo(() => type === 'page', [type]);
 
@@ -155,6 +163,39 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
 
   useEffect(() => {
     previewPage();
+  }, [pageModel.logics, pageModel.view]);
+
+  const fetchDeploy = useCallback(async () => {
+    if (deployDataRef.current) {
+      const category = deployDataRef.current.category;
+      const tempPageModel: PageModel = {
+        ...pageModel,
+        meta: { ...pageModel.meta },
+      };
+      tempPageModel.meta.mode = 'deploy';
+      const body: DeployRequestDTO = {
+        category,
+        pageModel: tempPageModel,
+        desc: deployDataRef.current.desc,
+      };
+      const data = await request('/api/deploy/', {
+        method: 'post',
+        body: JSON.stringify(body),
+      });
+      if (data && data.data) {
+        pagePathRef.current = `${getDeployPath(
+          category,
+          tempPageModel.meta.path,
+        )}`;
+        deployDataRef.current = null;
+        setOpenDeploy(false);
+        setOpenDeploySuccess(true);
+      } else {
+        notification.error({
+          message: '发布失败',
+        });
+      }
+    }
   }, [pageModel]);
 
   const deploy = useCallback(async () => {
@@ -162,16 +203,45 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
       message.error('页面内容不能为空');
       return;
     }
-    const tempPageModel: PageModel = {
-      ...pageModel,
-      meta: { ...pageModel.meta },
-    };
-    tempPageModel.meta.mode = 'deploy';
-    const data: any = await fetch('/api/generatePage/', {
-      method: 'post',
-      body: JSON.stringify(tempPageModel),
-    });
-    console.log(data);
+    if (!deployDataRef.current) {
+      message.error('发布设置不能为空');
+      return;
+    }
+    const category = deployDataRef.current.category;
+    const path = pageModel.meta.path;
+    const response = await request(
+      `/api/deploy/check/?${new URLSearchParams({
+        category,
+        path,
+      })}`,
+    );
+    if (response && response.data) {
+      const fullPath = getDeployPath(category, path);
+      Modal.confirm({
+        title: '更新确认',
+        content: (
+          <Flex
+            style={{ margin: '30px 0' }}
+            direction="column"
+            alignItems="flex-start">
+            <a href={fullPath} type="_blank">
+              {fullPath}
+            </a>
+            <p
+              style={{
+                margin: '20px 0',
+                fontSize: '14px',
+                fontWeight: 'bold',
+              }}>
+              该地址已存在，确定用新内容覆盖？
+            </p>
+          </Flex>
+        ),
+        onOk: fetchDeploy,
+      });
+    } else {
+      fetchDeploy();
+    }
   }, [pageModel]);
 
   const getReactCode = useCallback(async () => {
@@ -211,6 +281,11 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
     [],
   );
 
+  const closeDeploySuccessModal = useCallback(() => {
+    setOpenDeploySuccess(false);
+    pagePathRef.current = '';
+  }, []);
+
   return (
     <DragContext.Provider value={dragContextValue}>
       <Flex
@@ -249,7 +324,7 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
               <Button
                 type="primary"
                 style={{ marginLeft: '20px' }}
-                onClick={deploy}>
+                onClick={() => setOpenDeploy(true)}>
                 发布
               </Button>
             ) : null}
@@ -288,6 +363,35 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
           type="create"
         />
       </Flex>
+      {/* 为了清除DeployConfig内部状态缓存 */}
+      {openDeploy ? (
+        <Modal
+          open={openDeploy}
+          onCancel={() => setOpenDeploy(false)}
+          onOk={deploy}>
+          <DeployConfig
+            onChange={(data) => {
+              deployDataRef.current = data;
+            }}
+          />
+        </Modal>
+      ) : null}
+      <Modal
+        open={openDeploySuccess}
+        onCancel={closeDeploySuccessModal}
+        onOk={closeDeploySuccessModal}
+        mask={false}
+        maskClosable={false}>
+        <Flex direction="column" justifyContent="center" alignItems="center">
+          <h3 style={{ marginBottom: '30px' }}>发布成功</h3>
+          <p>
+            页面地址：
+            <a href={pagePathRef.current} type="_blank">
+              {pagePathRef.current}
+            </a>
+          </p>
+        </Flex>
+      </Modal>
     </DragContext.Provider>
   );
 };

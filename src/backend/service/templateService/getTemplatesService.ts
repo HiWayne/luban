@@ -1,8 +1,8 @@
+import escapeRegExp from 'lodash/escapeRegExp';
 import { isExist } from '@duitang/dt-base';
 import { mongoConfig } from '@/backend/config';
 import { FormatGetTemplatesRequestDTO, TemplateEntity } from './types';
 import { formatBriefData } from './getOwnTemplatesService';
-import { escapeRegex } from '@/backend/utils';
 
 export const getTemplatesService = async (
   params: FormatGetTemplatesRequestDTO,
@@ -28,10 +28,10 @@ export const getTemplatesService = async (
       conditions.type = type;
     }
     if (isExist(name)) {
-      conditions.name = new RegExp(escapeRegex(name), 'i');
+      conditions.name = new RegExp(escapeRegExp(name), 'i');
     }
     if (isExist(desc)) {
-      conditions.desc = new RegExp(escapeRegex(desc), 'i');
+      conditions.desc = new RegExp(escapeRegExp(desc), 'i');
     }
     if (isExist(author_id)) {
       if (!conditions.author) {
@@ -40,7 +40,10 @@ export const getTemplatesService = async (
       conditions.author.author_id = author_id;
     }
     if (isExist(author_name)) {
-      conditions.author.author_name = new RegExp(escapeRegex(author_name), 'i');
+      conditions.author.author_name = new RegExp(
+        escapeRegExp(author_name),
+        'i',
+      );
     }
     if (isExist(tags)) {
       conditions.tags = { $all: tags!.split(',') };
@@ -55,7 +58,12 @@ export const getTemplatesService = async (
     const db = mongodb.db(mongoConfig.dbName);
     const collection = db.collection(mongoConfig.templateCollectionName);
     const [list, total] = await Promise.all([
-      collection.find(conditions).skip(start).limit(limit).toArray(),
+      collection
+        .find(conditions)
+        .sort({ update_time: -1 })
+        .skip(start)
+        .limit(limit)
+        .toArray(),
       collection.countDocuments(conditions),
     ]);
     return {

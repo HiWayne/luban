@@ -42,7 +42,7 @@ export const RenderConfig: FC<{
   index: number;
 }> = ({ data, initialConfig, index }) => {
   const { id, configs } = data;
-  const { formSchema, FormComponent, name, description, propName } =
+  const { formSchema, FormComponent, name, description, propName, required } =
     configs[index];
 
   const { updateComponent } = useModifyPage();
@@ -506,7 +506,10 @@ export const RenderConfig: FC<{
         formItemContent = null;
     }
     return (
-      <Form.Item label={<h4>{name}</h4>} tooltip={description}>
+      <Form.Item
+        label={<h4>{name}</h4>}
+        tooltip={description}
+        required={required}>
         {formItemContent}
       </Form.Item>
     );
