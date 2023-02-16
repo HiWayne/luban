@@ -1,4 +1,4 @@
-import { ArrayExpression } from '../../../types/esAst';
+import { ArrayExpression } from '@/backend/types/esAst';
 import { generateCodeOfLiteral } from './generateCodeOfLiteral';
 import { generateCodeOfIdentifier } from './generateCodeOfIdentifier';
 import { generateCodeOfObjectExpression } from './generateCodeOfObjectExpression';
@@ -30,8 +30,7 @@ export const generateCodeOfArrayExpression = (
         break;
     }
     return (
-      elementsCode +
-      (isFirst || !elementCode ? elementCode : `,${elementCode}`)
+      elementsCode + (isFirst || !elementCode ? elementCode : `,${elementCode}`)
     );
   }, '')}]`;
 };

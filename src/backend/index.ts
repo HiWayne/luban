@@ -1,3 +1,5 @@
+import fs from 'fs';
+import { default as nodePath } from 'path';
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import { MongoClient } from 'mongodb';
@@ -23,7 +25,7 @@ import {
   UserRegisterDTO,
   UserResponseDTO,
 } from './service/userService/types';
-import { mongoConfig, redisConfig } from './config';
+import { HOST, mongoConfig, PORT, redisConfig } from './config';
 import {
   deleteTemplateService,
   getCollaborativeTemplatesService,
@@ -124,7 +126,7 @@ try {
             .send({ status: 0, data: null, message: '内容不能为空' });
         }
       } catch (e) {
-        reply.code(500).send({ status: 0, data: null, message: e });
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -139,16 +141,24 @@ try {
             const html = await generateVirtualStaticHtml(fileName);
             reply.headers({ 'content-type': 'text/html' }).send(html);
           } catch (e) {
-            reply.code(500).send({ status: 0, data: null, message: e });
+            catchErrorReply(e, req, reply);
           }
         } else if (fileType === 'js') {
           try {
             const js = await generateVirtualStaticJs(fileName);
             reply.headers({ 'content-type': 'text/javascript' }).send(js);
           } catch (e) {
-            reply.code(500).send({ status: 0, data: null, message: e });
+            catchErrorReply(e, req, reply);
           }
+        } else {
+          reply.send({ status: 0, data: null, message: '文件类型不合法' });
         }
+      } else {
+        reply.send({
+          status: 0,
+          data: null,
+          message: '文件名或文件类型不合法',
+        });
       }
     });
 
@@ -172,9 +182,7 @@ try {
             .send({ status: 0, data: null, message: '内容不能为空' });
         }
       } catch (e) {
-        reply
-          .code(500)
-          .send({ status: 0, data: null, message: '参数错误或服务器错误' });
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -216,6 +224,24 @@ try {
       });
     });
 
+    app.get('/api/get/publickey/', (req, reply) => {
+      try {
+        fs.readFile(
+          nodePath.resolve(__dirname, '../asymmetricEncryptionKeys/public.key'),
+          'utf-8',
+          (err, publicKey) => {
+            if (!err && publicKey) {
+              reply.headers({ 'content-type': 'text/plain' }).send(publicKey);
+            } else {
+              catchErrorReply(err, req, reply);
+            }
+          },
+        );
+      } catch (e) {
+        catchErrorReply(e, req, reply);
+      }
+    });
+
     app.get('/api/check/username/', async (req, reply) => {
       try {
         const { userName } = req.query || ({} as any);
@@ -228,7 +254,7 @@ try {
             .send({ status: 0, data: null, message: '缺少参数' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -239,7 +265,7 @@ try {
           const verifiedBody = await verifyUserInfo(body);
           const result = await checkUsernameService(verifiedBody.name);
           if (result) {
-            const response = await registerService(verifiedBody);
+            const response = await registerService(verifiedBody, req);
             reply
               .headers({
                 [ACCESS_TOKEN_HEADER]: response.accessToken,
@@ -253,7 +279,7 @@ try {
           }
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -267,7 +293,7 @@ try {
           typeof userName === 'string' &&
           typeof password === 'string'
         ) {
-          const response = await loginService({ userName, password });
+          const response = await loginService({ userName, password }, req);
           reply
             .headers({
               [ACCESS_TOKEN_HEADER]: response.accessToken,
@@ -280,7 +306,7 @@ try {
             .send({ status: 0, data: null, message: '参数错误' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -298,10 +324,10 @@ try {
         reply.send({
           status: 1,
           data: user,
-          message: user === null ? 'accessToken已过期' : '',
+          message: user === null ? 'token已过期' : '',
         });
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -327,7 +353,7 @@ try {
           }
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -343,7 +369,7 @@ try {
             .send({ status: 0, data: null, message: '缺少参数' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -354,7 +380,7 @@ try {
         const result = await searchUsersService(verifiedParams);
         reply.send({ status: 1, data: result, message: '' });
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -365,7 +391,7 @@ try {
           .headers({ [ACCESS_TOKEN_HEADER]: accessToken })
           .send({ status: 1, data: true, message: '' });
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -392,17 +418,18 @@ try {
               if (result) {
                 reply.send({ status: 1, data: result, message: '' });
               } else {
+                console.error('/api/create/template/', '保存模板失败');
                 reply
                   .status(500)
                   .send({ status: 0, data: null, message: '保存模板失败' });
               }
             } catch (e) {
-              catchErrorReply(e, reply);
+              catchErrorReply(e, req, reply);
             }
           }
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -430,12 +457,13 @@ try {
               if (result) {
                 reply.send({ status: 1, data: result, message: '' });
               } else {
+                console.error('/api/update/template/', '更新模板失败');
                 reply
                   .status(500)
-                  .send({ status: 0, data: null, message: '保存模板失败' });
+                  .send({ status: 0, data: null, message: '更新模板失败' });
               }
             } catch (e) {
-              reply.status(500).send({ status: 0, data: null, message: e });
+              catchErrorReply(e, req, reply);
             }
           }
         } else {
@@ -444,7 +472,7 @@ try {
             .send({ status: 0, data: null, message: '数据不能为空' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -466,7 +494,7 @@ try {
             const result = await getTemplatesService(params);
             reply.send({ status: 1, data: result, message: '' });
           } catch (e) {
-            reply.status(500).send({ status: 0, data: null, message: e });
+            catchErrorReply(e, req, reply);
           }
         } else {
           reply
@@ -497,7 +525,7 @@ try {
           reply.send({ status: 1, data: result, message: '' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -520,7 +548,7 @@ try {
           reply.send({ status: 1, data: result, message: '' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -536,14 +564,18 @@ try {
             .send({ status: 0, data: null, message: '缺少参数' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
     app.delete('/api/delete/template/', async (req, reply) => {
-      const { id } = await getUserIdFromHeaderService(req);
-      const result = await deleteTemplateService(id);
-      reply.send({ status: 1, data: result, message: '' });
+      try {
+        const { id } = await getUserIdFromHeaderService(req);
+        const result = await deleteTemplateService(id);
+        reply.send({ status: 1, data: result, message: '' });
+      } catch (e) {
+        catchErrorReply(e, req, reply);
+      }
     });
 
     app.post('/api/deploy/', async (req, reply) => {
@@ -560,6 +592,7 @@ try {
             if (htmlContent && jsContent) {
               const computedBody: ComputedDeployRequestDTO = {
                 category: body.category,
+                category_name: body.category_name,
                 pageModel: body.pageModel,
                 desc: body.desc || '',
                 htmlContent,
@@ -576,7 +609,7 @@ try {
                     .send({ status: 0, data: null, message: '发布失败' });
                 }
               } catch (e) {
-                catchErrorReply(e, reply);
+                catchErrorReply(e, req, reply);
               }
             }
           } else {
@@ -585,12 +618,13 @@ try {
               .send({ status: 0, data: null, message: '缺少参数' });
           }
         } else {
+          console.error('/api/deploy/', '用户不存在');
           reply
             .status(400)
             .send({ status: 0, data: null, message: '用户不存在' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -606,20 +640,22 @@ try {
             if (success) {
               reply.send({ status: 1, data: true, message: '' });
             } else {
+              console.error('/api/deploy/change/version/', '发布失败');
               reply
                 .status(500)
                 .send({ status: 0, data: null, message: '发布失败' });
             }
           } catch (e) {
-            catchErrorReply(e, reply);
+            catchErrorReply(e, req, reply);
           }
         } else {
+          console.error('/api/deploy/change/version/', '用户不存在');
           reply
             .status(400)
             .send({ status: 0, data: null, message: '用户不存在' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -635,7 +671,7 @@ try {
           });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -655,7 +691,7 @@ try {
             .send({ status: 0, data: null, message: '缺少参数' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -679,6 +715,7 @@ try {
               });
             }
           } else {
+            console.error('/api/deploy/delete/', '用户不存在');
             reply
               .status(400)
               .send({ status: 0, data: null, message: '用户不存在' });
@@ -689,7 +726,7 @@ try {
             .send({ status: 0, data: null, message: '参数不正确' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -703,6 +740,7 @@ try {
             await deployOnlineService(body.id, user);
             reply.send({ status: 1, data: true, message: '' });
           } else {
+            console.error('/api/deploy/online/', '用户不存在');
             reply
               .status(400)
               .send({ status: 0, data: null, message: '用户不存在' });
@@ -713,7 +751,7 @@ try {
             .send({ status: 0, data: null, message: '参数不正确' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -727,6 +765,7 @@ try {
             await deployOfflineService(body.id, user);
             reply.send({ status: 1, data: true, message: '' });
           } else {
+            console.error('/api/deploy/offline/', '用户不存在');
             reply
               .status(400)
               .send({ status: 0, data: null, message: '用户不存在' });
@@ -737,7 +776,7 @@ try {
             .send({ status: 0, data: null, message: '参数不正确' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -753,7 +792,7 @@ try {
             .send({ status: 0, data: null, message: '缺少参数' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -778,7 +817,7 @@ try {
         const data = await getDeployCategoryListService(params);
         reply.send({ status: 1, data, message: '' });
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -799,15 +838,16 @@ try {
               });
             }
           } catch (e) {
-            catchErrorReply(e, reply);
+            catchErrorReply(e, req, reply);
           }
         } else {
+          console.error('/api/create/category/', '用户不存在');
           reply
             .status(400)
             .send({ status: 0, data: null, message: '用户不存在' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -828,15 +868,16 @@ try {
               });
             }
           } catch (e) {
-            catchErrorReply(e, reply);
+            catchErrorReply(e, req, reply);
           }
         } else {
+          console.error('/api/update/category/', '用户不存在');
           reply
             .status(400)
             .send({ status: 0, data: null, message: '用户不存在' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
@@ -855,16 +896,17 @@ try {
             });
           }
         } else {
+          console.error('/api/delete/category/', '用户不存在');
           reply
             .status(400)
             .send({ status: 0, data: null, message: '用户不存在' });
         }
       } catch (e) {
-        catchErrorReply(e, reply);
+        catchErrorReply(e, req, reply);
       }
     });
 
-    app.listen({ port: 8000, host: '0.0.0.0' }, (error, address) => {
+    app.listen({ port: PORT, host: HOST }, (error, address) => {
       if (error) {
         console.error(error);
       }

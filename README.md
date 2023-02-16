@@ -1,22 +1,22 @@
-# 低代码平台 LuBan
+# 低代码平台 LuBan 鲁班
 
 ## （开发中……）
 
-能工巧匠-鲁班。可 toC & toB 的低代码平台，无需写代码、以可视化的方式搭建出复杂页面。
+能工巧匠-鲁班。可支持 toC & toB 的低代码平台，无需编写代码、轻松以可视化的方式搭建出复杂页面。
 
 ## 项目特点
 
-1. 灵活的 UI。可以自由组合组件、定制组件、组件粒度细，比如可以自定义表格每列单元格的内容、弹窗里的内容、可以从 div 开始绘制自定义 UI。
+1. 灵活的 UI。可以自由组合组件、定制组件，在 toc 模式甚至可以通过细粒度组件实现几乎各种 UI。比如在 tob 里可以自定义表格每列单元格的内容、弹窗里的内容，在 toc 里可以从 div 层面开始绘制 UI。
 
-2. 支持组件之间的自定义状态逻辑。比如我希望点击按钮后 -> 发出请求 -> compute 请求数据 -> 表格展示 computed 后的数据。或者希望表单修改后其他地方的内容也跟着变化等等。
+2. 支持组件之间的自定义状态逻辑。比如我希望：点击按钮 -> 发出请求 -> compute 请求数据 -> 卡片里展示 computed 后的数据。或者希望表单修改后其他地方的内容也跟着变化等等。
 
-3. 一秒上线。跳过传统开发的配置 nginx、构建、部署等过程。创建完页面后，可以自定义页面的 url，用户立即可访问。极大加快了新业务上线、修复 bug 的速度。
+3. 页面秒上线。可以自定义页面的 url 路径，点击发布后用户立即可访问。跳过传统开发的配置路由、打包构建、部署等过程。极大加快了新业务上线、修复 bug 的速度。
 
 4. 页面代码支持人工修改。面对超出平台能力的需求，可以在平台生成的源码(react)基础上人工修改然后发布，平台生成的代码拥有较好的可读性。
 
-5. 模板系统。你的 UI 可转化成模板。他人可复用你的模板快速搭建页面。你也可以邀请别人一起维护模板。
+5. 模板系统。你搭建好的页面可保存成模板。他人可复用你的模板快速搭建页面，并在其基础上继续修改。你还可以邀请别人一起维护模板。
 
-6. 较好的运行时性能。低代码平台产出的仅包含业务相关的、编译后的、浏览器可直接运行的代码，没有额外的运行时逻辑。
+6. 编译型平台、有较好的运行时性能。低代码平台产出的页面，仅包含编译后的业务相关的代码，没有额外的运行时逻辑。
 
 ## 技术栈
 
@@ -30,11 +30,15 @@ npm i -g pnpm
 
 ### 前端
 
-react18、styled-component、zustand
+react18、styled-component、zustand、typescript
 
 ### 后端
 
-fastify、redis
+fastify、nodejs、typescript
+
+### 数据库
+
+redis、mongo
 
 ## 项目运行
 
@@ -54,6 +58,8 @@ pnpm i
 
 用于 commit 前代码检查、规范 git commit 格式
 
+全局安装过 pnpm、commitizen 的，前两步不需要
+
 ```shell
 npm i -g pnpm commitizen && commitizen init cz-conventional-changelog --force --save --save-exact && npm run husky-prepare
 ```
@@ -64,19 +70,37 @@ npm i -g pnpm commitizen && commitizen init cz-conventional-changelog --force --
 
 2. 需要 redis 服务
 
-mongo、redis 配置在/src/backend/config/dbConfig.ts 里
+mongo、redis 相关配置在/src/backend/config/db.config.ts 里
 
 3. 需要同时启动前后端两个 web 服务
 
 ```shell
-# 前端服务，3000端口，用来启动配置后台
+# 前端服务，3000端口，用来访问配置后台页面
 npm run dev-frontend
 
-# 后端服务，8000端口，用来支持后台配置的编译
+# 后端服务，8000端口，用来支持编译、登录等服务
 npm run dev-backend
 ```
 
 4. 浏览器打开 http://localhost:3000
+
+### 部署
+
+在项目 `/src/backend/config/host.config.ts` 里可以配置低代码平台产出页面的`页面域名`、`public path`（开头有/末尾无/）、`cdn域名`。
+
+在项目 `/src/backend/config/server.config.ts` 里可以配置后端服务的端口。
+
+```
+npm run deploy
+```
+
+`npm run deploy`会将整个项目打包成`dist.zip`，然后你需要做的是：
+
+假设你在服务器使用 `luban` 文件夹存放 dist.zip
+
+1. 部署静态资源、启动服务：将 dist.zip 发送到服务器的`luban`文件夹并解压，这时 `luban` 下会多出 `dist` 文件夹，服务器需要有 node (推荐 17.6.0) 环境和`pnpm`，在 `dist` 文件夹下执行`pnpm i`、`npm run start`以启动后端服务。
+
+2. 外网访问：外部（例如 nginx）访问平台前端去项目中的 `dist-frontend` 目录、外部访问平台后端去服务器的 `8000` 端口、外部访问平台产出的页面去 `luban` 文件夹下的 `static` 目录
 
 ### Test
 
@@ -86,15 +110,53 @@ npm run dev-backend
 npm run test
 ```
 
+## 配置后台页面权限
+
+权限配置在路由（`/src/frontend/router/routes/*`）中的 `permissions: string[]`
+
+没有该字段视为不需要权限、空数组`[]`视为仅需登录、`['normal_manager']`(仅举例，具体值看业务)代表需要普通管理员身份
+
+举例：
+
+```ts
+const editorRoutes: RouteType[] = [
+  {
+    path: '/editor',
+    element: LazyEditor,
+    permissions: [], // 需要登录
+    // permissions: ['normal_manager'] 需要普通管理员身份
+    // permissions: undefined 不需要任何权限
+  },
+];
+```
+
+## FQ
+
+1. 该低代码平台前后端的原理是什么，开发遇到的问题有哪些？
+
+生成的页面是由配置产生的。配置的核心部分是 view 字段，它是由 nodeAST（一个最小粒度的、能表示 UI 与逻辑的抽象语法节点）嵌套组成的树，nodeAST 树会交给编译核心，每个 nodeAST 会在经过与其 type 对应的编译插件产出 react 代码。整个树从 root 节点开始，被递归编译成完整的 react 应用代码，编译过程中还有一些优化细节（如组件复用等）。由于生成的只是 react 源码（这部分美化后可以用于代码预览、人工二次编辑），所以还需要编译、构建、压缩成浏览器可执行的代码。由于后端的最终产物是个完整的应用(SPA: html+js)，所以低代码平台页面通过前端微服务的方式整合到主应用里用于可视化编辑的实时预览。低代码平台可视化编辑时，需要有拖拽调换位置、点击 UI 展示对应配置等交互，然而最终产物(html)已经与原始的 nodeAST 失去了关联。为了解决这一点，在编辑模式时，低代码平台页面每次添加 UI 时都会生成一个唯一 id（也就是 nodeAST 里的 id），后端编译插件会给 nodeAST 对应组件代码的最外层的 html 元素加上这个 id。低代码平台配置页本地也通过 id 存储了相关数据，于是低代码平台配置页面可以通过这个 html id 知道当前选中的是什么组件、什么 nodeAST，以及它的当前配置，从而可以进行可视化编辑交互。
+
+2. 如果平台已有组件不能满足需求怎么办？每个组件，在前端编辑器里可能都需要一套独特的配置面板，维护起来会不会很麻烦？
+
+如果平台已有的 UI 组件不能满足需求需要新增，编译系统在设计时抽象出了【编译插件】这个概念，编译核心与编译插件解耦，只需要新写一个编译插件即可满足新的需求。至于前端编辑器里的配置面板，新的 UI 组件确实可能带来一套完全不同的配置表单，但不需要额外新写。编辑器的渲染核心也已经为需求变化做了解耦，只需给编译插件定义 meta（元数据），即可自动在前端生成新的配置面板。（插件的写法以及 meta 的定义将会在下面的【开发文档】中介绍）
+
+3. `npm run dev` 后出现 `Vite Error, /node_modules/...... optimized info should be defined` 的错误怎么办？
+
+可能是因为新安装了依赖，`node_modules/.vite` 里没有缓存，试试 `sh node_modules/.bin/vite --force`。具体原因详见 vite 的 [dep-pre-bundling](https://vitejs.dev/guide/dep-pre-bundling.html)。
+
+4. 为什么 `.gitignore` 要忽略 `__snapshots__`？
+
+因为不同机器 `styled-components` 生成的 className 哈希不同，导致单测的`toMatchSnapshot`误报
+
 ## 开发指南
 
 前端代码在`/src/frontend/*`，主要负责后台页面
 
-后端代码在`/src/backend/*`，主要负责将后台发送过来的页面配置编译成前端代码（浏览器可直接运行的 html、js）
+后端代码在`/src/backend/*`，主要负责编译（将后台发送过来的页面配置编译成前端代码（浏览器可直接运行的 html、js））、用户系统、模板系统、发布系统、权限系统
 
-低代码搭建的页面中的最小粒度是 UI 模块（在配置中可以看作一个节点(node)），UI 模块都有 type 属性，不同 type 代表不同的 UI 模块，用以呈现各种特定外观、功能、交互的 UI 。后端编译服务也是以 UI 模块为粒度实现的，每个 UI 模块都有一个与之对应的编译插件，负责将 nodeAST（**一个表示 UI 和逻辑的 DSL(领域特定语言/配置)亦可把它看作 AST(抽象语法树)**）编译成 react 组件代码，编译核心只是负责将不同的 nodeAST 交给对应的插件编译。toC 页面的编译插件在`/backend/generateReactSourceCode/generateFrontstageCodePlugins/*`，toB 页面的编译函数在`/backend/generateReactSourceCode/generateBackstageCodePlugins/*`。
+低代码搭建的页面中的最小粒度是 UI 模块（在配置中可以看作一个节点(node)），UI 模块都有 type 属性，不同 type 代表不同的 UI 模块，用以呈现各种特定外观、功能、交互的 UI 。后端编译服务也是以 UI 模块为粒度实现的，每个 UI 模块都有一个与之对应的编译插件，负责将 nodeAST（**一个表示 UI 和逻辑的 AST(抽象语法树)**）编译成 react 组件代码，编译核心只是负责将不同的 nodeAST 交给对应的插件编译。toC 页面的编译插件在`/backend/generateReactSourceCode/generateFrontstageCodePlugins/*`，toB 页面的编译函数在`/backend/generateReactSourceCode/generateBackstageCodePlugins/*`。
 
-如需新增 UI 模块，在`/backend/generateReactSourceCode/generateFrontstageCodePlugins/*`或`/backend/generateReactSourceCode/generateBackstageCodePlugins/*`中新增对应的编译插件即可（还需在同目录的 index.ts 的 switch case 中使用它），从而实现了编译核心逻辑和新增业务之间的解耦。
+如需新增 UI 模块(组件)，在`/backend/generateReactSourceCode/generateFrontstageCodePlugins/*`或`/backend/generateReactSourceCode/generateBackstageCodePlugins/*`中新增对应的编译插件即可（还需在同目录的 index.ts 中新增 switch case），从而实现了编译核心逻辑和新增插件的解耦。
 
 UI 模块的类型文件在`/backend/types/backstage/index.ts`和`/backend/types/frontstage/index.ts`里
 
@@ -522,7 +584,7 @@ pnpm uninstall dependence_name
 
 ### Git Commit 规范
 
-遵循 angular specification
+自动化遵循 angular specification
 
 ```shell
 git add .
@@ -532,41 +594,3 @@ git cz
 
 git push
 ```
-
-## 配置后台页面权限
-
-权限配置在路由（`/src/frontend/router/routes/*`）中的 `permissions: string[]`
-
-没有该字段视为不需要权限、空数组`[]`视为仅需登录、`['normal_manager']`(仅举例，具体值看业务)代表需要普通管理员身份
-
-举例：
-
-```ts
-const editorRoutes: RouteType[] = [
-  {
-    path: '/editor',
-    element: LazyEditor,
-    permissions: [], // 需要登录
-    // permissions: ['normal_manager'] 需要普通管理员身份
-    // permissions: undefined 不需要任何权限
-  },
-];
-```
-
-## FQ
-
-1. 该低代码平台前后端的原理是什么，开发遇到的问题有哪些？
-
-生成的页面是由配置产生的。配置的核心部分是 view 字段，它是由 nodeAST（一个最小粒度的、能表示 UI 与逻辑的抽象语法节点）嵌套组成的树，nodeAST 树会交给编译核心，每个 nodeAST 会在经过与其 type 对应的编译插件产出 react 代码。整个树从 root 节点开始，被递归编译成完整的 react 应用代码，编译过程中还有一些优化细节（如组件复用等）。由于生成的只是 react 源码（这部分美化后可以用于代码预览、人工二次编辑），所以还需要编译、构建、压缩成浏览器可执行的代码。由于后端的最终产物是个完整的应用(SPA: html+js)，所以低代码平台页面通过前端微服务的方式整合到主应用里用于可视化编辑的实时预览。低代码平台可视化编辑时，需要有拖拽调换位置、点击 UI 展示对应配置等交互，然而最终产物(html)已经与原始的 nodeAST 失去了关联。为了解决这一点，在编辑模式时，低代码平台页面每次添加 UI 时都会生成一个唯一 id（也就是 nodeAST 里的 id），后端编译插件会给 nodeAST 对应组件代码的最外层的 html 元素加上这个 id。低代码平台配置页本地也通过 id 存储了相关数据，于是低代码平台配置页面可以通过这个 html id 知道当前选中的是什么组件、什么 nodeAST，以及它的当前配置，从而可以进行可视化编辑交互。
-
-2. 如果平台已有组件不能满足需求怎么办？每次新增组件，在前端编辑器里可能都需要一套独特的配置面板，维护起来会不会很麻烦？
-
-如果平台已有的 UI 组件不能满足需求，需要新增。编译系统在设计时抽象出了【编译插件】这个概念，编译核心与编译插件解耦，只需要新写一个编译插件即可。至于前端编辑器里的配置面板，新的 UI 组件确实可能带来一套完全不同的配置表单，但不需要额外新写。编辑器的渲染核心也已经为需求变化做了解耦，只需给编译插件定义 meta（元数据），即可自动在前端生成新的配置面板。（插件的写法以及 meta 的类型已经在上文【开发文档】中介绍了）
-
-3. `npm run dev` 后出现 `Vite Error, /node_modules/...... optimized info should be defined` 的错误怎么办？
-
-可能是因为新安装了依赖，`node_modules/.vite` 里没有缓存，试试 `sh node_modules/.bin/vite --force`。具体原因详见 vite 的 [dep-pre-bundling](https://vitejs.dev/guide/dep-pre-bundling.html)。
-
-4. 为什么 `.gitignore` 要忽略 `__snapshots__`？
-
-因为不同机器 `styled-components` 生成的 className 哈希不同，导致单测的`toMatchSnapshot`误报

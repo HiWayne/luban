@@ -35,6 +35,7 @@ export interface BriefApplication {
 export interface DeployEntity {
   _id: string;
   category: string;
+  category_name: string;
   path: string;
   applications: Application[];
   count: number;

@@ -3,12 +3,14 @@ import { BriefApplication, DeployStatus } from './deploy.entity';
 
 export interface DeployRequestDTO {
   category: string;
+  category_name: string;
   pageModel: PageModel;
   desc?: string;
 }
 
 export interface ComputedDeployRequestDTO {
   category: string;
+  category_name: string;
   pageModel: PageModel;
   htmlContent: string;
   jsContent: string;
@@ -34,6 +36,7 @@ export interface DeployRecordRequestDTO {
 export interface DeployRecordResponseDTO {
   id: string;
   category: string;
+  category_name: string;
   path: string;
   version: number;
   update_time: number;
@@ -49,6 +52,7 @@ export interface DeployRecordResponseDTO {
 export interface DeployDetailDTO {
   id: string;
   category: string;
+  category_name: string;
   path: string;
   applications: BriefApplication[];
   version: number;

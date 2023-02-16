@@ -1,3 +1,5 @@
+import { LoginData } from './user.entity';
+
 export interface UserRegisterDTO {
   name: string;
   desc: string;
@@ -14,6 +16,7 @@ export interface UserResponseDTO {
   avatar: string;
   create_time: number;
   roles: string[];
+  last_login_data: LoginData[];
 }
 
 export interface LoginInDTO {

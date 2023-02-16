@@ -5,6 +5,7 @@ import { DeployCategorySelect, PathInput } from '../../components';
 
 export interface DeployData {
   category: string;
+  category_name: string;
   path: string;
   desc: string;
 }
@@ -15,6 +16,7 @@ export const DeployConfig = ({
   onChange: (data: DeployData) => void;
 }) => {
   const [category, setCategory] = useState('');
+  const [categoryName, setCategoryName] = useState('');
 
   const [path, setPath] = useState('');
   const [desc, setDesc] = useState('');
@@ -27,15 +29,20 @@ export const DeployConfig = ({
     });
     onChange({
       category,
+      category_name: categoryName,
       path,
       desc: desc || '',
     });
-  }, [category, path, desc]);
+  }, [category, categoryName, path, desc]);
 
   return (
     <Form>
       <Form.Item label="分类">
-        <DeployCategorySelect category={category} setCategory={setCategory} />
+        <DeployCategorySelect
+          category={category}
+          setCategory={setCategory}
+          setCategoryName={setCategoryName}
+        />
         <Button
           onClick={() => {
             window.open('/deploy/categoryManage');

@@ -78,7 +78,16 @@ export const UploadImageConfig: FC<UploadImageConfigProps> = ({
           beforeUpload={beforeUpload}
           maxCount={1}>
           {imageUrl ? (
-            <img src={imageUrl} alt="upload" style={{ width: '100%' }} />
+            <img
+              src={imageUrl}
+              alt="upload"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+              }}
+            />
           ) : (
             uploadButton
           )}

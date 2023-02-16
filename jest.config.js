@@ -9,10 +9,9 @@ module.exports = {
     '^[@|./a-zA-Z0-9$_-]+\\.(svg|png|jpg|jpeg|gif|webp|ttf|otf)$':
       '<rootDir>/staticAssetsStub.js',
     '^@\\/(.*)': '<rootDir>/src/$1',
-    '^pages\\/(.*)': '<rootDir>/src/pages/$1',
-    '^router\\/(.*)': '<rootDir>/src/router/$1',
-    '^assets\\/(.*)': '<rootDir>/src/assets/$1',
-    '^dexie': '<rootDir>/node_modules/dexie/dist/dexie.js',
+    '^pages\\/(.*)': '<rootDir>/src/frontend/pages/$1',
+    '^router\\/(.*)': '<rootDir>/src/frontend/router/$1',
+    '^assets\\/(.*)': '<rootDir>/src/frontend/assets/$1',
   },
   coverageDirectory: 'coverage',
   collectCoverage: true,

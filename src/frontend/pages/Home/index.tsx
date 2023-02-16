@@ -12,7 +12,7 @@ const Entries = styled(({ className, children }) => (
 ))`
   padding-top: 200px;
   height: calc(100vh - ${HEADER_BAR_HEIGHT});
-  gap: 20px;
+  gap: 40px;
 `;
 
 const Entry = styled.div`
@@ -32,6 +32,7 @@ const Entry = styled.div`
     /* background-color: rgba(254, 254, 254, 0.6); */
     box-shadow: 0 4px 6px 0 rgb(0 0 0 / 6%), 0 4px 12px -1px rgb(0 0 0 / 4%),
       0 6px 8px 0 rgb(0 0 0 / 4%);
+    transform: translateY(-5px);
   }
 `;
 
@@ -67,6 +68,12 @@ const Home = () => {
             open();
           }}>
           创建模板
+        </Entry>
+        <Entry
+          onClick={() => {
+            navigate('/deploy/list');
+          }}>
+          发布列表
         </Entry>
       </Entries>
       <Modal

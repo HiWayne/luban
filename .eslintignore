@@ -14,5 +14,7 @@ commitlint.config.js
 babel.config.js
 jest.config.js
 staticAssetsStub.js
+ecosystem.config.js
+vite.config.ts
 
 __tests__

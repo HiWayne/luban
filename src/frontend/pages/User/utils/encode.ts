@@ -1,19 +1,36 @@
+import { notification } from 'antd';
 import JSEncrypt from 'jsencrypt';
 
-export const encode = (value: string) => {
+export const encode = async (value: string) => {
   if (value && typeof value === 'string') {
-    // 公钥 setPublicKey。密钥必须是这种格式setKey('-----BEGIN PRIVATE KEY-----MIICdFCQBj...中间省略...D3t4NbK1bqMA=-----END PRIVATE KEY-----')
-    const jSEncrypt = new JSEncrypt();
-    jSEncrypt.setPublicKey(
-      '-----BEGIN PUBLIC KEY-----MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMA8kdrLsuuat9gpfhaUMoNaUv+OztDcWnPoOc/cROL/0JFX0RXSmj9IQJHj5XkOy543J9uYEYCLpv4segpOLD0CAwEAAQ==-----END PUBLIC KEY-----',
-    );
-    const enc = jSEncrypt.encrypt(value);
-    if (enc) {
-      return btoa(enc);
+    const publicKey: string = await fetch('/api/get/publickey/')
+      .then((response) => response.text())
+      .catch(() => {
+        return null;
+      });
+    if (publicKey) {
+      // 公钥 setPublicKey。密钥必须是这种格式setKey('-----BEGIN PRIVATE KEY-----MIICdFCQBj...中间省略...D3t4NbK1bqMA=-----END PRIVATE KEY-----')
+      const jSEncrypt = new JSEncrypt();
+      jSEncrypt.setPublicKey(publicKey);
+      const enc = jSEncrypt.encrypt(value);
+      if (enc) {
+        return btoa(enc);
+      } else {
+        notification.error({
+          message: '加密失败',
+        });
+        return Promise.reject('加密失败');
+      }
     } else {
-      throw new Error('加密失败');
+      notification.error({
+        message: '密钥获取失败',
+      });
+      return Promise.reject('密钥获取失败');
     }
   } else {
-    return value;
+    notification.warning({
+      message: 'encode值不能为空',
+    });
+    return Promise.reject('encode值不能为空');
   }
 };

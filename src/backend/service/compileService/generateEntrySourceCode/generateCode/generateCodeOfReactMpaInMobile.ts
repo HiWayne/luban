@@ -3,8 +3,8 @@ import { normalizePageMeta } from '../utils';
 import { generateReactSourceCodeOfFrontstage } from '@/backend/service/compileService/generateReactSourceCode';
 import { Mode, PageModel } from '@/backend/types';
 import { bundleSourceCode } from '../../bundleSourceCode';
-import { DEPLOY_TARGET } from '../../config';
 import { getDeployPath } from '@/backend/service/deployService/utils';
+import { CDN_HOST, PUBLIC_PATH } from '@/backend/config';
 
 const removeSlashOfEnd = (string: string) =>
   string.replace(/^\//, '').replace(/\/$/, '');
@@ -81,10 +81,9 @@ export const generateCodeOfReactMpaInMobile = async (
           </head>
           <body>
             <div id="root"></div>
-            <script src="/${DEPLOY_TARGET}${getDeployPath(
-        category,
-        pathOfPageMeta,
-      )}/${meta.key}.js"></script>
+            <script src="${CDN_HOST ? `https://${CDN_HOST}` : ''}${
+        PUBLIC_PATH ? `/${PUBLIC_PATH}` : ''
+      }${getDeployPath(category, pathOfPageMeta)}/${meta.key}.js"></script>
           </body>
         </html>
         `;

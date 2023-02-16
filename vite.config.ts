@@ -1,9 +1,10 @@
-import { defineConfig } from 'vite';
+import fs from 'fs';
+import path, { posix } from 'path';
+import { defineConfig, loadEnv } from 'vite';
 import type { Plugin_2 } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
-import path, { posix } from 'path';
-import fs from 'fs';
+import { PUBLIC_PATH } from './src/backend/config';
 
 const resolve = (relativePath: string) =>
   posix.join(posix.resolve('./'), relativePath);
@@ -33,47 +34,55 @@ const reactVirtualized = (): Plugin_2 => {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    react(),
-    reactVirtualized(),
-    svgr({
-      // Set it to `true` to export React component as default.
-      // Notice that it will overrides the default behavior of Vite.
-      exportAsDefault: false,
-      // svgr options: https://react-svgr.com/docs/options/
-      svgrOptions: {
-        typescript: true,
-      },
-      // esbuild options, to transform jsx to js
-      esbuildOptions: {
-        // ...
-        loader: 'tsx',
-      },
-      //  A minimatch pattern, or array of patterns, which specifies the files in the build the plugin should include. By default all svg files will be included.
-      include: '**/*.svg',
-      //  A minimatch pattern, or array of patterns, which specifies the files in the build the plugin should ignore. By default no files are ignored.
-      exclude: '',
-    }),
-  ],
-  resolve: {
-    alias: {
-      pages: resolve('src/frontend/pages'),
-      router: resolve('src/frontend/router'),
-      '@': resolve('src'),
-      assets: resolve('src/frontend/assets'),
-      lib: resolve('lib'),
-      components: resolve('src/frontend/components'),
-    },
-  },
-  server: {
-    port: 3000,
-    host: '0.0.0.0',
-    proxy: {
-      '/api/': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+  return {
+    plugins: [
+      react(),
+      reactVirtualized(),
+      svgr({
+        // Set it to `true` to export React component as default.
+        // Notice that it will overrides the default behavior of Vite.
+        exportAsDefault: false,
+        // svgr options: https://react-svgr.com/docs/options/
+        svgrOptions: {
+          typescript: true,
+        },
+        // esbuild options, to transform jsx to js
+        esbuildOptions: {
+          // ...
+          loader: 'tsx',
+        },
+        //  A minimatch pattern, or array of patterns, which specifies the files in the build the plugin should include. By default all svg files will be included.
+        include: '**/*.svg',
+        //  A minimatch pattern, or array of patterns, which specifies the files in the build the plugin should ignore. By default no files are ignored.
+        exclude: '',
+      }),
+    ],
+    resolve: {
+      alias: {
+        pages: resolve('src/frontend/pages'),
+        router: resolve('src/frontend/router'),
+        '@': resolve('src'),
+        assets: resolve('src/frontend/assets'),
+        lib: resolve('lib'),
+        components: resolve('src/frontend/components'),
       },
     },
-  },
+    server: {
+      port: 3000,
+      host: '0.0.0.0',
+      proxy: {
+        '/api/': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+        },
+      },
+    },
+    build: {
+      outDir: 'dist-frontend',
+    },
+    base:
+      env.VITE_NODE_ENV !== 'development' && PUBLIC_PATH ? PUBLIC_PATH : '/',
+  };
 });

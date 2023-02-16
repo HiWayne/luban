@@ -18,6 +18,7 @@ const removeSlashOfStartAndEnd = (string: string) =>
 export const deployService = async (
   {
     category,
+    category_name,
     pageModel,
     htmlContent,
     jsContent,
@@ -66,6 +67,7 @@ export const deployService = async (
             const version = 1;
             return collection.insertOne({
               category,
+              category_name,
               path: pathOfPageMeta,
               applications: [
                 {

@@ -16,15 +16,14 @@ export const useLoginApi = (
     shallow,
   );
 
-  const encodedPassword = useMemo(() => encode(password), [password]);
-
   const login = useCallback(async () => {
-    if (!userName || !encodedPassword) {
+    if (!userName || !password) {
       notification.error({
         message: '登录失败',
         description: '必须有用户名和密码',
       });
     }
+    const encodedPassword = await encode(password);
     const response = await request(
       '/api/login/user/',
       {
@@ -37,7 +36,7 @@ export const useLoginApi = (
     if (userData) {
       setUser(userData);
     }
-  }, [userName, encodedPassword, remember]);
+  }, [userName, password, remember]);
 
   return { user, login };
 };

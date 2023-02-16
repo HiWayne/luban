@@ -10,6 +10,7 @@ export const formatUserResponse = (user: UserEntity) => {
       avatar: user.avatar,
       roles: user.roles,
       create_time: user.create_time,
+      last_login_data: user.last_login_data,
     };
   } else {
     return user;
