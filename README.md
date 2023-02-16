@@ -365,7 +365,7 @@ canHoist: false 代表不可以提升到全局声明，于是它只会在 App �
 
 ### 编译写法三。组件如何接收 children。
 
-有些组件是有子组件的，比如 BasicContainer 这个容器，只是负责包裹子组件，必须有 children 负责实际展示 UI。下面看看编译时怎么让父组件带上 children 的编译结果。
+有些组件是有子组件的，比如 BasicContainer 这个容器，只是负责包裹子组件，必须有 children 负责实际展示 UI。下面看看编译时怎么让父组件接收 children。
 
 ```js
 // generateCodeOfProp用来生成React中的 "prop=xxx" 代码，自动根据不同类型的值生成合适的写法，如果值是undefined则返回空字符串
