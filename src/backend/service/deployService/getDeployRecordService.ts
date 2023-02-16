@@ -52,6 +52,7 @@ export const getDeployRecordService = async (
       list: list.map((item: DeployEntity) => ({
         id: item._id,
         category: item.category,
+        category_name: item.category_name,
         path: item.path,
         version: item.version,
         update_time: item.update_time,

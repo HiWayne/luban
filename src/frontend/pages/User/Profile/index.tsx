@@ -1,18 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Avatar,
   Button,
+  Card,
+  Empty,
   Form,
   Input,
   Modal,
   notification,
   Radio,
+  Table,
 } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getParams } from '@duitang/dt-base';
 import { DtIcon } from '@duitang/dt-react-mobile';
+import { ReactComponent as MaleSVG } from 'assets/male.svg';
+import { ReactComponent as FemaleSVG } from 'assets/female.svg';
 import { Flex, Loading } from '@/frontend/components';
 import { useDeleteUserApi, useQueryUserApi, useUpdateUserApi } from '../api';
 import { UploadImageConfig } from '../../Editor/components/configComponents/UploadImageConfig';
@@ -51,19 +57,19 @@ const UserUpdater = ({
     () => [
       {
         label: (
-          <div>
+          <Flex>
             <span>男</span>
-            <span style={{ color: '#58a4eb', fontWeight: 'bolder' }}>♂</span>
-          </div>
+            <MaleSVG />
+          </Flex>
         ),
         value: 'male',
       },
       {
         label: (
-          <div>
+          <Flex>
             <span>女</span>
-            <span style={{ color: '#e071ad', fontWeight: 'bolder' }}>♀</span>
-          </div>
+            <FemaleSVG />
+          </Flex>
         ),
         value: 'female',
       },
@@ -159,6 +165,8 @@ const Profile = () => {
   >(null);
   const [confirmModalShow, setConfirmModalShow] = useState(false);
 
+  const navigate = useNavigate();
+
   const isSelf = useMemo(() => !query?.id, [query?.id]);
 
   const userData = useMemo(() => {
@@ -207,6 +215,29 @@ const Profile = () => {
     }
   }, []);
 
+  const logout = useCallback(() => {
+    clearTokens();
+    navigate('/', { replace: true });
+    window.location.reload();
+  }, []);
+
+  const columns = useMemo(
+    () => [
+      {
+        title: '设备ip',
+        dataIndex: 'ip',
+      },
+      {
+        title: '登录时间',
+        dataIndex: 'login_time',
+        render: (login_time: number) => (
+          <span>{dayjs(login_time).format('YYYY-MM-DD HH:mm:ss')}</span>
+        ),
+      },
+    ],
+    [],
+  );
+
   useEffect(() => {
     if (query?.id) {
       queryUserById(query.id);
@@ -216,45 +247,80 @@ const Profile = () => {
   }, [query?.id]);
 
   return (isSelf && !ownLoading) || (!isSelf && !queryLoading) ? (
-    <>
-      <Flex direction="column" justifyContent="flex-start" alignItems="center">
-        {userData ? (
-          <Avatar
-            size={64}
-            src={<DtIcon width="100%" ratio={1} src={userData.avatar} />}
-          />
-        ) : (
-          <Avatar size={64} icon={<UserOutlined />} />
-        )}
-        {userData ? <h3>{userData.name}</h3> : <h3>没有该用户</h3>}
-        {userData ? (
-          <>
-            <p>创建时间：{dayjs(userData.create_time).format('YYYY-MM-DD')}</p>
-            <p style={{ maxWidth: '350px' }}>{userData.desc}</p>
-          </>
-        ) : null}
-        {isSelf ? (
-          <Flex
-            style={{ width: '220px' }}
-            justifyContent="space-between"
-            alignItems="center">
-            <Button onClick={openModal}>修改用户信息</Button>
-            <Button type="primary" danger onClick={openConfirmModal}>
-              删除用户
-            </Button>
-          </Flex>
-        ) : null}
-      </Flex>
+    <Flex justifyContent="center" alignItems="center">
+      <Card style={{ display: 'inline-block' }} hoverable>
+        <Flex
+          direction="column"
+          justifyContent="flex-start"
+          alignItems="center">
+          {userData ? (
+            <Avatar
+              size={64}
+              src={<DtIcon width="100%" ratio={1} src={userData.avatar} />}
+            />
+          ) : (
+            <Avatar size={64} icon={<UserOutlined />} />
+          )}
+          {userData ? (
+            <Flex alignItems="center">
+              <h3>{userData.name}</h3>
+              {userData.sex === 'female' ? <FemaleSVG /> : <MaleSVG />}
+            </Flex>
+          ) : (
+            <h3>没有该用户</h3>
+          )}
+          {userData ? (
+            <>
+              <p style={{ margin: '20px 0' }}>
+                创建时间：{dayjs(userData.create_time).format('YYYY-MM-DD')}
+              </p>
+              <p style={{ marginBottom: '20px', maxWidth: '350px' }}>
+                {userData.desc}
+              </p>
+            </>
+          ) : (
+            <Empty />
+          )}
+          {isSelf ? (
+            <Flex
+              style={{ width: '320px' }}
+              justifyContent="space-between"
+              alignItems="center">
+              <Button onClick={openModal}>修改用户信息</Button>
+              <Button
+                onClick={() => {
+                  Modal.confirm({
+                    title: '确定要退出登录吗？',
+                    onOk: logout,
+                  });
+                }}>
+                退出登录
+              </Button>
+              <Button type="primary" danger onClick={openConfirmModal}>
+                删除用户
+              </Button>
+            </Flex>
+          ) : null}
+        </Flex>
+        <h4 style={{ margin: '100px 0 8px 0' }}>最近登录信息</h4>
+        <Table
+          style={{ width: '600px' }}
+          dataSource={userData?.last_login_data || []}
+          columns={columns}
+          pagination={false}
+        />
+      </Card>
       <Modal open={show} onCancel={closeModal} onOk={updateUser}>
         <UserUpdater onChange={setUpdateData} />
       </Modal>
       <Modal
         open={confirmModalShow}
         onCancel={closeConfirmModal}
-        onOk={deleteUser}>
-        确定要删除用户吗？
+        onOk={deleteUser}
+        title="确定要删除用户吗？">
+        该操作不可恢复
       </Modal>
-    </>
+    </Flex>
   ) : (
     <Loading size="large" />
   );

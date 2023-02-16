@@ -115,6 +115,16 @@ const DeployDetail = () => {
         title: '版本号',
         dataIndex: 'version',
         key: 'version',
+        render: (version: number) => (
+          <span>
+            {version}
+            {version === detail?.version ? (
+              <span style={{ color: '#ff4d4f' }}>【当前版本】</span>
+            ) : (
+              ''
+            )}
+          </span>
+        ),
       },
       {
         title: '页面标题',
@@ -168,15 +178,24 @@ const DeployDetail = () => {
                     <>
                       {version === detail!.version ? (
                         <>
+                          <br />
                           <span style={{ color: '#ff4d4f' }}>
-                            此版本删除后应用链接将无法访问！
+                            删除该版本 应用链接将无法访问！
                           </span>
                           <br />
                         </>
                       ) : null}
+                      <br />
                       <span>
                         删除操作不可恢复，如果删除的版本是当前上线的版本，还会导致应用链接无法访问。请谨慎操作。
                       </span>
+                      <br />
+                      <br />
+                      {detail!.applications.length === 1 ? (
+                        <span>
+                          这是最后一个版本，删除后整个发布信息会被删除
+                        </span>
+                      ) : null}
                     </>
                   ),
                   onOk: () => {
@@ -272,7 +291,9 @@ const DeployDetail = () => {
         )}
       </Card>
       <Card style={{ marginTop: '30px' }}>
-        <h3 style={{ margin: '6px 0' }}>应用历史版本</h3>
+        <h3 style={{ margin: '6px 0 12px 0' }}>
+          应用历史版本（总数：{detail?.applications.length || 0}）
+        </h3>
         {detail ? (
           <Table
             dataSource={

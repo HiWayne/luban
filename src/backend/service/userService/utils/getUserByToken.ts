@@ -3,7 +3,7 @@ import { decodeJWTToken } from './decodeJWTToken';
 export const getUserByToken = async (token: string) => {
   if (typeof token !== 'string' || !token) {
     return Promise.reject({
-      status: 400,
+      code: 400,
       response: { status: 4, data: null, message: '' },
     });
   }
@@ -12,7 +12,7 @@ export const getUserByToken = async (token: string) => {
     return data.data;
   } else {
     return Promise.reject({
-      status: 400,
+      code: 400,
       response: { status: 4, data: null, message: '' },
     });
   }

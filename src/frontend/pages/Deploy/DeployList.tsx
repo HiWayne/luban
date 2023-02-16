@@ -12,6 +12,7 @@ import {
 } from '@/backend/service/deployService/types';
 import { UserInfo } from './components';
 import { UserResponseDTO } from '@/backend/service/userService/types';
+import { getDeployPath } from '@/frontend/utils/getDeployPath';
 
 const DeployList = () => {
   const [category, setCategory] = useState('');
@@ -77,11 +78,17 @@ const DeployList = () => {
       },
       {
         title: '分类',
-        dataIndex: 'category',
+        dataIndex: 'category_name',
       },
       {
         title: '路径',
         dataIndex: 'path',
+      },
+      {
+        title: '完整路径',
+        render: (_: any, record: DeployRecordResponseDTO) => (
+          <span>{getDeployPath(record.category, record.path)}</span>
+        ),
       },
       {
         title: '当前版本',
@@ -122,11 +129,13 @@ const DeployList = () => {
   return (
     <>
       <Card>
+        <h2 style={{ marginBottom: '30px' }}>应用发布查询</h2>
         <Form layout="inline">
           <Form.Item label="分类">
             <DeployCategorySelect
               category={category}
               setCategory={setCategory}
+              hasEmpty
             />
           </Form.Item>
           <Form.Item label="路径">
@@ -157,6 +166,7 @@ const DeployList = () => {
           </Form.Item>
         </Form>
         <Button
+          type="primary"
           onClick={() => {
             reset();
             queryDeployList();
@@ -165,6 +175,7 @@ const DeployList = () => {
         </Button>
       </Card>
       <Card>
+        <p style={{ marginBottom: '20px' }}>应用总数：{total}</p>
         <Table
           dataSource={response?.list || []}
           columns={columns}

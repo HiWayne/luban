@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Alert, Button, Form, Input, Radio } from 'antd';
 import { dtThumb, getParams } from '@duitang/dt-base';
+import { ReactComponent as MaleSVG } from 'assets/male.svg';
+import { ReactComponent as FemaleSVG } from 'assets/female.svg';
 import { Flex } from '@/frontend/components';
 import { UploadImageConfig } from '../../Editor/components/configComponents/UploadImageConfig';
 import { useRegister } from '../hooks';
@@ -44,19 +46,19 @@ const Register = () => {
     () => [
       {
         label: (
-          <div>
+          <Flex>
             <span>男</span>
-            <span style={{ color: '#58a4eb', fontWeight: 'bolder' }}>♂</span>
-          </div>
+            <MaleSVG />
+          </Flex>
         ),
         value: 'male',
       },
       {
         label: (
-          <div>
+          <Flex>
             <span>女</span>
-            <span style={{ color: '#e071ad', fontWeight: 'bolder' }}>♀</span>
-          </div>
+            <FemaleSVG />
+          </Flex>
         ),
         value: 'female',
       },

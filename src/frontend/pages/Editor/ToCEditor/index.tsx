@@ -168,6 +168,7 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
   const fetchDeploy = useCallback(async () => {
     if (deployDataRef.current) {
       const category = deployDataRef.current.category;
+      const category_name = deployDataRef.current.category_name;
       const tempPageModel: PageModel = {
         ...pageModel,
         meta: { ...pageModel.meta },
@@ -175,6 +176,7 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
       tempPageModel.meta.mode = 'deploy';
       const body: DeployRequestDTO = {
         category,
+        category_name,
         pageModel: tempPageModel,
         desc: deployDataRef.current.desc,
       };

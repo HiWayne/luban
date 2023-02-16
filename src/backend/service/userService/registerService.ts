@@ -1,3 +1,4 @@
+import { FastifyRequest } from 'fastify';
 import { mongoConfig } from '@/backend/config';
 import { UserEntity, UserRegisterDTO } from './types';
 import { createIdService, getVersionService } from '../userIdService';
@@ -11,7 +12,10 @@ import {
   formatUserResponse,
 } from './utils';
 
-export const registerService = async (body: UserRegisterDTO) => {
+export const registerService = async (
+  body: UserRegisterDTO,
+  req: FastifyRequest,
+) => {
   try {
     const { name, password, desc, sex, avatar } = body;
 
@@ -42,7 +46,7 @@ export const registerService = async (body: UserRegisterDTO) => {
       avatar,
       roles: [],
       create_time: currentTimestamp,
-      last_login_times: [currentTimestamp],
+      last_login_data: [{ login_time: currentTimestamp, ip: req.ip }],
     });
     if (result.acknowledged) {
       const userData: UserEntity = {
@@ -56,7 +60,7 @@ export const registerService = async (body: UserRegisterDTO) => {
         avatar,
         roles: [],
         create_time: currentTimestamp,
-        last_login_times: [currentTimestamp],
+        last_login_data: [{ login_time: currentTimestamp, ip: req.ip }],
       };
 
       const responseUser = formatUserResponse(userData);

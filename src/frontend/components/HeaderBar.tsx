@@ -1,12 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  FC,
-  MouseEventHandler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { FC, MouseEventHandler, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { UserResponseDTO } from '@/backend/service/userService/types';
 import { Flex } from './Flex';
@@ -63,10 +56,11 @@ const Menus = styled(({ className }) => {
   );
 })`
   padding: 0;
-  display: ${(props) => (props.show ? 'block' : 'none')};
+  display: none;
   position: absolute;
-  left: -20px;
-  bottom: -100px;
+  left: -5px;
+  bottom: 0;
+  transform: translateY(100%);
   width: 120px;
   box-sizing: border-box;
   border-radius: 12px;
@@ -80,8 +74,6 @@ interface UserProps {
 }
 
 const User = styled<FC<UserProps>>(({ className, data }) => {
-  const [showMenus, setShow] = useState(false);
-
   const navigate = useNavigate();
 
   const url = useMemo(() => {
@@ -94,23 +86,10 @@ const User = styled<FC<UserProps>>(({ className, data }) => {
         );
   }, []);
 
-  const closeMenus = useCallback(() => {
-    setShow(false);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('click', closeMenus);
-    return () => {
-      window.removeEventListener('click', closeMenus);
-    };
-  }, []);
-
   const handleClick = useCallback<MouseEventHandler>(
     (event) => {
       event.stopPropagation();
-      if (data) {
-        setShow((show) => !show);
-      } else {
+      if (!data) {
         navigate(url ? `/login?url=${url}` : '/login');
       }
     },
@@ -121,12 +100,17 @@ const User = styled<FC<UserProps>>(({ className, data }) => {
     <Flex className={className} alignItems="center" onClick={handleClick}>
       <Avatar size={32} src={data?.avatar} />
       <UserName>{data?.name || '未登录'}</UserName>
-      <Menus show={showMenus} />
+      {data ? <Menus className="user-menus" /> : null}
     </Flex>
   );
 })`
   position: relative;
+  height: 100%;
   cursor: pointer;
+
+  &:hover > .user-menus {
+    display: block;
+  }
 `;
 
 export const HeaderBar = () => {

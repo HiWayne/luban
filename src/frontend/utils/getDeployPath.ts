@@ -1,7 +1,13 @@
-import { DEPLOY_HOST } from '../config';
+import { ENTRANCE_HOST, PUBLIC_PATH } from '@/backend/config';
 
 export const getDeployPath = (category: string, path: string) => {
-  return `${DEPLOY_HOST}/${category
+  return `${
+    ENTRANCE_HOST
+      ? PUBLIC_PATH
+        ? `https://${ENTRANCE_HOST}${PUBLIC_PATH}`
+        : `https://${ENTRANCE_HOST}`
+      : ''
+  }/${category.replace(/^\//, '').replace(/\/$/, '')}/${path
     .replace(/^\//, '')
-    .replace(/\/$/, '')}/${path.replace(/^\//, '').replace(/\/$/, '')}/`;
+    .replace(/\/$/, '')}/`;
 };

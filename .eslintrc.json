@@ -25,7 +25,8 @@
     "import/no-named-default": "off",
     "no-use-before-define": "error",
     "prefer-promise-reject-errors": "off",
-    "consistent-return": "off"
+    "consistent-return": "off",
+    "@typescript-eslint/return-await": "off"
   },
   "extends": [
     "airbnb",

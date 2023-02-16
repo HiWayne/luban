@@ -15,7 +15,7 @@ export const useRegisterApi = () => {
   );
 
   const register = useCallback(async (data: UserRegisterDTO) => {
-    data.password = encode(data.password);
+    data.password = await encode(data.password);
     const response = await request(
       '/api/register/user/',
       {

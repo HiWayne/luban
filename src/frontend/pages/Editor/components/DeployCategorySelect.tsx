@@ -5,21 +5,31 @@ import { useGetDeployCategoriesApi } from '../api';
 export const DeployCategorySelect = ({
   category,
   setCategory,
+  setCategoryName,
+  hasEmpty,
 }: {
   category: string;
   setCategory: (category: string) => void;
+  setCategoryName?: (category: string) => void;
+  hasEmpty?: boolean;
 }) => {
   const { getDeployCategories, categories, loading, more, reset } =
     useGetDeployCategoriesApi();
 
-    
-    
-    const categoryOptions = useMemo(
-      () =>
-      categories.map((categoryData) => ({
-        label: categoryData.name,
-        value: categoryData.value,
-      })),
+  const categoryOptions = useMemo(
+    () =>
+      hasEmpty
+        ? [
+            { label: '所有', value: '' },
+            ...categories.map((categoryData) => ({
+              label: categoryData.name,
+              value: categoryData.value,
+            })),
+          ]
+        : categories.map((categoryData) => ({
+            label: categoryData.name,
+            value: categoryData.value,
+          })),
     [categories],
   );
 
@@ -49,12 +59,27 @@ export const DeployCategorySelect = ({
     [loading, more],
   );
 
+  const onChange = useCallback(
+    (
+      value: string,
+      option:
+        | { label: string; value: string }
+        | { label: string; value: string }[],
+    ) => {
+      setCategory(value);
+      if (typeof setCategoryName === 'function') {
+        setCategoryName((option as { label: string; value: string }).label);
+      }
+    },
+    [],
+  );
+
   return (
     <Select
       loading={loading}
       style={{ width: '200px' }}
       value={category}
-      onChange={setCategory}
+      onChange={onChange}
       onDropdownVisibleChange={onDropdownVisibleChange}
       onPopupScroll={onPopupScroll}
       options={categoryOptions}

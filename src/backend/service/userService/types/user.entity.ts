@@ -1,3 +1,8 @@
+export interface LoginData {
+  login_time: number;
+  ip: string;
+}
+
 export interface UserEntity {
   _id: string;
   id: number;
@@ -8,6 +13,6 @@ export interface UserEntity {
   sex: 'male' | 'female';
   avatar: string;
   create_time: number;
-  last_login_times: number[];
+  last_login_data: LoginData[];
   roles: string[];
 }
