@@ -5,4 +5,4 @@ export const CDN_HOST = '';
 export const ENTRANCE_HOST = '';
 
 // 页面入口的public path
-export const PUBLIC_PATH = '123';
+export const PUBLIC_PATH = '';
