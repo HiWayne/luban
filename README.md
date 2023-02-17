@@ -2,7 +2,7 @@
 
 ## （开发中……）
 
-能工巧匠-鲁班。可支持 toC & toB 的低代码平台，无需编写代码、轻松以可视化的方式搭建出复杂页面。
+能工巧匠-鲁班。可支持 toC、toB 页面的可视化搭建，无需编写代码、可以自定义 UI 和交互逻辑。
 
 ## 项目特点
 
@@ -91,10 +91,10 @@ npm run dev-backend
 在项目 `/src/backend/config/server.config.ts` 里可以配置后端服务的端口。
 
 ```
-npm run deploy
+npm run zip
 ```
 
-`npm run deploy`会将整个项目打包成`dist.zip`，然后你需要做的是：
+`npm run zip`会将整个项目打包成`dist.zip`，然后你需要做的是：
 
 假设你在服务器使用 `luban` 文件夹存放 dist.zip
 
