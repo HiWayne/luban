@@ -20,11 +20,18 @@
 
 ## 技术栈
 
-### 依赖管理工具
+### 版本管理工具
 
-`pnpm`
+使用`nvm`管理 node 版本、使用`pnpm`替代 npm
 
 ```shell
+# mac安装nvm方法，其他设备自行查找
+brew install nvm
+
+nvm install 17.6.0
+
+nvm use 17.6.0
+
 npm i -g pnpm
 ```
 
@@ -91,16 +98,20 @@ npm run dev-backend
 在项目 `/src/backend/config/server.config.ts` 里可以配置后端服务的端口。
 
 ```
+npm run build
+
 npm run zip
 ```
 
-`npm run zip`会将整个项目打包成`dist.zip`，然后你需要做的是：
+`npm run build`编译打包前后端代码
+
+`npm run zip`会将相关内容打包成`dist.zip`，然后你需要做的是：
 
 假设你在服务器使用 `luban` 文件夹存放 dist.zip
 
-1. 部署静态资源、启动服务：将 dist.zip 发送到服务器的`luban`文件夹并解压，这时 `luban` 下会多出 `dist` 文件夹，服务器需要有 node (推荐 17.6.0) 环境和`pnpm`，在 `dist` 文件夹下执行`pnpm i`、`npm run start`以启动后端服务。
+1. 将 dist.zip 发送到服务器的`luban`文件夹下并解压，这时 `luban` 下会多出 `dist` 文件夹。服务器需要有 node (推荐 17.6.0) 环境和`pnpm`，在 `dist` 文件夹下执行`pnpm i`、`npm run start`，以启动后端服务。
 
-2. 外网访问：外部（例如 nginx）访问平台前端去项目中的 `dist-frontend` 目录、外部访问平台后端去服务器的 `8000` 端口、外部访问平台产出的页面去 `luban` 文件夹下的 `pages` 目录
+2. 外网如何访问：外部（例如 nginx）访问平台前端去`dist`文件夹中的 `dist-frontend` 目录、外部访问平台后端去服务器的 `8000` 端口、外部访问平台产出的页面去 `luban` 文件夹下的 `pages` 目录
 
 ### Test
 
