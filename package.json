@@ -10,7 +10,8 @@
     "test": "lint-staged --allow-empty && jest",
     "build-backend": "npx swc src/backend --only **/*.ts -d dist-backend --config-file .swcrc && node ./.sh/copyFolder.js ./asymmetricEncryptionKeys ./dist-backend/asymmetricEncryptionKeys && rm -rf ./dist-backend/_temp",
     "dev-backend": "npm run build-backend && node dist-backend/backend/index.js",
-    "zip": "rm -f dist.zip && npm run build-frontend && npm run build-backend && zip -r dist.zip ./.bin ./.sh ./dist-backend ./dist-frontend ./package.json ./pnpm-lock.yaml ecosystem.config.js",
+    "build": "npm run build-frontend && npm run build-backend",
+    "zip": "rm -f dist.zip && zip -r dist.zip ./.bin ./dist-backend ./dist-frontend ./package.json ./pnpm-lock.yaml ecosystem.config.js",
     "start": "sh ./.bin/check_pm2_plugin.sh && pm2 start ecosystem.config.js",
     "pm2": "pm2"
   },
