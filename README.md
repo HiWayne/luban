@@ -100,7 +100,7 @@ npm run zip
 
 1. 部署静态资源、启动服务：将 dist.zip 发送到服务器的`luban`文件夹并解压，这时 `luban` 下会多出 `dist` 文件夹，服务器需要有 node (推荐 17.6.0) 环境和`pnpm`，在 `dist` 文件夹下执行`pnpm i`、`npm run start`以启动后端服务。
 
-2. 外网访问：外部（例如 nginx）访问平台前端去项目中的 `dist-frontend` 目录、外部访问平台后端去服务器的 `8000` 端口、外部访问平台产出的页面去 `luban` 文件夹下的 `static` 目录
+2. 外网访问：外部（例如 nginx）访问平台前端去项目中的 `dist-frontend` 目录、外部访问平台后端去服务器的 `8000` 端口、外部访问平台产出的页面去 `luban` 文件夹下的 `pages` 目录
 
 ### Test
 
