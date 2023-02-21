@@ -51,9 +51,7 @@ export const getOwnTemplatesService = async (
   } = params;
   try {
     const conditions: any = {
-      author: {
-        author_id: userId,
-      },
+      'author.author_id': userId,
     };
 
     if (isExist(name)) {

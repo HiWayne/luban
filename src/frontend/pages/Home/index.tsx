@@ -11,6 +11,7 @@ const Entries = styled(({ className, children }) => (
   </Flex>
 ))`
   padding-top: 200px;
+  box-sizing: border-box;
   height: calc(100vh - ${HEADER_BAR_HEIGHT});
   gap: 40px;
 `;

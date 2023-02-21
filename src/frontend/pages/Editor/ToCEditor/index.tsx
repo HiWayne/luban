@@ -25,9 +25,9 @@ import {
   DeployData,
 } from './components';
 import useStore from '@/frontend/store';
-import { useCreateTemplateApi } from '../api';
+import { useCreateTemplateApi, useGetTemplatesApi } from '../api';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
-import { useEditorInteractive } from '../hooks';
+import { useEditorInteractive, useModifyPage } from '../hooks';
 import { request } from '@/frontend/utils';
 import {
   addConfigToMap,
@@ -47,7 +47,7 @@ export const toCComponents = Object.values(compileFunctions)
 
 export const KEY = 'lubanApp';
 
-const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
+const ToCEditor = ({ type, id }: { type: 'page' | 'template'; id: string }) => {
   const { pageModel, currentComponent, setPageMeta } = useStore(
     (state) => ({
       pageModel: state.editor.pageModel,
@@ -75,6 +75,19 @@ const ToCEditor = ({ type }: { type: 'page' | 'template' }) => {
 
   const { onDragStart, onDragEnd, onDragOver, onDrop } =
     useEditorInteractive(updateCount);
+
+  const { getTemplateDetail } = useGetTemplatesApi();
+  const { addComponentFromTemplate } = useModifyPage();
+
+  useEffect(() => {
+    if (id) {
+      getTemplateDetail(id).then((templateDetail) => {
+        if (templateDetail) {
+          addComponentFromTemplate(templateDetail);
+        }
+      });
+    }
+  }, [id]);
 
   useEffect(() => {
     const addNodeInStore = useStore.getState().editor.addNodeAST;

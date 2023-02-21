@@ -185,6 +185,7 @@ const DeployList = () => {
             disabled: loading,
             total,
           }}
+          rowKey="id"
         />
       </Card>
     </>

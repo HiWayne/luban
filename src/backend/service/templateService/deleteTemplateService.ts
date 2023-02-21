@@ -1,12 +1,13 @@
+import { ObjectId } from 'mongodb';
 import { mongoConfig } from '@/backend/config';
 
-export const deleteTemplateService = async (id: number) => {
+export const deleteTemplateService = async (id: string) => {
   if (id !== undefined) {
     try {
       const mongodb = process.dbContext.mongo;
       const db = mongodb.db(mongoConfig.dbName);
       const collection = db.collection(mongoConfig.templateCollectionName);
-      const result = await collection.deleteOne({ id });
+      const result = await collection.deleteOne({ _id: new ObjectId(id) });
       // result { acknowledged: true, deletedCount: 1 }
       return result.acknowledged && result.deletedCount === 1;
     } catch (e) {

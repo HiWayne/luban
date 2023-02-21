@@ -9,7 +9,7 @@ const renderMap = {
 };
 
 const Editor = () => {
-  const { type, ui } = getParams() as any as EditorQuery;
+  const { type, ui, id } = getParams() as any as EditorQuery;
 
   if (!type || !ui) {
     return <h3>页面缺少参数</h3>;
@@ -17,7 +17,7 @@ const Editor = () => {
 
   const RenderEditor = renderMap[ui];
 
-  return <RenderEditor type={type} />;
+  return <RenderEditor type={type} id={id} />;
 };
 
 export default Editor;

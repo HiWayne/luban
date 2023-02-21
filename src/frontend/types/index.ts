@@ -9,4 +9,5 @@ export type NodeAST = (NodeASTOfFrontstage | NodeASTOfBackstage) & {
 export interface EditorQuery {
   type: 'page' | 'template';
   ui: 'toc' | 'tob';
+  id: string;
 }

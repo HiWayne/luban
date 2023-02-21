@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   Alert,
   Avatar,
@@ -26,6 +27,41 @@ import { useRegister } from '../hooks';
 import { UserRegisterDTO } from '@/backend/service/userService/types';
 import useStore from '@/frontend/store';
 import { clearTokens } from '../utils';
+
+const OuterWrapper = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url(https://c-ssl.dtstatic.com/uploads/ops/202302/08/20230208142149_89116.png);
+  background-color: #97befc;
+  background-size: contain;
+  background-position: bottom;
+  background-repeat: repeat no-repeat;
+`;
+
+const Title = styled.div`
+  color: #545454;
+  font-size: 24px;
+  padding: 10px 0 30px;
+`;
+
+const CreateTime = styled.p`
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 20px;
+`;
+
+const Description = styled.p`
+  margin-bottom: 30px;
+  max-width: 400px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.8);
+  border: 5px double rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+`;
 
 const UserUpdater = ({
   onChange,
@@ -101,8 +137,12 @@ const UserUpdater = ({
   }, [name, avatar, desc, sex, user]);
 
   return (
-    <div>
-      <Form>
+    <Flex
+      direction="column"
+      alignItems="center"
+      style={{ padding: '10px 20px' }}>
+      <Title>修改用户信息</Title>
+      <Form labelCol={{ span: 4 }} labelAlign="left" style={{ width: '100%' }}>
         <Form.Item label="头像">
           <UploadImageConfig
             defaultUrl={avatar}
@@ -139,11 +179,13 @@ const UserUpdater = ({
             }}
             onBlur={verify}
             maxLength={200}
+            showCount
+            autoSize
             placeholder="这个用户真能吃，什么也没留下"
           />
         </Form.Item>
       </Form>
-    </div>
+    </Flex>
   );
 };
 
@@ -247,7 +289,7 @@ const Profile = () => {
   }, [query?.id]);
 
   return (isSelf && !ownLoading) || (!isSelf && !queryLoading) ? (
-    <Flex justifyContent="center" alignItems="center">
+    <OuterWrapper>
       <Card style={{ display: 'inline-block' }} hoverable>
         <Flex
           direction="column"
@@ -256,7 +298,14 @@ const Profile = () => {
           {userData ? (
             <Avatar
               size={64}
-              src={<DtIcon width="100%" ratio={1} src={userData.avatar} />}
+              src={
+                <DtIcon
+                  noGif={false}
+                  width="100%"
+                  ratio={1}
+                  src={userData.avatar}
+                />
+              }
             />
           ) : (
             <Avatar size={64} icon={<UserOutlined />} />
@@ -271,12 +320,10 @@ const Profile = () => {
           )}
           {userData ? (
             <>
-              <p style={{ margin: '20px 0' }}>
+              <CreateTime>
                 创建时间：{dayjs(userData.create_time).format('YYYY-MM-DD')}
-              </p>
-              <p style={{ marginBottom: '20px', maxWidth: '350px' }}>
-                {userData.desc}
-              </p>
+              </CreateTime>
+              <Description>{userData.desc}</Description>
             </>
           ) : (
             <Empty />
@@ -292,6 +339,9 @@ const Profile = () => {
                   Modal.confirm({
                     title: '确定要退出登录吗？',
                     onOk: logout,
+                    centered: true,
+                    cancelText: '取消',
+                    okText: '确定退出',
                   });
                 }}>
                 退出登录
@@ -302,7 +352,7 @@ const Profile = () => {
             </Flex>
           ) : null}
         </Flex>
-        <h4 style={{ margin: '100px 0 8px 0' }}>最近登录信息</h4>
+        <h4 style={{ margin: '60px 0 8px 0' }}>最近登录信息</h4>
         <Table
           style={{ width: '600px' }}
           dataSource={userData?.last_login_data || []}
@@ -310,17 +360,26 @@ const Profile = () => {
           pagination={false}
         />
       </Card>
-      <Modal open={show} onCancel={closeModal} onOk={updateUser}>
+      <Modal
+        cancelText="取消"
+        okText="确定修改"
+        open={show}
+        onCancel={closeModal}
+        onOk={updateUser}>
         <UserUpdater onChange={setUpdateData} />
       </Modal>
       <Modal
+        cancelText="取消"
+        okText="确定删除"
+        okType="danger"
+        centered
         open={confirmModalShow}
         onCancel={closeConfirmModal}
         onOk={deleteUser}
         title="确定要删除用户吗？">
         该操作不可恢复
       </Modal>
-    </Flex>
+    </OuterWrapper>
   ) : (
     <Loading size="large" />
   );

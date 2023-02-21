@@ -570,7 +570,7 @@ try {
 
     app.delete('/api/delete/template/', async (req, reply) => {
       try {
-        const { id } = await getUserIdFromHeaderService(req);
+        const id = (req.query as { id: string }).id;
         const result = await deleteTemplateService(id);
         reply.send({ status: 1, data: result, message: '' });
       } catch (e) {

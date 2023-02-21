@@ -51,6 +51,9 @@ const Menus = styled(({ className }) => {
       <Link to="/profile">
         <Menu>用户信息</Menu>
       </Link>
+      <Link to="/creation">
+        <Menu>我的创作</Menu>
+      </Link>
       <Menu onClick={logout}>退出登录</Menu>
     </ul>
   );
@@ -58,9 +61,8 @@ const Menus = styled(({ className }) => {
   padding: 0;
   display: none;
   position: absolute;
-  left: -5px;
-  bottom: 0;
-  transform: translateY(100%);
+  right: -10px;
+  top: 50px;
   width: 120px;
   box-sizing: border-box;
   border-radius: 12px;
