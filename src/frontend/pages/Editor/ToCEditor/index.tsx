@@ -32,10 +32,9 @@ import { request } from '@/frontend/utils';
 import {
   addConfigToMap,
   addNodeASTToMap,
-  createUniqueId,
+  createRootNodeAST,
   getComponentOfNodeAST,
 } from '../utils';
-import { NodeAST } from '@/frontend/types';
 import { OutputPageArea } from './components/OutputPageArea';
 import { DragContext } from './DragProvider';
 import { DeployRequestDTO } from '@/backend/service/deployService/types';
@@ -93,19 +92,13 @@ const ToCEditor = ({ type, id }: { type: 'page' | 'template'; id: string }) => {
     const addNodeInStore = useStore.getState().editor.addNodeAST;
     const view = useStore.getState().editor.pageModel.view;
     if (!view) {
-      const rootNodeAST: NodeAST = {
-        id: createUniqueId(),
-        parent: null,
-        type: 'BasicContainer',
-        props: {},
-        children: [],
-      };
+      const rootNodeAST = createRootNodeAST();
       // 在store中添加
       addNodeInStore(rootNodeAST);
       // 在高性能nodeAST数据结构中添加
       addNodeASTToMap(rootNodeAST);
       // 在nodeAST配置缓存添加
-      const component = getComponentOfNodeAST(rootNodeAST.id);
+      const component = getComponentOfNodeAST(rootNodeAST);
       if (component) {
         if (Array.isArray(component.configs)) {
           const defaultConfigs = component.configs.reduce((configs, config) => {

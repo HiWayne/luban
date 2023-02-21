@@ -24,6 +24,7 @@ export interface EditorStore {
   updateNodeAST: (id: number, props: any) => void;
   removeNodeAST: (id: number) => void;
   copyNodeASTToParent: (id: number) => void;
+  clearAllNodeAST: () => void;
 }
 
 const createEditorStore: (
@@ -99,6 +100,11 @@ const createEditorStore: (
   copyNodeASTToParent(id: number) {
     set((state) => {
       copyNodeASTToParent(state.editor.pageModel.view, id);
+    });
+  },
+  clearAllNodeAST() {
+    set((state) => {
+      state.editor.pageModel.view = null;
     });
   },
 });

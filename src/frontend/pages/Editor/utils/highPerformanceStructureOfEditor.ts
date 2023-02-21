@@ -48,6 +48,12 @@ export const removeNodeASTFromMap = (id: number) => {
   }
 };
 
+export const clearNodeASTMap = () => {
+  nodeASTMap.forEach((_, key) => {
+    nodeASTMap.delete(key);
+  });
+};
+
 const nodeConfigMap = new Map<number, Record<string, any>>();
 
 export const addConfigToMap = (id: number, configs: Record<string, any>) => {
@@ -90,6 +96,12 @@ export const findConfigFromMap = (id: number, propName?: string) => {
   } else {
     return nodeConfigMap.get(id);
   }
+};
+
+export const clearNodeConfigMap = () => {
+  nodeConfigMap.forEach((_, key) => {
+    nodeConfigMap.delete(key);
+  });
 };
 
 export const copyNodeASTToParentInMap = (id: number) => {

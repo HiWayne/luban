@@ -8,6 +8,7 @@ import {
   addConfigToMap,
   addNodeASTToMap,
   createUniqueId,
+  idReturnToZero,
   getComponentOfNodeAST,
   prepareNodeAST,
   removeConfigFromMap,
@@ -15,41 +16,15 @@ import {
   setNodeASTMap,
   updateConfigFromMap,
   updateNodeASTFromMap,
+  clearNodeASTMap,
+  clearNodeConfigMap,
+  createRootNodeAST,
 } from '../utils';
 import { NodeAST } from '@/frontend/types';
 import { findPathById, iterateNodeAST } from '../utils/operateNodeAST';
 import { TemplateDetailResponseDTO } from '@/backend/service/templateService/types';
 
 export const useModifyPage = () => {
-  // const addComponentFromExist = useCallback(
-  //   (nodeAST: NodeAST, config: any, targetId?: number) => {
-  //     const {
-  //       addNodeAST: addNodeInStore,
-  //       pageModel,
-  //       setCurrentChooseComponent,
-  //     } = useStore.getState().editor;
-  //     nodeAST = {
-  //       ...nodeAST,
-  //       parent: targetId !== undefined ? targetId : pageModel.view.id,
-  //     };
-  //     // 在store中添加
-  //     addNodeInStore(nodeAST, targetId);
-  //     // 在高性能nodeAST数据结构中添加
-  //     addNodeASTToMap(nodeAST);
-  //     // 在nodeAST配置缓存添加
-  //     addConfigToMap(nodeAST.id, config);
-  //     const component = getComponentOfNodeAST(nodeAST);
-  //     if (component) {
-  //       // 打开对应的配置面板
-  //       setCurrentChooseComponent({
-  //         component: { ...component, id: nodeAST.id },
-  //         config,
-  //       });
-  //     }
-  //   },
-  //   [],
-  // );
-
   const addComponentFromInitial = useCallback(
     (data: ToCComponentMeta, targetId?: number) => {
       message.success(`成功添加【${data.name}】组件`, 2);
@@ -172,13 +147,39 @@ export const useModifyPage = () => {
     copyNodeASTToParent(id);
   }, []);
 
+  const resetPage = useCallback(() => {
+    const { addNodeAST, clearAllNodeAST } = useStore.getState().editor;
+    idReturnToZero.method();
+    clearNodeASTMap();
+    clearNodeConfigMap();
+    clearAllNodeAST();
+    const rootNodeAST = createRootNodeAST();
+    // 在store中添加
+    addNodeAST(rootNodeAST);
+    // 在高性能nodeAST数据结构中添加
+    addNodeASTToMap(rootNodeAST);
+    // 在nodeAST配置缓存添加
+    const component = getComponentOfNodeAST(rootNodeAST);
+    if (component) {
+      if (Array.isArray(component.configs)) {
+        const defaultConfigs = component.configs.reduce((configs, config) => {
+          if (isExist(config.defaultConfig)) {
+            configs[config.propName] = config.defaultConfig;
+          }
+          return configs;
+        }, {} as any);
+        addConfigToMap(rootNodeAST.id, defaultConfigs);
+      }
+    }
+  }, []);
+
   return {
-    // addComponentFromExist,
     addComponentFromInitial,
     addComponentFromTemplate,
     updateComponent,
     removeComponent,
     moveComponent,
     copyComponentToParent,
+    resetPage,
   };
 };
