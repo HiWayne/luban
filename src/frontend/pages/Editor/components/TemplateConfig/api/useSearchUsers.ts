@@ -8,21 +8,27 @@ export const useSearchUsers = () => {
     new Map(),
   );
 
-  const searchUsers = useCallback(async (name: string) => {
-    const response = await request(`/api/search/users/?name=${name}`);
-    if (response && response.data && response.data.list) {
-      setUsers(response.data.list);
-      setUsersMap(
-        response.data.list.reduce(
-          (map: Map<number, UserResponseDTO>, user: UserResponseDTO) => {
-            map.set(user.id, user);
-            return map;
-          },
-          new Map(),
-        ),
-      );
-    }
-  }, []);
+  const searchUsers = useCallback(
+    async (queryParams: { name?: string; ids?: string }) => {
+      const query = Object.keys(queryParams)
+        .map((key) => `${key}=${queryParams[key as 'name' | 'ids']}`)
+        .join('&');
+      const response = await request(`/api/search/users/?${query}`);
+      if (response && response.data && response.data.list) {
+        setUsers(response.data.list);
+        setUsersMap(
+          response.data.list.reduce(
+            (map: Map<number, UserResponseDTO>, user: UserResponseDTO) => {
+              map.set(user.id, user);
+              return map;
+            },
+            new Map(),
+          ),
+        );
+      }
+    },
+    [],
+  );
 
   return {
     users,

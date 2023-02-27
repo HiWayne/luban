@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
 import { request } from '@/frontend/utils';
 
-export const useCreateTemplateApi = () => {
+export const useEditTemplateApi = () => {
   const createTemplate = useCallback(
     async (templateData: SaveTemplateRequestDTO) => {
       const response = await request(
@@ -18,7 +18,23 @@ export const useCreateTemplateApi = () => {
     [],
   );
 
+  const updateTemplate = useCallback(
+    async (id: string, templateData: SaveTemplateRequestDTO) => {
+      const response = await request(
+        '/api/update/template/',
+        {
+          method: 'put',
+          body: JSON.stringify({ ...templateData, id }),
+        },
+        { successNotify: true },
+      );
+      return response.data;
+    },
+    [],
+  );
+
   return {
     createTemplate,
+    updateTemplate,
   };
 };

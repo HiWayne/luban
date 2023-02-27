@@ -15,7 +15,11 @@ import { PageModel } from '@/backend/types';
 import { Flex } from '@/frontend/components';
 import * as compileFunctions from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/plugins';
 import type { ToCComponentMeta } from '@/backend/service/compileService/generateReactSourceCode/generateFrontstageCodePlugins/toCComponentsPluginsConfig';
-import { ConfigPanel, TemplateConfig } from '../components';
+import {
+  ConfigPanel,
+  TemplateConfig,
+  TemplateConfigRefProps,
+} from '../components';
 import {
   BasicComponents,
   PreviewSourceCode,
@@ -25,8 +29,11 @@ import {
   DeployData,
 } from './components';
 import useStore from '@/frontend/store';
-import { useCreateTemplateApi, useGetTemplatesApi } from '../api';
-import { SaveTemplateRequestDTO } from '@/backend/service/templateService/types';
+import { useEditTemplateApi, useGetTemplatesApi } from '../api';
+import {
+  SaveTemplateRequestDTO,
+  TemplateDetailResponseDTO,
+} from '@/backend/service/templateService/types';
 import { useEditorInteractive, useModifyPage } from '../hooks';
 import { request } from '@/frontend/utils';
 import {
@@ -59,6 +66,11 @@ const ToCEditor = ({ type, id }: { type: 'page' | 'template'; id: string }) => {
   const [title, setTitle] = useState('未命名');
   const [sourceCode, setSourceCode] = useState('');
   const [templateConfigShow, setTemplateConfigShow] = useState(false);
+  const [templateConfigType, setTemplateConfigType] = useState<
+    'create' | 'update'
+  >('create');
+  const [templateDetail, setTemplateDetail] =
+    useState<TemplateDetailResponseDTO>();
   const [updateCount, setUpdateCount] = useState(0);
   const [openDeploy, setOpenDeploy] = useState(false);
   const [openDeploySuccess, setOpenDeploySuccess] = useState(false);
@@ -67,21 +79,24 @@ const ToCEditor = ({ type, id }: { type: 'page' | 'template'; id: string }) => {
   const controllerRef: MutableRefObject<AbortController | null> = useRef(null);
   const deployDataRef: MutableRefObject<DeployData | null> = useRef(null);
   const pagePathRef = useRef('');
+  const templateConfigRef = useRef<TemplateConfigRefProps>(null);
 
   const usedForPage = useMemo(() => type === 'page', [type]);
 
-  const { createTemplate } = useCreateTemplateApi();
+  const { createTemplate, updateTemplate } = useEditTemplateApi();
 
   const { onDragStart, onDragEnd, onDragOver, onDrop } =
     useEditorInteractive(updateCount);
 
   const { getTemplateDetail } = useGetTemplatesApi();
-  const { addComponentFromTemplate } = useModifyPage();
+  const { addComponentFromTemplate, resetPage } = useModifyPage();
 
   useEffect(() => {
     if (id) {
+      resetPage();
       getTemplateDetail(id).then((templateDetail) => {
         if (templateDetail) {
+          setTemplateDetail(templateDetail);
           addComponentFromTemplate(templateDetail);
         }
       });
@@ -262,26 +277,48 @@ const ToCEditor = ({ type, id }: { type: 'page' | 'template'; id: string }) => {
     setSourceCode(code);
   }, [pageModel]);
 
-  const openTemplateConfigModal = useCallback(() => {
-    setTemplateConfigShow(true);
-  }, []);
+  const openTemplateConfigModal = (type: 'create' | 'update') =>
+    useCallback(() => {
+      setTemplateConfigShow(true);
+      setTemplateConfigType(type);
+      if (type === 'update') {
+        templateConfigRef.current?.set(templateDetail!);
+      }
+    }, [templateDetail]);
 
   const closeTemplateConfigModal = useCallback(() => {
     setTemplateConfigShow(false);
   }, []);
 
-  const createTemplateAndCloseModal = useCallback(
+  const EditTemplateAndCloseModal = useCallback(
     async (templateData: SaveTemplateRequestDTO) => {
-      const result = await createTemplate(templateData);
-      if (result) {
-        closeTemplateConfigModal();
-      } else {
-        notification.error({
-          message: '创建模板失败',
-        });
+      switch (templateConfigType) {
+        case 'create':
+          const createTemplateResult = await createTemplate(templateData);
+          if (createTemplateResult) {
+            closeTemplateConfigModal();
+          } else {
+            notification.error({
+              message: '创建模板失败',
+            });
+          }
+          break;
+        case 'update':
+          const updateTemplateResult = await updateTemplate(
+            templateDetail?.id!,
+            templateData,
+          );
+          if (updateTemplateResult) {
+            closeTemplateConfigModal();
+          } else {
+            notification.error({
+              message: '更新模板失败',
+            });
+          }
+          break;
       }
     },
-    [],
+    [templateConfigType, templateDetail],
   );
 
   const dragContextValue = useMemo(
@@ -321,12 +358,24 @@ const ToCEditor = ({ type, id }: { type: 'page' | 'template'; id: string }) => {
           )}
           <div style={{ marginTop: '20px' }}>
             {usedForPage ? null : (
-              <Button
-                type="primary"
-                style={{ marginLeft: '20px' }}
-                onClick={openTemplateConfigModal}>
-                保存为模板
-              </Button>
+              <>
+                {!templateDetail ? (
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: '20px' }}
+                    onClick={openTemplateConfigModal('create')}>
+                    保存为模板
+                  </Button>
+                ) : null}
+                {templateDetail ? (
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: '20px' }}
+                    onClick={openTemplateConfigModal('update')}>
+                    更新模板
+                  </Button>
+                ) : null}
+              </>
             )}
             {usedForPage ? (
               <Button
@@ -366,9 +415,10 @@ const ToCEditor = ({ type, id }: { type: 'page' | 'template'; id: string }) => {
         <ConfigPanel data={currentComponent} onDrop={onDrop} />
         <TemplateConfig
           open={templateConfigShow}
-          onOk={createTemplateAndCloseModal}
+          onOk={EditTemplateAndCloseModal}
+          ref={templateConfigRef}
           onCancel={closeTemplateConfigModal}
-          type="create"
+          type={templateConfigType}
         />
       </Flex>
       {/* 为了清除DeployConfig内部状态缓存 */}

@@ -102,6 +102,7 @@ export interface TemplateBriefResponseDTO {
 export interface TemplateDetailResponseDTO {
   id: string;
   type: 'toc' | 'tob';
+  status: 'active' | 'inactive';
   private: boolean;
   name: string;
   desc: string;

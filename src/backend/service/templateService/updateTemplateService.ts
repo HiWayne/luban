@@ -25,7 +25,7 @@ export const updateTemplateService = async (
       });
       if (template) {
         if (
-          template.author.author_id !== userId ||
+          template.author.author_id !== userId &&
           !template.collaborators.includes(userId)
         ) {
           throw new Error('没有权限更新模板');

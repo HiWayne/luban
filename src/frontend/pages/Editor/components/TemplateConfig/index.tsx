@@ -1,4 +1,13 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from 'react';
 import {
   Form,
   Input,
@@ -119,12 +128,13 @@ const Tags: FC<TagsProps> = ({ tags, onChange }) => {
           onBlur={handleInputConfirm}
           onPressEnter={handleInputConfirm}
           autoFocus
+          maxLength={8}
         />
-      ) : (
+      ) : tags.length < 20 ? (
         <Tag onClick={showInput} style={tagPlusStyle}>
           <PlusOutlined /> New Tag
         </Tag>
-      )}
+      ) : null}
     </>
   );
 };
@@ -136,12 +146,14 @@ interface TemplateConfigProps {
   type: 'create' | 'update';
 }
 
-export const TemplateConfig: FC<TemplateConfigProps> = ({
-  open,
-  onCancel,
-  onOk,
-  type,
-}) => {
+export interface TemplateConfigRefProps {
+  set: (templateData: SaveTemplateRequestDTO) => void;
+}
+
+export const TemplateConfig = forwardRef<
+  TemplateConfigRefProps,
+  TemplateConfigProps
+>(({ open, onCancel, onOk, type }, ref) => {
   const pageViewModel = useStore(
     (store) => store.editor.pageModel?.view,
   ) as NodeAST;
@@ -157,6 +169,21 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
 
   const { users, usersMap, searchUsers } = useSearchUsers();
 
+  useImperativeHandle(ref, () => ({
+    set(templateData) {
+      setPreview(templateData.preview || '');
+      setName(templateData.name);
+      setDesc(templateData.desc || '');
+      setPublic(!templateData.private);
+      setStatus(templateData.status);
+      setTags(templateData.tags || []);
+      const collaborators = templateData.collaborators || [];
+      searchUsers({ ids: collaborators.join(',') }).then(() => {
+        setSelectValue(collaborators);
+      });
+    },
+  }));
+
   const pageType = useMemo(() => getParams().ui as 'toc' | 'tob', []);
 
   const searchResultList = useMemo(
@@ -170,7 +197,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
 
   const debounceSearch = useCallback(
     debounce((value: string) => {
-      searchUsers(value).finally(() => {
+      searchUsers({ name: value }).finally(() => {
         setLoading(false);
       });
     }, 800),
@@ -186,7 +213,7 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
     (ids: number[]) => {
       if (!ids.slice(0, -1).some((id) => id === ids[ids.length - 1])) {
         setSelectValue(ids);
-        setCollaborators((origin) => {
+        /* setCollaborators((origin) => {
           if (ids.length > 0) {
             return [
               ...origin,
@@ -195,11 +222,15 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
           } else {
             return [];
           }
-        });
+        }); */
       }
     },
     [users],
   );
+
+  useEffect(() => {
+    setCollaborators(selectValue.map((id) => usersMap.get(id)!));
+  }, [selectValue]);
 
   const handleOk = useCallback(() => {
     if (!pageViewModel || !pageViewModel.children?.length) {
@@ -234,13 +265,18 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
   }, [name, desc, isPublic, status, tags, collaborators, preview, onOk]);
 
   return (
-    <Modal open={open} onCancel={onCancel} onOk={handleOk}>
+    <Modal
+      open={open}
+      onCancel={onCancel}
+      onOk={handleOk}
+      okText={type === 'update' ? '更新' : '创建'}
+      cancelText="取消">
       <Form
         style={{ padding: '20px 0' }}
         labelCol={{ span: 4 }}
         labelAlign="left">
         <Form.Item label="预览图">
-          <UploadImageConfig onChange={setPreview} />
+          <UploadImageConfig defaultUrl={preview} onChange={setPreview} />
         </Form.Item>
         <Form.Item label="模板名称">
           <Input
@@ -314,4 +350,4 @@ export const TemplateConfig: FC<TemplateConfigProps> = ({
       </Form>
     </Modal>
   );
-};
+});
